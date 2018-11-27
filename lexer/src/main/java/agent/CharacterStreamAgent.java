@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.util.Optional;
 
 public class CharacterStreamAgent {
 
@@ -15,6 +14,7 @@ public class CharacterStreamAgent {
 	private char buffer;
 	private boolean bufferContainsChar;
 	private boolean isCorrupted;
+	private boolean reachedEnd;
 
 	public CharacterStreamAgent() {
 		resetAgent();
@@ -27,6 +27,7 @@ public class CharacterStreamAgent {
 		inStreamPosition = 1;
 		bufferContainsChar = true;
 		isCorrupted = false;
+		reachedEnd = false;
 	}
 
 	public int getBufferedPosition() {
@@ -42,22 +43,26 @@ public class CharacterStreamAgent {
 		currentStream = inputStream;
 	}
 
-	public Optional<Character> bufferAndGetChar() {
-		if (isCorrupted)
-			return Optional.empty();
+	public char bufferAndGetChar() {
+		if (reachedEnd || isCorrupted)
+			return '\u0000';
 		if (bufferContainsChar)
-			return Optional.of(buffer);
+			return buffer;
 		try {
 			int character = streamReader.read();
 			inStreamPosition++;
-			if (character == -1)
-				return Optional.empty();
+			if (character == -1) {
+				reachedEnd = true;
+				closeReader();
+				return '\u0000';
+			}
 			bufferContainsChar = true;
-			char newChar = (char)character;
-			return Optional.of(newChar);
+			buffer = (char) character;
+			return buffer;
 		} catch (IOException e) {
 			isCorrupted = true;
-			return Optional.empty();
+			closeReader();
+			return '\u0000';
 		}
 	}
 
@@ -67,4 +72,14 @@ public class CharacterStreamAgent {
 			bufferedPosition++;
 		}
 	}
+
+	private void closeReader() {
+		if (streamReader != null) {
+			try {
+				streamReader.close();
+			} catch (IOException ignored) {
+			}
+		}
+	}
+
 }
