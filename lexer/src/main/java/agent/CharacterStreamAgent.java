@@ -24,7 +24,7 @@ public class CharacterStreamAgent {
 
 	public void resetAgent() {
 		streamReader = null;
-		bufferedPosition = 1;
+		bufferedPosition = 0;
 		inStreamPosition = 1;
 		bufferContainsChar = false;
 		isCorrupted = false;
@@ -64,36 +64,42 @@ public class CharacterStreamAgent {
 			return buffer;
 		try {
 			int character = streamReader.read();
-			inStreamPosition++;
-			if (character == -1) {
-				reachedEnd = true;
-				closeReader();
-				return CHAR_ETX;
-			}
+			++inStreamPosition;
+			if (character == -1)
+				return handleEndOfTextReached();
 			bufferContainsChar = true;
+			++bufferedPosition;
 			buffer = (char) character;
 			return buffer;
 		} catch (IOException e) {
-			isCorrupted = true;
-			closeReader();
-			return CHAR_NULL;
+			return handleStreamCorruption();
 		}
 	}
 
 	public void commitBufferedChar() {
-		if (bufferContainsChar) {
+		if (bufferContainsChar)
 			bufferContainsChar = false;
-			bufferedPosition++;
-		}
 	}
 
-	private void closeReader() {
+	public void closeReader() {
 		if (streamReader != null) {
 			try {
 				streamReader.close();
 			} catch (IOException ignored) {
 			}
 		}
+	}
+
+	private char handleEndOfTextReached() {
+		reachedEnd = true;
+		closeReader();
+		return CHAR_ETX;
+	}
+
+	private char handleStreamCorruption() {
+		isCorrupted = true;
+		closeReader();
+		return CHAR_NULL;
 	}
 
 }

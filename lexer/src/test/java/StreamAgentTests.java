@@ -33,11 +33,11 @@ public class StreamAgentTests {
 	}
 
 	@Test
-	public void resetAgent_agentCreated_positionEqualsOne() {
+	public void resetAgent_agentCreated_positionEqualsZero() {
 		//when
 		agent.resetAgent();
 		//then
-		assertThat(agent.getBufferedPosition()).isEqualTo(1);
+		assertThat(agent.getBufferedPosition()).isEqualTo(0);
 	}
 
 	@Test
@@ -70,7 +70,7 @@ public class StreamAgentTests {
 		//when
 		agent.bufferAndGetChar();
 		//then
-		assertThat(agent.getBufferedPosition()).isEqualTo(1);
+		assertThat(agent.getBufferedPosition()).isEqualTo(0);
 	}
 
 	@Test
@@ -108,7 +108,7 @@ public class StreamAgentTests {
 	}
 
 	@Test
-	public void bufferAndGetChar_readAndNotCommited_positionIsUnchanged() {
+	public void bufferAndGetChar_readAndNotCommited_positionChanged() {
 		//before
 		agent.resetAgent();
 		agent.handleStream(sampleStream());
@@ -153,11 +153,11 @@ public class StreamAgentTests {
 		//when
 		agent.commitBufferedChar();
 		//then
-		assertThat(agent.getBufferedPosition()).isEqualTo(1);
+		assertThat(agent.getBufferedPosition()).isEqualTo(0);
 	}
 
 	@Test
-	public void commitBufferedChar_charIsBuffered_positionChanges() {
+	public void commitBufferedChar_charIsBuffered_positionIsUnchanged() {
 		//before
 		agent.resetAgent();
 		agent.handleStream(sampleStream());
@@ -166,7 +166,7 @@ public class StreamAgentTests {
 		//when
 		agent.commitBufferedChar();
 		//then
-		assertThat(agent.getBufferedPosition()).isEqualTo(before + 1);
+		assertThat(agent.getBufferedPosition()).isEqualTo(before);
 	}
 
 	@Test
