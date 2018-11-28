@@ -8,7 +8,6 @@ import java.io.Reader;
 public class CharacterStreamAgent {
 
 	private Reader streamReader;
-	private InputStream currentStream;
 	private int bufferedPosition;
 	private int inStreamPosition;
 	private char buffer;
@@ -22,10 +21,9 @@ public class CharacterStreamAgent {
 
 	public void resetAgent() {
 		streamReader = null;
-		currentStream = null;
 		bufferedPosition = 1;
 		inStreamPosition = 1;
-		bufferContainsChar = true;
+		bufferContainsChar = false;
 		isCorrupted = false;
 		reachedEnd = false;
 	}
@@ -38,13 +36,18 @@ public class CharacterStreamAgent {
 		return isCorrupted;
 	}
 
+	public boolean bufferContainsChar() {
+		return bufferContainsChar;
+	}
+
 	public void handleStream(InputStream inputStream) {
 		streamReader = new InputStreamReader(inputStream);
-		currentStream = inputStream;
 	}
 
 	public char bufferAndGetChar() {
-		if (reachedEnd || isCorrupted)
+		if (reachedEnd)
+			return '\u0003';
+		if (isCorrupted)
 			return '\u0000';
 		if (bufferContainsChar)
 			return buffer;
@@ -54,7 +57,7 @@ public class CharacterStreamAgent {
 			if (character == -1) {
 				reachedEnd = true;
 				closeReader();
-				return '\u0000';
+				return '\u0003';
 			}
 			bufferContainsChar = true;
 			buffer = (char) character;
