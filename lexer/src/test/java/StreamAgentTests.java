@@ -1,6 +1,7 @@
 import agent.CharacterStreamAgent;
 import org.junit.Test;
 import java.io.ByteArrayInputStream;
+import static agent.CharacterStreamAgent.*;
 import static org.assertj.core.api.Assertions.*;
 
 public class StreamAgentTests {
@@ -47,7 +48,7 @@ public class StreamAgentTests {
 		//when
 		char character = agent.bufferAndGetChar();
 		//then
-		assertThat(character).isEqualTo('\u0003');
+		assertThat(character).isEqualTo(CHAR_ETX);
 	}
 
 	@Test
@@ -81,7 +82,7 @@ public class StreamAgentTests {
 		//when
 		char character = agent.bufferAndGetChar();
 		//then
-		assertThat(character).isEqualTo('\u0003');
+		assertThat(character).isEqualTo(CHAR_ETX);
 	}
 
 	@Test
@@ -142,7 +143,7 @@ public class StreamAgentTests {
 		//when
 		char character = agent.bufferAndGetChar();
 		//then
-		assertThat(character).isEqualTo('\u0003');
+		assertThat(character).isEqualTo(CHAR_ETX);
 	}
 
 	@Test

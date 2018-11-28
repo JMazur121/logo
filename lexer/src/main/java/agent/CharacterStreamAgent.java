@@ -15,6 +15,8 @@ public class CharacterStreamAgent {
 	private boolean bufferContainsChar;
 	private boolean isCorrupted;
 	private boolean reachedEnd;
+	public static final char CHAR_ETX = '\u0003';
+	public static final char CHAR_NULL = '\u0000';
 
 	public CharacterStreamAgent() {
 		resetAgent();
@@ -55,9 +57,9 @@ public class CharacterStreamAgent {
 
 	public char bufferAndGetChar() {
 		if (reachedEnd)
-			return '\u0003';
+			return CHAR_ETX;
 		if (isCorrupted)
-			return '\u0000';
+			return CHAR_NULL;
 		if (bufferContainsChar)
 			return buffer;
 		try {
@@ -66,7 +68,7 @@ public class CharacterStreamAgent {
 			if (character == -1) {
 				reachedEnd = true;
 				closeReader();
-				return '\u0003';
+				return CHAR_ETX;
 			}
 			bufferContainsChar = true;
 			buffer = (char) character;
@@ -74,7 +76,7 @@ public class CharacterStreamAgent {
 		} catch (IOException e) {
 			isCorrupted = true;
 			closeReader();
-			return '\u0000';
+			return CHAR_NULL;
 		}
 	}
 
