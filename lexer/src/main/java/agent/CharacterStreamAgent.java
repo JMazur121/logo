@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.Charset;
 
 public class CharacterStreamAgent {
 
@@ -40,8 +41,16 @@ public class CharacterStreamAgent {
 		return bufferContainsChar;
 	}
 
+	public boolean reachedEnd() {
+		return reachedEnd;
+	}
+
 	public void handleStream(InputStream inputStream) {
 		streamReader = new InputStreamReader(inputStream);
+	}
+
+	public void handleStream(InputStream inputStream, Charset charset) {
+		streamReader = new InputStreamReader(inputStream, charset);
 	}
 
 	public char bufferAndGetChar() {
