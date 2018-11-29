@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Optional;
 import static tokenizer.TokenType.*;
 
-
 public class Lexer {
 
 	private static final Map<String, TokenType> expectedTokens;
@@ -56,10 +55,7 @@ public class Lexer {
 	}
 
 	public Lexer() {
-		lineNumber = 1;
-		positionInLine = 1;
-		agent = new CharacterStreamAgent();
-		isCorrupted = false;
+		restart();
 	}
 
 	public void handleStream(InputStream inputStream) {
@@ -70,12 +66,24 @@ public class Lexer {
 		agent.handleStream(inputStream, charset);
 	}
 
+	public void restart() {
+		lineNumber = 1;
+		positionInLine = 0;
+		if (agent != null)
+			agent.resetAgent();
+		else
+			agent = new CharacterStreamAgent();
+		isCorrupted = false;
+	}
+
 	public Optional<TokenType> findToken(String stringRepresentation) {
 		TokenType found = expectedTokens.get(stringRepresentation);
 		return (found == null) ? Optional.empty() : Optional.of(found);
 	}
 
 	public Optional<Token> nextToken() {
+		if (isCorrupted)
+			return Optional.empty();
 		return Optional.empty();
 	}
 

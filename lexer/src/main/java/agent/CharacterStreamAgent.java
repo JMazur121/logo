@@ -28,6 +28,7 @@ public class CharacterStreamAgent {
 	}
 
 	public void resetAgent() {
+		closeReader();
 		streamReader = null;
 		bufferedPosition = 0;
 		inStreamPosition = 1;
