@@ -13,7 +13,7 @@ public class StreamAgentTests {
 		//when
 		agent.resetAgent();
 		//then
-		assertThat(agent.bufferContainsChar()).isFalse();
+		assertThat(agent.isBufferContainingChar()).isFalse();
 	}
 
 	@Test
@@ -29,7 +29,7 @@ public class StreamAgentTests {
 		//when
 		agent.resetAgent();
 		//then
-		assertThat(agent.reachedEnd()).isFalse();
+		assertThat(agent.isReachedEnd()).isFalse();
 	}
 
 	@Test
@@ -59,7 +59,7 @@ public class StreamAgentTests {
 		//when
 		agent.bufferAndGetChar();
 		//then
-		assertThat(agent.bufferContainsChar()).isFalse();
+		assertThat(agent.isBufferContainingChar()).isFalse();
 	}
 
 	@Test
@@ -104,7 +104,7 @@ public class StreamAgentTests {
 		//when
 		char character = agent.bufferAndGetChar();
 		//then
-		assertThat(agent.bufferContainsChar()).isTrue();
+		assertThat(agent.isBufferContainingChar()).isTrue();
 	}
 
 	@Test
@@ -178,7 +178,7 @@ public class StreamAgentTests {
 		//when
 		agent.commitBufferedChar();
 		//then
-		assertThat(agent.bufferContainsChar()).isFalse();
+		assertThat(agent.isBufferContainingChar()).isFalse();
 	}
 
 	private ByteArrayInputStream emptyStream() {

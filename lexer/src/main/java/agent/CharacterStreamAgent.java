@@ -1,5 +1,6 @@
 package agent;
 
+import lombok.Getter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -9,11 +10,15 @@ import java.nio.charset.Charset;
 public class CharacterStreamAgent {
 
 	private Reader streamReader;
+	@Getter
 	private int bufferedPosition;
 	private int inStreamPosition;
 	private char buffer;
-	private boolean bufferContainsChar;
+	@Getter
+	private boolean isBufferContainingChar;
+	@Getter
 	private boolean isCorrupted;
+	@Getter
 	private boolean reachedEnd;
 	public static final char CHAR_ETX = '\u0003';
 	public static final char CHAR_NULL = '\u0000';
@@ -26,25 +31,9 @@ public class CharacterStreamAgent {
 		streamReader = null;
 		bufferedPosition = 0;
 		inStreamPosition = 1;
-		bufferContainsChar = false;
+		isBufferContainingChar = false;
 		isCorrupted = false;
 		reachedEnd = false;
-	}
-
-	public int getBufferedPosition() {
-		return bufferedPosition;
-	}
-
-	public boolean isCorrupted() {
-		return isCorrupted;
-	}
-
-	public boolean bufferContainsChar() {
-		return bufferContainsChar;
-	}
-
-	public boolean reachedEnd() {
-		return reachedEnd;
 	}
 
 	public void handleStream(InputStream inputStream) {
@@ -60,14 +49,14 @@ public class CharacterStreamAgent {
 			return CHAR_ETX;
 		if (isCorrupted)
 			return CHAR_NULL;
-		if (bufferContainsChar)
+		if (isBufferContainingChar)
 			return buffer;
 		try {
 			int character = streamReader.read();
 			++inStreamPosition;
 			if (character == -1)
 				return handleEndOfTextReached();
-			bufferContainsChar = true;
+			isBufferContainingChar = true;
 			++bufferedPosition;
 			buffer = (char) character;
 			return buffer;
@@ -77,8 +66,8 @@ public class CharacterStreamAgent {
 	}
 
 	public void commitBufferedChar() {
-		if (bufferContainsChar)
-			bufferContainsChar = false;
+		if (isBufferContainingChar)
+			isBufferContainingChar = false;
 	}
 
 	public void closeReader() {

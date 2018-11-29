@@ -1,13 +1,25 @@
 package tokenizer;
 
+import agent.CharacterStreamAgent;
 import com.google.common.collect.ImmutableMap;
+import lombok.Getter;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.Optional;
 import static tokenizer.TokenType.*;
 
+
 public class Lexer {
 
 	private static final Map<String, TokenType> expectedTokens;
+	@Getter
+	private int lineNumber;
+	@Getter
+	private int positionInLine;
+	private CharacterStreamAgent agent;
+	@Getter
+	private boolean isCorrupted;
 
 	static {
 		expectedTokens = ImmutableMap.<String, TokenType>builder()
@@ -43,9 +55,28 @@ public class Lexer {
 				.build();
 	}
 
+	public Lexer() {
+		lineNumber = 1;
+		positionInLine = 1;
+		agent = new CharacterStreamAgent();
+		isCorrupted = false;
+	}
+
+	public void handleStream(InputStream inputStream) {
+		agent.handleStream(inputStream);
+	}
+
+	public void handleStream(InputStream inputStream, Charset charset) {
+		agent.handleStream(inputStream, charset);
+	}
+
 	public Optional<TokenType> findToken(String stringRepresentation) {
 		TokenType found = expectedTokens.get(stringRepresentation);
 		return (found == null) ? Optional.empty() : Optional.of(found);
+	}
+
+	public Optional<Token> nextToken() {
+		return Optional.empty();
 	}
 
 }
