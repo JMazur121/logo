@@ -125,8 +125,10 @@ public class Lexer {
 				agent.commitBufferedChar();
 				nextChar = agent.bufferAndGetChar();
 			}
-			if (nextChar == '\n')
+			if (nextChar == '\n') {
 				handleNewLine();
+				agent.commitBufferedChar();
+			}
 			else
 				handleETX();
 		}
@@ -140,9 +142,18 @@ public class Lexer {
 	private void skipMultiLineComment() {
 		char nextChar = agent.bufferAndGetChar();
 		if (nextChar == '{') {
+			agent.commitBufferedChar();
+			++positionInLine;
 			while ((nextChar != '}') && (nextChar != CHAR_ETX)) {
-				agent.commitBufferedChar();
 				nextChar = agent.bufferAndGetChar();
+				agent.commitBufferedChar();
+				++positionInLine;
+				if (nextChar == '\n') {
+					handleNewLine();
+				}
+			}
+			if (nextChar == CHAR_ETX) {
+				// TODO: 2018-12-08 underfull comment, throw exception 
 			}
 		}
 	}
