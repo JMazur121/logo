@@ -4,14 +4,17 @@ import agent.CharacterStreamAgent;
 import com.google.common.collect.ImmutableMap;
 import lombok.Getter;
 import java.io.InputStream;
+import java.io.StreamCorruptedException;
 import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.Optional;
+import static agent.CharacterStreamAgent.CHAR_ETX;
 import static tokenizer.TokenType.*;
 
 public class Lexer {
 
 	private static final Map<String, TokenType> expectedTokens;
+	private static final Token etxToken;
 	@Getter
 	private int lineNumber;
 	@Getter
@@ -19,6 +22,8 @@ public class Lexer {
 	private CharacterStreamAgent agent;
 	@Getter
 	private boolean isCorrupted;
+	@Getter
+	private boolean reachedEnd;
 
 	static {
 		expectedTokens = ImmutableMap.<String, TokenType>builder()
@@ -52,6 +57,7 @@ public class Lexer {
 				.put(":=", T_ASSIGNMENT)
 				.put(",", T_COMMA)
 				.build();
+		etxToken = Token.builder().tokenType(T_CONTROL_ETX).build();
 	}
 
 	public Lexer() {
@@ -68,12 +74,13 @@ public class Lexer {
 
 	public void restart() {
 		lineNumber = 1;
-		positionInLine = 0;
+		positionInLine = 1;
 		if (agent != null)
 			agent.resetAgent();
 		else
 			agent = new CharacterStreamAgent();
 		isCorrupted = false;
+		reachedEnd = false;
 	}
 
 	public Optional<TokenType> findToken(String stringRepresentation) {
@@ -81,10 +88,63 @@ public class Lexer {
 		return (found == null) ? Optional.empty() : Optional.of(found);
 	}
 
-	public Optional<Token> nextToken() {
+	public Token nextToken() throws StreamCorruptedException {
 		if (isCorrupted)
-			return Optional.empty();
-		return Optional.empty();
+			throw new StreamCorruptedException();
+		if (reachedEnd)
+			return etxToken;
+		skipWhitespaces();
+		skipComments();
+	}
+
+	private void skipWhitespaces() {
+		char nextChar;
+		while (Character.isWhitespace(nextChar = agent.bufferAndGetChar())) {
+			if (nextChar == ' ' || nextChar == '\t')
+				++positionInLine;
+			else
+				handleNewLine();
+			agent.commitBufferedChar();
+		}
+	}
+
+	private void handleNewLine() {
+		++lineNumber;
+		positionInLine = 1;
+	}
+
+	private void skipComments() {
+		skipSingleLineComment();
+		skipMultiLineComment();
+	}
+
+	private void skipSingleLineComment() {
+		char nextChar = agent.bufferAndGetChar();
+		if (nextChar == '#') {
+			while ((nextChar != '\n') && (nextChar != CHAR_ETX)) {
+				agent.commitBufferedChar();
+				nextChar = agent.bufferAndGetChar();
+			}
+			if (nextChar == '\n')
+				handleNewLine();
+			else
+				handleETX();
+		}
+	}
+
+	private void handleETX() {
+		reachedEnd = true;
+		agent.closeReader();
+	}
+
+	private void skipMultiLineComment() {
+		char nextChar = agent.bufferAndGetChar();
+		if (nextChar == '{') {
+			while ((nextChar != '}') && (nextChar != CHAR_ETX)) {
+				agent.commitBufferedChar();
+				nextChar = agent.bufferAndGetChar();
+			}
+		}
 	}
 
 }
