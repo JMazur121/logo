@@ -2,6 +2,7 @@ package tokenizer;
 
 import agent.CharacterStreamAgent;
 import com.google.common.collect.ImmutableMap;
+import exceptions.IncompleteExpressionException;
 import lombok.Getter;
 import java.io.InputStream;
 import java.io.StreamCorruptedException;
@@ -9,12 +10,14 @@ import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.Optional;
 import static agent.CharacterStreamAgent.CHAR_ETX;
+import static agent.CharacterStreamAgent.CHAR_NULL;
 import static tokenizer.TokenType.*;
 
 public class Lexer {
 
 	private static final Map<String, TokenType> expectedTokens;
 	private static final Token etxToken;
+	public static final int IDENTIFIER_MAX_LENGTH = 30;
 	@Getter
 	private int lineNumber;
 	@Getter
@@ -88,24 +91,42 @@ public class Lexer {
 		return (found == null) ? Optional.empty() : Optional.of(found);
 	}
 
-	public Token nextToken() throws StreamCorruptedException {
+	public Token nextToken() throws StreamCorruptedException, IncompleteExpressionException {
 		if (isCorrupted)
 			throw new StreamCorruptedException();
 		if (reachedEnd)
 			return etxToken;
 		skipWhitespaces();
 		skipComments();
+		char nextChar = agent.bufferAndGetChar();
+		if (nextChar == CHAR_ETX) {
+			handleETX();
+			return etxToken;
+		}
+		if (nextChar == CHAR_NULL) {
+			isCorrupted = true;
+			throw new StreamCorruptedException();
+		}
+		if (Character.isDigit(nextChar))
+			return buildNumericConstant(nextChar);
+		else if (Character.isLetter(nextChar))
+			return buildIdentifierOrKeyword(nextChar);
+		else
+			return buildOperator(nextChar);
 	}
 
 	private void skipWhitespaces() {
 		char nextChar;
 		while (Character.isWhitespace(nextChar = agent.bufferAndGetChar())) {
-			if (nextChar == ' ' || nextChar == '\t')
-				++positionInLine;
-			else
+			commitAndMovePosition();
+			if (nextChar == '\n')
 				handleNewLine();
-			agent.commitBufferedChar();
 		}
+	}
+
+	private void commitAndMovePosition() {
+		++positionInLine;
+		agent.commitBufferedChar();
 	}
 
 	private void handleNewLine() {
@@ -113,7 +134,7 @@ public class Lexer {
 		positionInLine = 1;
 	}
 
-	private void skipComments() {
+	private void skipComments() throws IncompleteExpressionException {
 		skipSingleLineComment();
 		skipMultiLineComment();
 	}
@@ -128,8 +149,7 @@ public class Lexer {
 			if (nextChar == '\n') {
 				handleNewLine();
 				agent.commitBufferedChar();
-			}
-			else
+			} else
 				handleETX();
 		}
 	}
@@ -139,23 +159,65 @@ public class Lexer {
 		agent.closeReader();
 	}
 
-	private void skipMultiLineComment() {
+	private void skipMultiLineComment() throws IncompleteExpressionException {
 		char nextChar = agent.bufferAndGetChar();
 		if (nextChar == '{') {
-			agent.commitBufferedChar();
-			++positionInLine;
+			commitAndMovePosition();
 			while ((nextChar != '}') && (nextChar != CHAR_ETX)) {
 				nextChar = agent.bufferAndGetChar();
-				agent.commitBufferedChar();
-				++positionInLine;
+				commitAndMovePosition();
 				if (nextChar == '\n') {
 					handleNewLine();
 				}
 			}
 			if (nextChar == CHAR_ETX) {
-				// TODO: 2018-12-08 underfull comment, throw exception 
+				throw new IncompleteExpressionException("Incomplete multi-line comment - ETX reached");
 			}
 		}
+	}
+
+	private TokenPosition buildTokenPosition() {
+		return new TokenPosition(lineNumber, positionInLine, agent.getBufferedPosition());
+	}
+
+	private Token buildNumericConstant(char currentDigit) {
+		TokenPosition position = buildTokenPosition();
+		StringBuilder builder = new StringBuilder();
+		while (Character.isDigit(currentDigit)) {
+			builder.append(currentDigit);
+			commitAndMovePosition();
+			currentDigit = agent.bufferAndGetChar();
+		}
+		int value = Integer.parseInt(builder.toString());
+		return new NumericToken(position, value);
+	}
+
+	private Token buildIdentifierOrKeyword(char currentChar) {
+		TokenPosition position = buildTokenPosition();
+		StringBuilder builder = new StringBuilder();
+		boolean wasDigit = false;
+		while (Character.isLetter(currentChar)) {
+			builder.append(currentChar);
+			commitAndMovePosition();
+			currentChar = agent.bufferAndGetChar();
+		}
+		for (int i=0; i<IDENTIFIER_MAX_LENGTH; i++) {
+			if ()
+		}
+		// TODO: 2018-12-08 Naprawic budowanie identyfikatorow i pilnowanie dlugosci 
+	}
+
+	private String buildIdentifier(StringBuilder builder, char currentChar) {
+		while (Character.isLetter(currentChar) || Character.isDigit(currentChar)) {
+			builder.append(currentChar);
+			commitAndMovePosition();
+			currentChar = agent.bufferAndGetChar();
+		}
+		return builder.toString();
+	}
+
+	private Token buildOperator(char firstChar) {
+
 	}
 
 }

@@ -1,16 +1,17 @@
 package tokenizer;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
-@Builder
 public class NumericToken extends Token {
 
-	private final int value;
+	private int value;
+
+	public NumericToken(TokenPosition position, int value) {
+		super(TokenType.T_NUMERIC_CONSTANT, position);
+		this.value = value;
+	}
 
 }
