@@ -3,6 +3,7 @@ import exceptions.TokenBuildingException;
 import org.junit.Test;
 import tokenizer.Lexer;
 import tokenizer.Token;
+import tokenizer.TokenPosition;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,51 +40,89 @@ public class LexerTests {
 		assertThat(token.getTokenType()).isEqualTo(T_CONTROL_ETX);
 	}
 
-//	@Test
-//	public void nextToken_lexerOnUnknownCharacters_returnsEmptyOptional() {
-//		//before
-//		lexer.restart();
-//		lexer.handleStream(corruptedStream());
-//		//when
-//		Optional<Token> token = lexer.nextToken();
-//		//then
-//		assertThat(token.isPresent()).isFalse();
-//	}
-//
-//	@Test
-//	public void nextToken_streamWithSingleIdentifier_returnsIdentifierToken() {
-//		//before
-//		lexer.restart();
-//		ByteArrayInputStream is = new ByteArrayInputStream("identifier".getBytes());
-//		lexer.handleStream(is);
-//		//when
-//		Optional<Token> token = lexer.nextToken();
-//		//then
-//		assertThat(token.isPresent()).isTrue();
-//		Token identifierToken = token.get();
-//		assertThat(identifierToken.getTokenType()).isEqualTo(T_IDENTIFIER);
-//		assertThat(identifierToken.getLine()).isEqualTo(1);
-//		assertThat(identifierToken.getPositionInLine()).isEqualTo(1);
-//		assertThat(identifierToken.getAbsolutePosition()).isEqualTo(1);
-//	}
-//
-//	@Test
-//	public void nextToken_singleIdentifierWithDigits_returnsIdentifierToken() {
-//		//before
-//		lexer.restart();
-//		ByteArrayInputStream is = new ByteArrayInputStream("a123".getBytes());
-//		lexer.handleStream(is);
-//		//when
-//		Optional<Token> token = lexer.nextToken();
-//		//then
-//		assertThat(token.isPresent()).isTrue();
-//		Token identifierToken = token.get();
-//		assertThat(identifierToken.getTokenType()).isEqualTo(T_IDENTIFIER);
-//		assertThat(identifierToken.getLine()).isEqualTo(1);
-//		assertThat(identifierToken.getPositionInLine()).isEqualTo(1);
-//		assertThat(identifierToken.getAbsolutePosition()).isEqualTo(1);
-//	}
-//
+	@Test(expected = TokenBuildingException.class)
+	public void nextToken_lexerOnUnknownCharacters_throwsException() throws IncompleteExpressionException, TokenBuildingException, IOException {
+		//before
+		lexer.restart();
+		lexer.handleStream(corruptedStream());
+		//when
+		Token token = lexer.nextToken();
+	}
+
+	@Test
+	public void nextToken_streamWithSingleIdentifier_returnsIdentifierToken() throws IncompleteExpressionException, TokenBuildingException, IOException {
+		//before
+		lexer.restart();
+		ByteArrayInputStream is = new ByteArrayInputStream("identifier".getBytes());
+		lexer.handleStream(is);
+		//when
+		Token token = lexer.nextToken();
+		//then
+		assertThat(token.getTokenType()).isEqualTo(T_IDENTIFIER);
+		TokenPosition position = token.getPosition();
+		assertThat(position.getLine()).isEqualTo(1);
+		assertThat(position.getPositionInLine()).isEqualTo(1);
+		assertThat(position.getAbsolutePosition()).isEqualTo(1);
+	}
+
+	@Test
+	public void nextToken_singleIdentifierWithDigits_returnsIdentifierToken() throws IncompleteExpressionException, TokenBuildingException, IOException {
+		//before
+		lexer.restart();
+		ByteArrayInputStream is = new ByteArrayInputStream("a123".getBytes());
+		lexer.handleStream(is);
+		//when
+		Token token = lexer.nextToken();
+		//then
+		assertThat(token.getTokenType()).isEqualTo(T_IDENTIFIER);
+		TokenPosition position = token.getPosition();
+		assertThat(position.getLine()).isEqualTo(1);
+		assertThat(position.getPositionInLine()).isEqualTo(1);
+		assertThat(position.getAbsolutePosition()).isEqualTo(1);
+	}
+
+	@Test
+	public void nextToken_identifierWith29Characters_returnsIdentifierToken() throws IncompleteExpressionException, TokenBuildingException, IOException {
+		//before
+		lexer.restart();
+		ByteArrayInputStream is = new ByteArrayInputStream("a1bbb2bbb3bbb4bbb5bbb6bbb7bbb".getBytes());
+		lexer.handleStream(is);
+		//when
+		Token token = lexer.nextToken();
+		//then
+		assertThat(token.getTokenType()).isEqualTo(T_IDENTIFIER);
+		TokenPosition position = token.getPosition();
+		assertThat(position.getLine()).isEqualTo(1);
+		assertThat(position.getPositionInLine()).isEqualTo(1);
+		assertThat(position.getAbsolutePosition()).isEqualTo(1);
+	}
+
+	@Test
+	public void nextToken_identifierWith30Characters_returnsIdentifierToken() throws IncompleteExpressionException, TokenBuildingException, IOException {
+		//before
+		lexer.restart();
+		ByteArrayInputStream is = new ByteArrayInputStream("a1bbb2bbb3bbb4bbb5bbb6bbb7bbbx".getBytes());
+		lexer.handleStream(is);
+		//when
+		Token token = lexer.nextToken();
+		//then
+		assertThat(token.getTokenType()).isEqualTo(T_IDENTIFIER);
+		TokenPosition position = token.getPosition();
+		assertThat(position.getLine()).isEqualTo(1);
+		assertThat(position.getPositionInLine()).isEqualTo(1);
+		assertThat(position.getAbsolutePosition()).isEqualTo(1);
+	}
+
+	@Test(expected = TokenBuildingException.class)
+	public void nextToken_tooLongIdentifier_throwsException() throws IncompleteExpressionException, TokenBuildingException, IOException {
+		//before
+		lexer.restart();
+		ByteArrayInputStream is = new ByteArrayInputStream("a1bbb2bbb3bbb4bbb5bbb6bbb7bbbxx".getBytes());
+		lexer.handleStream(is);
+		//when
+		Token token = lexer.nextToken();
+	}
+
 //	@Test
 //	public void nextToken_streamWithSingleNumericConstant_returnsNumericConstantToken() {
 //		//before
