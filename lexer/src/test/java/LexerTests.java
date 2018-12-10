@@ -1,4 +1,3 @@
-import exceptions.IncompleteExpressionException;
 import exceptions.TokenBuildingException;
 import org.junit.Test;
 import tokenizer.Lexer;
@@ -30,7 +29,7 @@ public class LexerTests {
 	}
 
 	@Test
-	public void nextToken_lexerOnEmptyStream_returnsETXToken() throws IncompleteExpressionException, TokenBuildingException, IOException {
+	public void nextToken_lexerOnEmptyStream_returnsETXToken() throws TokenBuildingException, IOException {
 		//before
 		lexer.restart();
 		lexer.handleStream(emptyStream());
@@ -41,7 +40,7 @@ public class LexerTests {
 	}
 
 	@Test(expected = TokenBuildingException.class)
-	public void nextToken_lexerOnUnknownCharacters_throwsException() throws IncompleteExpressionException, TokenBuildingException, IOException {
+	public void nextToken_lexerOnUnknownCharacters_throwsException() throws TokenBuildingException, IOException {
 		//before
 		lexer.restart();
 		lexer.handleStream(corruptedStream());
@@ -50,7 +49,7 @@ public class LexerTests {
 	}
 
 	@Test
-	public void nextToken_streamWithSingleIdentifier_returnsIdentifierToken() throws IncompleteExpressionException, TokenBuildingException, IOException {
+	public void nextToken_streamWithSingleIdentifier_returnsIdentifierToken() throws TokenBuildingException, IOException {
 		//before
 		lexer.restart();
 		ByteArrayInputStream is = new ByteArrayInputStream("identifier".getBytes());
@@ -66,7 +65,7 @@ public class LexerTests {
 	}
 
 	@Test
-	public void nextToken_singleIdentifierWithDigits_returnsIdentifierToken() throws IncompleteExpressionException, TokenBuildingException, IOException {
+	public void nextToken_singleIdentifierWithDigits_returnsIdentifierToken() throws TokenBuildingException, IOException {
 		//before
 		lexer.restart();
 		ByteArrayInputStream is = new ByteArrayInputStream("a123".getBytes());
@@ -82,7 +81,7 @@ public class LexerTests {
 	}
 
 	@Test
-	public void nextToken_identifierWith29Characters_returnsIdentifierToken() throws IncompleteExpressionException, TokenBuildingException, IOException {
+	public void nextToken_identifierWith29Characters_returnsIdentifierToken() throws TokenBuildingException, IOException {
 		//before
 		lexer.restart();
 		ByteArrayInputStream is = new ByteArrayInputStream("a1bbb2bbb3bbb4bbb5bbb6bbb7bbb".getBytes());
@@ -98,7 +97,7 @@ public class LexerTests {
 	}
 
 	@Test
-	public void nextToken_identifierWith30Characters_returnsIdentifierToken() throws IncompleteExpressionException, TokenBuildingException, IOException {
+	public void nextToken_identifierWith30Characters_returnsIdentifierToken() throws TokenBuildingException, IOException {
 		//before
 		lexer.restart();
 		ByteArrayInputStream is = new ByteArrayInputStream("a1bbb2bbb3bbb4bbb5bbb6bbb7bbbx".getBytes());
@@ -114,7 +113,7 @@ public class LexerTests {
 	}
 
 	@Test(expected = TokenBuildingException.class)
-	public void nextToken_tooLongIdentifier_throwsException() throws IncompleteExpressionException, TokenBuildingException, IOException {
+	public void nextToken_tooLongIdentifier_throwsException() throws TokenBuildingException, IOException {
 		//before
 		lexer.restart();
 		ByteArrayInputStream is = new ByteArrayInputStream("a1bbb2bbb3bbb4bbb5bbb6bbb7bbbxx".getBytes());
@@ -124,7 +123,7 @@ public class LexerTests {
 	}
 
 	@Test
-	public void nextToken_streamWithSingleNumericConstant_returnsNumericConstantToken() throws IncompleteExpressionException, TokenBuildingException, IOException {
+	public void nextToken_streamWithSingleNumericConstant_returnsNumericConstantToken() throws TokenBuildingException, IOException {
 		//before
 		lexer.restart();
 		ByteArrayInputStream is = new ByteArrayInputStream("1410".getBytes());
@@ -140,7 +139,7 @@ public class LexerTests {
 	}
 
 	@Test(expected = TokenBuildingException.class)
-	public void nextToken_tooWideNumericConstant_throwsException() throws IncompleteExpressionException, TokenBuildingException, IOException {
+	public void nextToken_tooWideNumericConstant_throwsException() throws TokenBuildingException, IOException {
 		//before
 		lexer.restart();
 		ByteArrayInputStream is = new ByteArrayInputStream("200000000000".getBytes());
@@ -150,7 +149,7 @@ public class LexerTests {
 	}
 
 	@Test
-	public void nextToken_streamAfterSingleIdentifier_returnsETXToken() throws IncompleteExpressionException, TokenBuildingException, IOException {
+	public void nextToken_streamAfterSingleIdentifier_returnsETXToken() throws TokenBuildingException, IOException {
 		//before
 		lexer.restart();
 		ByteArrayInputStream is = new ByteArrayInputStream("identifier".getBytes());
@@ -163,7 +162,7 @@ public class LexerTests {
 	}
 
 	@Test
-	public void nextToken_streamWithSingleOperator_returnsOperatorToken() throws IncompleteExpressionException, TokenBuildingException, IOException {
+	public void nextToken_streamWithSingleOperator_returnsOperatorToken() throws TokenBuildingException, IOException {
 		//before
 		lexer.restart();
 		ByteArrayInputStream is = new ByteArrayInputStream("+".getBytes());
@@ -179,7 +178,7 @@ public class LexerTests {
 	}
 
 	@Test
-	public void nextToken_streamWithWhitespaces_returnsTwoTokens() throws IncompleteExpressionException, TokenBuildingException, IOException {
+	public void nextToken_streamWithWhitespaces_returnsTwoTokens() throws TokenBuildingException, IOException {
 		//before
 		lexer.restart();
 		ByteArrayInputStream is = new ByteArrayInputStream("def kwadrat".getBytes());
@@ -201,7 +200,7 @@ public class LexerTests {
 	}
 
 	@Test
-	public void nextToken_streamWithNewLine_changesPositions() throws IncompleteExpressionException, TokenBuildingException, IOException {
+	public void nextToken_streamWithNewLine_changesPositions() throws TokenBuildingException, IOException {
 		//before
 		lexer.restart();
 		ByteArrayInputStream is = new ByteArrayInputStream("id2 \nid3".getBytes());
@@ -215,7 +214,7 @@ public class LexerTests {
 	}
 
 	@Test
-	public void nextToken_streamWithLineComment_returnsETXToken() throws IncompleteExpressionException, TokenBuildingException, IOException {
+	public void nextToken_streamWithLineComment_returnsETXToken() throws TokenBuildingException, IOException {
 		//before
 		lexer.restart();
 		ByteArrayInputStream is = new ByteArrayInputStream("#comment".getBytes());
@@ -227,7 +226,7 @@ public class LexerTests {
 	}
 
 	@Test
-	public void nextToken_streamWithBlockComment_returnsETXToken() throws IncompleteExpressionException, TokenBuildingException, IOException {
+	public void nextToken_streamWithBlockComment_returnsETXToken() throws TokenBuildingException, IOException {
 		//before
 		lexer.restart();
 		ByteArrayInputStream is = new ByteArrayInputStream("{sdad\ndasd\nsadd\n}".getBytes());

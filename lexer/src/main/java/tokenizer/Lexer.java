@@ -2,7 +2,6 @@ package tokenizer;
 
 import agent.CharacterStreamAgent;
 import com.google.common.collect.ImmutableMap;
-import exceptions.IncompleteExpressionException;
 import exceptions.TokenBuildingException;
 import lombok.Getter;
 import java.io.IOException;
@@ -19,8 +18,9 @@ public class Lexer {
 	private static final Token etxToken;
 	public static final int IDENTIFIER_MAX_LENGTH = 30;
 	public static final String IDENTIFIER_TOO_LONG = "Lexer error - identifier length exceeds maximum (30).";
-	public static final String UNKNOWN_TOKEN = "Lexer error - token was not recognized";
-	public static final String NUMBER_PARSING_ERROR = "Lexer error - number cannot be parsed";
+	public static final String UNKNOWN_TOKEN = "Lexer error - token was not recognized.";
+	public static final String NUMBER_PARSING_ERROR = "Lexer error - number cannot be parsed.";
+	public static final String MULTILINE_COMMENT_ERROR = "Lexer error - missing comment's closing bracket.";
 	@Getter
 	private int lineNumber;
 	@Getter
@@ -87,12 +87,12 @@ public class Lexer {
 		reachedEnd = false;
 	}
 
-	public Optional<TokenType> findToken(String stringRepresentation) {
+	private Optional<TokenType> findToken(String stringRepresentation) {
 		TokenType found = expectedTokens.get(stringRepresentation);
 		return (found == null) ? Optional.empty() : Optional.of(found);
 	}
 
-	public Token nextToken() throws IncompleteExpressionException, IOException, TokenBuildingException {
+	public Token nextToken() throws IOException, TokenBuildingException {
 		if (reachedEnd)
 			return etxToken;
 		skipWhitespaces();
@@ -129,7 +129,7 @@ public class Lexer {
 		positionInLine = 1;
 	}
 
-	private void skipComments() throws IncompleteExpressionException, IOException {
+	private void skipComments() throws IOException, TokenBuildingException {
 		skipSingleLineComment();
 		skipMultiLineComment();
 	}
@@ -149,7 +149,8 @@ public class Lexer {
 		}
 	}
 
-	private void skipMultiLineComment() throws IncompleteExpressionException, IOException {
+	private void skipMultiLineComment() throws IOException, TokenBuildingException {
+		TokenPosition position = buildTokenPosition();
 		char nextChar = agent.bufferAndGetChar();
 		if (nextChar == '{') {
 			commitAndMovePosition();
@@ -161,7 +162,7 @@ public class Lexer {
 				}
 			}
 			if (nextChar == CHAR_ETX) {
-				throw new IncompleteExpressionException("Incomplete multi-line comment - ETX reached");
+				throw new TokenBuildingException(position, "", MULTILINE_COMMENT_ERROR);
 			}
 		}
 	}
@@ -210,8 +211,7 @@ public class Lexer {
 		builder.append(firstChar);
 		commitAndMovePosition();
 		String oneCharToken = builder.toString();
-		char secondChar = agent.bufferAndGetChar();
-		builder.append(secondChar);
+		builder.append(agent.bufferAndGetChar());
 		String twoCharsToken = builder.toString();
 		//first try to find 2-characters operator
 		Optional<TokenType> twoCharsType = findToken(twoCharsToken);
