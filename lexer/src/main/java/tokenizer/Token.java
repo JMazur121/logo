@@ -3,7 +3,6 @@ package tokenizer;
 import lombok.*;
 
 @Getter
-@Setter
 @AllArgsConstructor
 @Builder
 public class Token {
