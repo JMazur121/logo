@@ -1,6 +1,7 @@
 import agent.CharacterStreamAgent;
 import org.junit.Test;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import static agent.CharacterStreamAgent.*;
 import static org.assertj.core.api.Assertions.*;
 
@@ -14,14 +15,6 @@ public class StreamAgentTests {
 		agent.resetAgent();
 		//then
 		assertThat(agent.isBufferContainingChar()).isFalse();
-	}
-
-	@Test
-	public void resetAgent_agentCreated_agentIsNotCorrupted() {
-		//when
-		agent.resetAgent();
-		//then
-		assertThat(agent.isCorrupted()).isFalse();
 	}
 
 	@Test
@@ -41,7 +34,7 @@ public class StreamAgentTests {
 	}
 
 	@Test
-	public void bufferAndGetChar_readingEmptyStream_returnsETX() {
+	public void bufferAndGetChar_readingEmptyStream_returnsETX() throws IOException {
 		//before
 		agent.resetAgent();
 		agent.handleStream(emptyStream());
@@ -52,7 +45,7 @@ public class StreamAgentTests {
 	}
 
 	@Test
-	public void bufferAndGetChar_readingEmptyStream_noCharIsBuffered() {
+	public void bufferAndGetChar_readingEmptyStream_noCharIsBuffered() throws IOException {
 		//before
 		agent.resetAgent();
 		agent.handleStream(emptyStream());
@@ -63,7 +56,7 @@ public class StreamAgentTests {
 	}
 
 	@Test
-	public void bufferAndGetChar_readingEmptyStream_positionIsUnchanged() {
+	public void bufferAndGetChar_readingEmptyStream_positionIsUnchanged() throws IOException {
 		//before
 		agent.resetAgent();
 		agent.handleStream(emptyStream());
@@ -74,7 +67,7 @@ public class StreamAgentTests {
 	}
 
 	@Test
-	public void bufferAndGetChar_callingAfterReachingEnd_stillReturnsETX() {
+	public void bufferAndGetChar_callingAfterReachingEnd_stillReturnsETX() throws IOException {
 		//before
 		agent.resetAgent();
 		agent.handleStream(emptyStream());
@@ -86,7 +79,7 @@ public class StreamAgentTests {
 	}
 
 	@Test
-	public void bufferAndGetChar_nonEmptyStream_returnsFirstChar() {
+	public void bufferAndGetChar_nonEmptyStream_returnsFirstChar() throws IOException {
 		//before
 		agent.resetAgent();
 		agent.handleStream(sampleStream());
@@ -97,7 +90,7 @@ public class StreamAgentTests {
 	}
 
 	@Test
-	public void bufferAndGetChar_readNewChar_bufferIsNotEmpty() {
+	public void bufferAndGetChar_readNewChar_bufferIsNotEmpty() throws IOException {
 		//before
 		agent.resetAgent();
 		agent.handleStream(sampleStream());
@@ -108,7 +101,7 @@ public class StreamAgentTests {
 	}
 
 	@Test
-	public void bufferAndGetChar_readAndNotCommited_positionChanged() {
+	public void bufferAndGetChar_readAndNotCommited_positionChanged() throws IOException {
 		//before
 		agent.resetAgent();
 		agent.handleStream(sampleStream());
@@ -119,7 +112,7 @@ public class StreamAgentTests {
 	}
 
 	@Test
-	public void bufferAndGetChar_readAfterCommit_nextCharIsReturned() {
+	public void bufferAndGetChar_readAfterCommit_nextCharIsReturned() throws IOException {
 		//before
 		agent.resetAgent();
 		agent.handleStream(sampleStream());
@@ -132,7 +125,7 @@ public class StreamAgentTests {
 	}
 
 	@Test
-	public void bufferAndGetChar_readAfterLastChar_returnsETX() {
+	public void bufferAndGetChar_readAfterLastChar_returnsETX() throws IOException {
 		//before
 		agent.resetAgent();
 		agent.handleStream(sampleStream());
@@ -157,7 +150,7 @@ public class StreamAgentTests {
 	}
 
 	@Test
-	public void commitBufferedChar_charIsBuffered_positionIsUnchanged() {
+	public void commitBufferedChar_charIsBuffered_positionIsUnchanged() throws IOException {
 		//before
 		agent.resetAgent();
 		agent.handleStream(sampleStream());
@@ -170,7 +163,7 @@ public class StreamAgentTests {
 	}
 
 	@Test
-	public void commitBufferedChar_charIsBuffered_bufferBecomesEmpty() {
+	public void commitBufferedChar_charIsBuffered_bufferBecomesEmpty() throws IOException {
 		//before
 		agent.resetAgent();
 		agent.handleStream(sampleStream());

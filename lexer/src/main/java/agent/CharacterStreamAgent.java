@@ -17,11 +17,8 @@ public class CharacterStreamAgent {
 	@Getter
 	private boolean isBufferContainingChar;
 	@Getter
-	private boolean isCorrupted;
-	@Getter
 	private boolean reachedEnd;
 	public static final char CHAR_ETX = '\u0003';
-	public static final char CHAR_NULL = '\u0000';
 
 	public CharacterStreamAgent() {
 		resetAgent();
@@ -33,7 +30,6 @@ public class CharacterStreamAgent {
 		bufferedPosition = 0;
 		inStreamPosition = 1;
 		isBufferContainingChar = false;
-		isCorrupted = false;
 		reachedEnd = false;
 	}
 
@@ -45,25 +41,19 @@ public class CharacterStreamAgent {
 		streamReader = new InputStreamReader(inputStream, charset);
 	}
 
-	public char bufferAndGetChar() {
+	public char bufferAndGetChar() throws IOException {
 		if (reachedEnd)
 			return CHAR_ETX;
-		if (isCorrupted)
-			return CHAR_NULL;
 		if (isBufferContainingChar)
 			return buffer;
-		try {
-			int character = streamReader.read();
-			++inStreamPosition;
-			if (character == -1)
-				return handleEndOfTextReached();
-			isBufferContainingChar = true;
-			++bufferedPosition;
-			buffer = (char) character;
-			return buffer;
-		} catch (IOException e) {
-			return handleStreamCorruption();
-		}
+		int character = streamReader.read();
+		++inStreamPosition;
+		if (character == -1)
+			return handleEndOfTextReached();
+		isBufferContainingChar = true;
+		++bufferedPosition;
+		buffer = (char) character;
+		return buffer;
 	}
 
 	public void commitBufferedChar() {
@@ -84,12 +74,6 @@ public class CharacterStreamAgent {
 		reachedEnd = true;
 		closeReader();
 		return CHAR_ETX;
-	}
-
-	private char handleStreamCorruption() {
-		isCorrupted = true;
-		closeReader();
-		return CHAR_NULL;
 	}
 
 }

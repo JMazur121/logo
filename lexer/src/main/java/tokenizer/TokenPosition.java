@@ -2,15 +2,18 @@ package tokenizer;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
-@Setter
 @AllArgsConstructor
 public class TokenPosition {
 
-	private int line;
-	private int positionInLine;
-	private int absolutePosition;
+	private final int line;
+	private final int positionInLine;
+	private final int absolutePosition;
+
+	@Override
+	public String toString() {
+		return String.format("(Position:%d|Line:%d|Column:%d) ",absolutePosition, line, positionInLine);
+	}
 
 }

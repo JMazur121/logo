@@ -3,14 +3,14 @@ package tokenizer;
 import agent.CharacterStreamAgent;
 import com.google.common.collect.ImmutableMap;
 import exceptions.IncompleteExpressionException;
+import exceptions.TokenBuildingException;
 import lombok.Getter;
+import java.io.IOException;
 import java.io.InputStream;
-import java.io.StreamCorruptedException;
 import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.Optional;
 import static agent.CharacterStreamAgent.CHAR_ETX;
-import static agent.CharacterStreamAgent.CHAR_NULL;
 import static tokenizer.TokenType.*;
 
 public class Lexer {
@@ -18,13 +18,15 @@ public class Lexer {
 	private static final Map<String, TokenType> expectedTokens;
 	private static final Token etxToken;
 	public static final int IDENTIFIER_MAX_LENGTH = 30;
+	public static final String IDENTIFIER_TOO_LONG = "Lexer error - identifier length exceeds maximum (30).";
+	public static final String UNKNOWN_TOKEN = "Lexer error - token was not recognized";
+	public static final String NUMBER_PARSING_ERROR = "Lexer error - number cannot be parsed";
 	@Getter
 	private int lineNumber;
 	@Getter
 	private int positionInLine;
-	private CharacterStreamAgent agent;
 	@Getter
-	private boolean isCorrupted;
+	private CharacterStreamAgent agent;
 	@Getter
 	private boolean reachedEnd;
 
@@ -82,7 +84,6 @@ public class Lexer {
 			agent.resetAgent();
 		else
 			agent = new CharacterStreamAgent();
-		isCorrupted = false;
 		reachedEnd = false;
 	}
 
@@ -91,21 +92,15 @@ public class Lexer {
 		return (found == null) ? Optional.empty() : Optional.of(found);
 	}
 
-	public Token nextToken() throws StreamCorruptedException, IncompleteExpressionException {
-		if (isCorrupted)
-			throw new StreamCorruptedException();
+	public Token nextToken() throws IncompleteExpressionException, IOException, TokenBuildingException {
 		if (reachedEnd)
 			return etxToken;
 		skipWhitespaces();
 		skipComments();
 		char nextChar = agent.bufferAndGetChar();
 		if (nextChar == CHAR_ETX) {
-			handleETX();
+			reachedEnd = true;
 			return etxToken;
-		}
-		if (nextChar == CHAR_NULL) {
-			isCorrupted = true;
-			throw new StreamCorruptedException();
 		}
 		if (Character.isDigit(nextChar))
 			return buildNumericConstant(nextChar);
@@ -115,7 +110,7 @@ public class Lexer {
 			return buildOperator(nextChar);
 	}
 
-	private void skipWhitespaces() {
+	private void skipWhitespaces() throws IOException {
 		char nextChar;
 		while (Character.isWhitespace(nextChar = agent.bufferAndGetChar())) {
 			commitAndMovePosition();
@@ -134,12 +129,12 @@ public class Lexer {
 		positionInLine = 1;
 	}
 
-	private void skipComments() throws IncompleteExpressionException {
+	private void skipComments() throws IncompleteExpressionException, IOException {
 		skipSingleLineComment();
 		skipMultiLineComment();
 	}
 
-	private void skipSingleLineComment() {
+	private void skipSingleLineComment() throws IOException {
 		char nextChar = agent.bufferAndGetChar();
 		if (nextChar == '#') {
 			while ((nextChar != '\n') && (nextChar != CHAR_ETX)) {
@@ -150,16 +145,11 @@ public class Lexer {
 				handleNewLine();
 				agent.commitBufferedChar();
 			} else
-				handleETX();
+				reachedEnd = true;
 		}
 	}
 
-	private void handleETX() {
-		reachedEnd = true;
-		agent.closeReader();
-	}
-
-	private void skipMultiLineComment() throws IncompleteExpressionException {
+	private void skipMultiLineComment() throws IncompleteExpressionException, IOException {
 		char nextChar = agent.bufferAndGetChar();
 		if (nextChar == '{') {
 			commitAndMovePosition();
@@ -180,7 +170,7 @@ public class Lexer {
 		return new TokenPosition(lineNumber, positionInLine, agent.getBufferedPosition());
 	}
 
-	private Token buildNumericConstant(char currentDigit) {
+	private Token buildNumericConstant(char currentDigit) throws IOException, TokenBuildingException {
 		TokenPosition position = buildTokenPosition();
 		StringBuilder builder = new StringBuilder();
 		while (Character.isDigit(currentDigit)) {
@@ -188,36 +178,52 @@ public class Lexer {
 			commitAndMovePosition();
 			currentDigit = agent.bufferAndGetChar();
 		}
-		int value = Integer.parseInt(builder.toString());
-		return new NumericToken(position, value);
+		try {
+			int value = Integer.parseInt(builder.toString());
+			return new NumericToken(position, value);
+		} catch (Exception ex) {
+			throw new TokenBuildingException(position, builder.toString(), NUMBER_PARSING_ERROR);
+		}
 	}
 
-	private Token buildIdentifierOrKeyword(char currentChar) {
+	private Token buildIdentifierOrKeyword(char currentChar) throws IOException, TokenBuildingException {
 		TokenPosition position = buildTokenPosition();
 		StringBuilder builder = new StringBuilder();
-		boolean wasDigit = false;
-		while (Character.isLetter(currentChar)) {
+		int length = 0;
+		//we allow to build string longer than maximum, so that we know that identifier is incorrect
+		while (Character.isLetterOrDigit(currentChar) && length <= (IDENTIFIER_MAX_LENGTH + 1)) {
 			builder.append(currentChar);
+			++length;
 			commitAndMovePosition();
 			currentChar = agent.bufferAndGetChar();
 		}
-		for (int i=0; i<IDENTIFIER_MAX_LENGTH; i++) {
-			if ()
-		}
-		// TODO: 2018-12-08 Naprawic budowanie identyfikatorow i pilnowanie dlugosci 
+		if (length > 30)
+			throw new TokenBuildingException(position, builder.toString(), IDENTIFIER_TOO_LONG);
+		String createdWord = builder.toString();
+		Optional<TokenType> foundType = findToken(createdWord);
+		return foundType.map(tokenType -> new Token(tokenType, position)).orElseGet(() -> new LiteralToken(T_IDENTIFIER, position, createdWord));
 	}
 
-	private String buildIdentifier(StringBuilder builder, char currentChar) {
-		while (Character.isLetter(currentChar) || Character.isDigit(currentChar)) {
-			builder.append(currentChar);
+	private Token buildOperator(char firstChar) throws IOException, TokenBuildingException {
+		TokenPosition position = buildTokenPosition();
+		StringBuilder builder = new StringBuilder(2);
+		builder.append(firstChar);
+		commitAndMovePosition();
+		String oneCharToken = builder.toString();
+		char secondChar = agent.bufferAndGetChar();
+		builder.append(secondChar);
+		String twoCharsToken = builder.toString();
+		//first try to find 2-characters operator
+		Optional<TokenType> twoCharsType = findToken(twoCharsToken);
+		if (twoCharsType.isPresent()) {
 			commitAndMovePosition();
-			currentChar = agent.bufferAndGetChar();
+			return new Token(twoCharsType.get(), position);
 		}
-		return builder.toString();
-	}
-
-	private Token buildOperator(char firstChar) {
-
+		//then try to find one-character operator
+		Optional<TokenType> oneCharType = findToken(oneCharToken);
+		if (oneCharType.isPresent())
+			return new Token(oneCharType.get(), position);
+		throw new TokenBuildingException(position, twoCharsToken, UNKNOWN_TOKEN);
 	}
 
 }

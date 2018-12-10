@@ -8,7 +8,7 @@ import lombok.*;
 @Builder
 public class Token {
 
-	private TokenType tokenType;
-	private TokenPosition position;
+	private final TokenType tokenType;
+	private final TokenPosition position;
 
 }
