@@ -223,6 +223,7 @@ public class Lexer {
 		Optional<TokenType> oneCharType = findToken(oneCharToken);
 		if (oneCharType.isPresent())
 			return new Token(oneCharType.get(), position);
+		//there are not any options left - token is unknown
 		throw new TokenBuildingException(position, twoCharsToken, UNKNOWN_TOKEN);
 	}
 
