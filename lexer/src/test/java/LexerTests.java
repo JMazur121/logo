@@ -139,6 +139,16 @@ public class LexerTests {
 		assertThat(position.getAbsolutePosition()).isEqualTo(1);
 	}
 
+	@Test(expected = TokenBuildingException.class)
+	public void nextToken_tooWideNumericConstant_throwsException() throws IncompleteExpressionException, TokenBuildingException, IOException {
+		//before
+		lexer.restart();
+		ByteArrayInputStream is = new ByteArrayInputStream("200000000000".getBytes());
+		lexer.handleStream(is);
+		//when
+		Token token = lexer.nextToken();
+	}
+
 	@Test
 	public void nextToken_streamAfterSingleIdentifier_returnsETXToken() throws IncompleteExpressionException, TokenBuildingException, IOException {
 		//before
@@ -188,6 +198,20 @@ public class LexerTests {
 		assertThat(identifierPosition.getAbsolutePosition()).isEqualTo(5);
 		assertThat(identifierPosition.getLine()).isEqualTo(1);
 		assertThat(identifierPosition.getPositionInLine()).isEqualTo(5);
+	}
+
+	@Test
+	public void nextToken_streamWithNewLine_changesPositions() throws IncompleteExpressionException, TokenBuildingException, IOException {
+		//before
+		lexer.restart();
+		ByteArrayInputStream is = new ByteArrayInputStream("id2 \nid3".getBytes());
+		lexer.handleStream(is);
+		//when
+		lexer.nextToken();
+		lexer.nextToken();
+		//then
+		assertThat(lexer.getLineNumber()).isEqualTo(2);
+		assertThat(lexer.getPositionInLine()).isEqualTo(4);
 	}
 
 	@Test
