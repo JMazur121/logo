@@ -95,7 +95,7 @@ public class Lexer {
 	public Token nextToken() throws IOException, TokenBuildingException {
 		if (reachedEnd)
 			return etxToken;
-		skippCommentsAndWhitespaces();
+		skipCommentsAndWhitespaces();
 		char nextChar = agent.bufferAndGetChar();
 		if (nextChar == CHAR_ETX) {
 			reachedEnd = true;
@@ -109,7 +109,7 @@ public class Lexer {
 			return buildOperator(nextChar);
 	}
 
-	private void skippCommentsAndWhitespaces() throws IOException, TokenBuildingException {
+	private void skipCommentsAndWhitespaces() throws IOException, TokenBuildingException {
 		while (skipWhitespaces() || skipSingleLineComment() || skipMultiLineComment()) {}
 	}
 
