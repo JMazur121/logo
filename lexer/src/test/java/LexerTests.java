@@ -178,6 +178,60 @@ public class LexerTests {
 	}
 
 	@Test
+	public void nextToken_streamWith3OneCharOperators_returns3Tokens() throws IOException, TokenBuildingException {
+		//before
+		lexer.restart();
+		ByteArrayInputStream is = new ByteArrayInputStream("+++".getBytes());
+		lexer.handleStream(is);
+		//when
+		Token t1 = lexer.nextToken();
+		Token t2 = lexer.nextToken();
+		Token t3 = lexer.nextToken();
+		//then
+		assertThat(t1.getTokenType()).isEqualTo(T_ARITHMETIC_ADDITIVE_PLUS);
+		assertThat(t2.getTokenType()).isEqualTo(T_ARITHMETIC_ADDITIVE_PLUS);
+		assertThat(t3.getTokenType()).isEqualTo(T_ARITHMETIC_ADDITIVE_PLUS);
+		assertThat(t1.getPosition().getPositionInLine()).isEqualTo(1);
+		assertThat(t2.getPosition().getPositionInLine()).isEqualTo(2);
+		assertThat(t3.getPosition().getPositionInLine()).isEqualTo(3);
+	}
+
+	@Test
+	public void nextToken_streamWith3TwoCharOperators_returnsThreeTokens() throws IOException, TokenBuildingException {
+		//before
+		lexer.restart();
+		ByteArrayInputStream is = new ByteArrayInputStream("!=<=:=".getBytes());
+		lexer.handleStream(is);
+		//when
+		Token t1 = lexer.nextToken();
+		Token t2 = lexer.nextToken();
+		Token t3 = lexer.nextToken();
+		//then
+		assertThat(t1.getTokenType()).isEqualTo(T_RELATIONAL_NOT_EQUAL);
+		assertThat(t2.getTokenType()).isEqualTo(T_RELATIONAL_LESS_THAN_OR_EQUAL);
+		assertThat(t3.getTokenType()).isEqualTo(T_ASSIGNMENT);
+		assertThat(t1.getPosition().getPositionInLine()).isEqualTo(1);
+		assertThat(t2.getPosition().getPositionInLine()).isEqualTo(3);
+		assertThat(t3.getPosition().getPositionInLine()).isEqualTo(5);
+	}
+
+	@Test
+	public void nextToken_differentLengthOperators_returnsTwoTokens() throws IOException, TokenBuildingException {
+		//before
+		lexer.restart();
+		ByteArrayInputStream is = new ByteArrayInputStream("*==".getBytes());
+		lexer.handleStream(is);
+		//when
+		Token t1 = lexer.nextToken();
+		Token t2 = lexer.nextToken();
+		//then
+		assertThat(t1.getTokenType()).isEqualTo(T_ARITHMETIC_MULT_MULTIPLICATION);
+		assertThat(t2.getTokenType()).isEqualTo(T_RELATIONAL_EQUAL);
+		assertThat(t1.getPosition().getPositionInLine()).isEqualTo(1);
+		assertThat(t2.getPosition().getPositionInLine()).isEqualTo(2);
+	}
+
+	@Test
 	public void nextToken_streamWithWhitespaces_returnsTwoTokens() throws TokenBuildingException, IOException {
 		//before
 		lexer.restart();
@@ -197,6 +251,25 @@ public class LexerTests {
 		assertThat(identifierPosition.getAbsolutePosition()).isEqualTo(5);
 		assertThat(identifierPosition.getLine()).isEqualTo(1);
 		assertThat(identifierPosition.getPositionInLine()).isEqualTo(5);
+	}
+
+	@Test
+	public void nextToken_commaSeparatedIdentifiers_returnsThreeTokens() throws IOException, TokenBuildingException {
+		//before
+		lexer.restart();
+		ByteArrayInputStream is = new ByteArrayInputStream("id1,id2".getBytes());
+		lexer.handleStream(is);
+		//when
+		Token t1 = lexer.nextToken();
+		Token t2 = lexer.nextToken();
+		Token t3 = lexer.nextToken();
+		//then
+		assertThat(t1.getTokenType()).isEqualTo(T_IDENTIFIER);
+		assertThat(t2.getTokenType()).isEqualTo(T_COMMA);
+		assertThat(t3.getTokenType()).isEqualTo(T_IDENTIFIER);
+		assertThat(t1.getPosition().getPositionInLine()).isEqualTo(1);
+		assertThat(t2.getPosition().getPositionInLine()).isEqualTo(4);
+		assertThat(t3.getPosition().getPositionInLine()).isEqualTo(5);
 	}
 
 	@Test

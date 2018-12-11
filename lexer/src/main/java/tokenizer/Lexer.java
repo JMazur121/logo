@@ -95,8 +95,7 @@ public class Lexer {
 	public Token nextToken() throws IOException, TokenBuildingException {
 		if (reachedEnd)
 			return etxToken;
-		skipWhitespaces();
-		skipComments();
+		skippCommentsAndWhitespaces();
 		char nextChar = agent.bufferAndGetChar();
 		if (nextChar == CHAR_ETX) {
 			reachedEnd = true;
@@ -110,13 +109,63 @@ public class Lexer {
 			return buildOperator(nextChar);
 	}
 
-	private void skipWhitespaces() throws IOException {
-		char nextChar;
-		while (Character.isWhitespace(nextChar = agent.bufferAndGetChar())) {
-			commitAndMovePosition();
-			if (nextChar == '\n')
-				handleNewLine();
+	private void skippCommentsAndWhitespaces() throws IOException, TokenBuildingException {
+		while (skipWhitespaces() || skipSingleLineComment() || skipMultiLineComment()) {}
+	}
+
+	private boolean skipWhitespaces() throws IOException {
+		char nextChar = agent.bufferAndGetChar();
+		if (Character.isWhitespace(nextChar)) {
+			while (Character.isWhitespace(nextChar)) {
+				commitAndMovePosition();
+				if (isNewlineCharacter(nextChar))
+					handleNewLine();
+				nextChar = agent.bufferAndGetChar();
+			}
+			return true;
 		}
+		return false;
+	}
+
+	private boolean skipSingleLineComment() throws IOException {
+		char nextChar = agent.bufferAndGetChar();
+		if (nextChar == '#') {
+			while (!isNewlineCharacter(nextChar) && (nextChar != CHAR_ETX)) {
+				agent.commitBufferedChar();
+				nextChar = agent.bufferAndGetChar();
+			}
+			if (isNewlineCharacter(nextChar)) {
+				handleNewLine();
+				agent.commitBufferedChar();
+			} else
+				reachedEnd = true;
+			return true;
+		}
+		return false;
+	}
+
+	private boolean skipMultiLineComment() throws IOException, TokenBuildingException {
+		TokenPosition position = buildTokenPosition();
+		char nextChar = agent.bufferAndGetChar();
+		if (nextChar == '{') {
+			commitAndMovePosition();
+			while ((nextChar != '}') && (nextChar != CHAR_ETX)) {
+				nextChar = agent.bufferAndGetChar();
+				commitAndMovePosition();
+				if (isNewlineCharacter(nextChar)) {
+					handleNewLine();
+				}
+			}
+			if (nextChar == CHAR_ETX) {
+				throw new TokenBuildingException(position, "", MULTILINE_COMMENT_ERROR);
+			}
+			return true;
+		}
+		return false;
+	}
+
+	private boolean isNewlineCharacter(char character) {
+		return character == '\n';
 	}
 
 	private void commitAndMovePosition() {
@@ -127,44 +176,6 @@ public class Lexer {
 	private void handleNewLine() {
 		++lineNumber;
 		positionInLine = 1;
-	}
-
-	private void skipComments() throws IOException, TokenBuildingException {
-		skipSingleLineComment();
-		skipMultiLineComment();
-	}
-
-	private void skipSingleLineComment() throws IOException {
-		char nextChar = agent.bufferAndGetChar();
-		if (nextChar == '#') {
-			while ((nextChar != '\n') && (nextChar != CHAR_ETX)) {
-				agent.commitBufferedChar();
-				nextChar = agent.bufferAndGetChar();
-			}
-			if (nextChar == '\n') {
-				handleNewLine();
-				agent.commitBufferedChar();
-			} else
-				reachedEnd = true;
-		}
-	}
-
-	private void skipMultiLineComment() throws IOException, TokenBuildingException {
-		TokenPosition position = buildTokenPosition();
-		char nextChar = agent.bufferAndGetChar();
-		if (nextChar == '{') {
-			commitAndMovePosition();
-			while ((nextChar != '}') && (nextChar != CHAR_ETX)) {
-				nextChar = agent.bufferAndGetChar();
-				commitAndMovePosition();
-				if (nextChar == '\n') {
-					handleNewLine();
-				}
-			}
-			if (nextChar == CHAR_ETX) {
-				throw new TokenBuildingException(position, "", MULTILINE_COMMENT_ERROR);
-			}
-		}
 	}
 
 	private TokenPosition buildTokenPosition() {
