@@ -1,0 +1,20 @@
+def spirala(bok) [
+    jesli(bok < 10) [stop()]
+    np(bok)
+    pw(90)
+    spirala(bok - 2)
+]
+
+#zmienna globalna
+bok := 10
+{
+Definicja nowej zmiennej.
+Wartosc zalezna od " bok " .
+}
+bok2 := bok + 5
+jesli(bok % 2 == 0) [spirala(bok)]
+wpw jesli (bok2 > 10) [kwadraty(bok2)]
+wpw [
+    spirala(100)
+    kwadraty(20)
+]
