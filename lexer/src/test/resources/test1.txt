@@ -1,0 +1,8 @@
+#prosty komentarz w jednej linii
+zmienna := 1251
+jesli(zmienna > 100)
+    proc1()
+{
+Komentarz wielolinijkowy.
+Na pewno zostanie pominiety
+}

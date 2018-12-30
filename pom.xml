@@ -10,6 +10,7 @@
     <version>1.0-SNAPSHOT</version>
     <modules>
         <module>lexer</module>
+        <module>lexerpresentation</module>
     </modules>
 
     <properties>
@@ -18,6 +19,8 @@
         <assertj.version>3.11.1</assertj.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <guava.version>27.0-jre</guava.version>
+        <commons.version>2.6</commons.version>
     </properties>
 
     <dependencyManagement>
@@ -29,6 +32,18 @@
                 <artifactId>lombok</artifactId>
                 <version>${lombok.version}</version>
                 <scope>provided</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons.version}</version>
             </dependency>
 
             <!--Test dependencies-->

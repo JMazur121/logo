@@ -1,0 +1,18 @@
+#przykladowy komentarz
+#teraz nastapi definicja metody
+
+def kwadrat (bok) [
+    powtarzaj (i,4) [
+        np(bok)
+        pw(90)
+    ]
+]
+
+bok := 100
+kwadrat(bok)
+a := bok + (5 * b)/2
+
+{
+Komentarz do pomieniecia
+Ta linijka takze
+}

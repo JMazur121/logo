@@ -1,5 +1,6 @@
 package agent;
 
+import lombok.Getter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -9,42 +10,27 @@ import java.nio.charset.Charset;
 public class CharacterStreamAgent {
 
 	private Reader streamReader;
+	@Getter
 	private int bufferedPosition;
 	private int inStreamPosition;
 	private char buffer;
-	private boolean bufferContainsChar;
-	private boolean isCorrupted;
+	@Getter
+	private boolean isBufferContainingChar;
+	@Getter
 	private boolean reachedEnd;
 	public static final char CHAR_ETX = '\u0003';
-	public static final char CHAR_NULL = '\u0000';
 
 	public CharacterStreamAgent() {
 		resetAgent();
 	}
 
 	public void resetAgent() {
+		closeReader();
 		streamReader = null;
 		bufferedPosition = 0;
 		inStreamPosition = 1;
-		bufferContainsChar = false;
-		isCorrupted = false;
+		isBufferContainingChar = false;
 		reachedEnd = false;
-	}
-
-	public int getBufferedPosition() {
-		return bufferedPosition;
-	}
-
-	public boolean isCorrupted() {
-		return isCorrupted;
-	}
-
-	public boolean bufferContainsChar() {
-		return bufferContainsChar;
-	}
-
-	public boolean reachedEnd() {
-		return reachedEnd;
 	}
 
 	public void handleStream(InputStream inputStream) {
@@ -55,30 +41,24 @@ public class CharacterStreamAgent {
 		streamReader = new InputStreamReader(inputStream, charset);
 	}
 
-	public char bufferAndGetChar() {
+	public char bufferAndGetChar() throws IOException {
 		if (reachedEnd)
 			return CHAR_ETX;
-		if (isCorrupted)
-			return CHAR_NULL;
-		if (bufferContainsChar)
+		if (isBufferContainingChar)
 			return buffer;
-		try {
-			int character = streamReader.read();
-			++inStreamPosition;
-			if (character == -1)
-				return handleEndOfTextReached();
-			bufferContainsChar = true;
-			++bufferedPosition;
-			buffer = (char) character;
-			return buffer;
-		} catch (IOException e) {
-			return handleStreamCorruption();
-		}
+		int character = streamReader.read();
+		++inStreamPosition;
+		if (character == -1)
+			return handleEndOfTextReached();
+		isBufferContainingChar = true;
+		++bufferedPosition;
+		buffer = (char) character;
+		return buffer;
 	}
 
 	public void commitBufferedChar() {
-		if (bufferContainsChar)
-			bufferContainsChar = false;
+		if (isBufferContainingChar)
+			isBufferContainingChar = false;
 	}
 
 	public void closeReader() {
@@ -94,12 +74,6 @@ public class CharacterStreamAgent {
 		reachedEnd = true;
 		closeReader();
 		return CHAR_ETX;
-	}
-
-	private char handleStreamCorruption() {
-		isCorrupted = true;
-		closeReader();
-		return CHAR_NULL;
 	}
 
 }
