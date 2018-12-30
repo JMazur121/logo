@@ -101,12 +101,13 @@ public class Lexer {
 			reachedEnd = true;
 			return etxToken;
 		}
+		TokenPosition position = buildTokenPosition();
 		if (Character.isDigit(nextChar))
-			return buildNumericConstant(nextChar);
+			return buildNumericConstant(nextChar, position);
 		else if (Character.isLetter(nextChar))
-			return buildIdentifierOrKeyword(nextChar);
+			return buildIdentifierOrKeyword(nextChar, position);
 		else
-			return buildOperator(nextChar);
+			return buildOperator(nextChar, position);
 	}
 
 	private void skipCommentsAndWhitespaces() throws IOException, TokenBuildingException {
@@ -182,10 +183,10 @@ public class Lexer {
 		return new TokenPosition(lineNumber, positionInLine, agent.getBufferedPosition());
 	}
 
-	private Token buildNumericConstant(char currentDigit) throws IOException, TokenBuildingException {
-		TokenPosition position = buildTokenPosition();
+	private Token buildNumericConstant(char currentDigit, TokenPosition position) throws IOException, TokenBuildingException {
 		StringBuilder builder = new StringBuilder();
 		while (Character.isDigit(currentDigit)) {
+			//robic to mnozeniem przez 10, bo moznaa szybciej odkryc przekroczenie zakresu
 			builder.append(currentDigit);
 			commitAndMovePosition();
 			currentDigit = agent.bufferAndGetChar();
@@ -198,8 +199,7 @@ public class Lexer {
 		}
 	}
 
-	private Token buildIdentifierOrKeyword(char currentChar) throws IOException, TokenBuildingException {
-		TokenPosition position = buildTokenPosition();
+	private Token buildIdentifierOrKeyword(char currentChar, TokenPosition position) throws IOException, TokenBuildingException {
 		StringBuilder builder = new StringBuilder();
 		int length = 0;
 		//we allow to build string longer than maximum, so that we know that identifier is incorrect
@@ -216,8 +216,7 @@ public class Lexer {
 		return foundType.map(tokenType -> new Token(tokenType, position)).orElseGet(() -> new LiteralToken(T_IDENTIFIER, position, createdWord));
 	}
 
-	private Token buildOperator(char firstChar) throws IOException, TokenBuildingException {
-		TokenPosition position = buildTokenPosition();
+	private Token buildOperator(char firstChar, TokenPosition position) throws IOException, TokenBuildingException {
 		StringBuilder builder = new StringBuilder(2);
 		builder.append(firstChar);
 		commitAndMovePosition();

@@ -8,14 +8,19 @@ import static tokenizer.TokenType.T_CONTROL_ETX;
 
 public class Main {
 
-	public static void main(String[] args) throws IOException, TokenBuildingException {
+	public static void main(String[] args) {
 		ClassLoader classloader = Thread.currentThread().getContextClassLoader();
 		InputStream in = classloader.getResourceAsStream("logo.txt");
 		Lexer lexer = new Lexer();
 		lexer.handleStream(in, Charset.forName("UTF-8"));
 		Token token;
-		while (!T_CONTROL_ETX.equals((token = lexer.nextToken()).getTokenType()))
-			System.out.println(token);
+		try {
+			while (!T_CONTROL_ETX.equals((token = lexer.nextToken()).getTokenType()))
+				System.out.println(token);
+		} catch (IOException | TokenBuildingException e) {
+			lexer.restart();
+			System.out.println(e.getMessage());
+		}
 	}
 
 }
