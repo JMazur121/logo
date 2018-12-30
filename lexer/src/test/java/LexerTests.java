@@ -1,6 +1,7 @@
 import exceptions.TokenBuildingException;
 import org.junit.Test;
 import tokenizer.Lexer;
+import tokenizer.NumericToken;
 import tokenizer.Token;
 import tokenizer.TokenPosition;
 import java.io.ByteArrayInputStream;
@@ -136,6 +137,27 @@ public class LexerTests {
 		assertThat(position.getLine()).isEqualTo(1);
 		assertThat(position.getPositionInLine()).isEqualTo(1);
 		assertThat(position.getAbsolutePosition()).isEqualTo(1);
+		NumericToken numericToken = (NumericToken)token;
+		assertThat(numericToken.getValue()).isEqualTo(1410);
+	}
+
+	@Test
+	public void nextToken_streamWithMaximumNumericValue_returnsNumericConstantToken() throws IOException, TokenBuildingException {
+		//before
+		lexer.restart();
+		String max = Integer.toString(Integer.MAX_VALUE);
+		ByteArrayInputStream is = new ByteArrayInputStream(max.getBytes());
+		lexer.handleStream(is);
+		//when
+		Token token = lexer.nextToken();
+		//then
+		assertThat(token.getTokenType()).isEqualTo(T_NUMERIC_CONSTANT);
+		TokenPosition position = token.getPosition();
+		assertThat(position.getLine()).isEqualTo(1);
+		assertThat(position.getPositionInLine()).isEqualTo(1);
+		assertThat(position.getAbsolutePosition()).isEqualTo(1);
+		NumericToken numericToken = (NumericToken)token;
+		assertThat(numericToken.getValue()).isEqualTo(Integer.MAX_VALUE);
 	}
 
 	@Test(expected = TokenBuildingException.class)

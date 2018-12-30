@@ -185,18 +185,16 @@ public class Lexer {
 
 	private Token buildNumericConstant(char currentDigit, TokenPosition position) throws IOException, TokenBuildingException {
 		StringBuilder builder = new StringBuilder();
+		int value = 0;
 		while (Character.isDigit(currentDigit)) {
-			//robic to mnozeniem przez 10, bo moznaa szybciej odkryc przekroczenie zakresu
 			builder.append(currentDigit);
+			value = value*10 + Character.digit(currentDigit, 10);
+			if (value < 0)
+				throw new TokenBuildingException(position, builder.toString(), NUMBER_PARSING_ERROR);
 			commitAndMovePosition();
 			currentDigit = agent.bufferAndGetChar();
 		}
-		try {
-			int value = Integer.parseInt(builder.toString());
-			return new NumericToken(position, value);
-		} catch (Exception ex) {
-			throw new TokenBuildingException(position, builder.toString(), NUMBER_PARSING_ERROR);
-		}
+		return new NumericToken(position, value);
 	}
 
 	private Token buildIdentifierOrKeyword(char currentChar, TokenPosition position) throws IOException, TokenBuildingException {
