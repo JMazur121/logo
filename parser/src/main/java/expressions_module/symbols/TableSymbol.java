@@ -1,17 +1,17 @@
-package expressions;
+package expressions_module.symbols;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public class NumericSymbol extends Symbol {
+public class TableSymbol extends Symbol {
 
-	private final int value;
+	private final String identifier;
 
 	@Override
 	public boolean isConstant() {
-		return true;
+		return false;
 	}
 
 }

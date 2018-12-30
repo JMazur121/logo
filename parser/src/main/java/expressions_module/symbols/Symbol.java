@@ -1,4 +1,4 @@
-package expressions;
+package expressions_module.symbols;
 
 public abstract class Symbol {
 

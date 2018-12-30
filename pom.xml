@@ -12,6 +12,7 @@
         <module>lexer</module>
         <module>lexerpresentation</module>
         <module>parser</module>
+        <module>interpreter</module>
     </modules>
 
     <properties>
