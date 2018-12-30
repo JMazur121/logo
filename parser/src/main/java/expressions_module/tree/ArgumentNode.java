@@ -10,7 +10,7 @@ public class ArgumentNode extends Node {
 	}
 
 	@Override
-	protected void accept(Visitor visitor) {
+	public void accept(Visitor visitor) {
 		visitor.visitArgumentNode(this);
 	}
 

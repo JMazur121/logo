@@ -10,7 +10,7 @@ public class OperatorNode extends Node {
 	}
 
 	@Override
-	protected void accept(Visitor visitor) {
+	public void accept(Visitor visitor) {
 		if (leftChild != null)
 			leftChild.accept(visitor);
 		if (rightChild != null)

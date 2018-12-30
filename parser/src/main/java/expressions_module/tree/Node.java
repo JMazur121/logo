@@ -17,6 +17,6 @@ public abstract class Node {
 		this.token = token;
 	}
 
-	protected abstract void accept(Visitor visitor);
+	public abstract void accept(Visitor visitor);
 
 }
