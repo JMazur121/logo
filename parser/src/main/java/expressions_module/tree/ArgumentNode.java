@@ -1,12 +1,29 @@
 package expressions_module.tree;
 
 import expressions_module.visitors.ExpressionVisitor;
-import tokenizer.Token;
+import lombok.Getter;
 
 public class ArgumentNode extends Node {
 
-	public ArgumentNode(Node leftChild, Node rightChild, Token argument) {
-		super(leftChild, rightChild, argument);
+	@Getter
+	private ReadableArgument argument;
+
+	private ArgumentNode(String dictionaryKey) {
+		super(null, null);
+		argument = new DictionaryArgument(dictionaryKey);
+	}
+
+	private ArgumentNode(int value, boolean isConstantValue) {
+		super(null, null);
+		argument = new IndexedArgument(value, isConstantValue);
+	}
+
+	public static ArgumentNode buildDictionaryArgumentNode(String dictionaryKey) {
+		return new ArgumentNode(dictionaryKey);
+	}
+
+	public static ArgumentNode buildRandomAccessArgumentNode(int value, boolean isConstantValue) {
+		return new ArgumentNode(value, isConstantValue);
 	}
 
 	@Override

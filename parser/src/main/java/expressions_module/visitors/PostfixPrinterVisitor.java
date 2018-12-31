@@ -2,10 +2,8 @@ package expressions_module.visitors;
 
 import expressions_module.tree.ArgumentNode;
 import expressions_module.tree.OperatorNode;
-import tokenizer.LiteralToken;
-import tokenizer.NumericToken;
+import expressions_module.tree.ReadableArgument;
 import tokenizer.Token;
-import tokenizer.TokenType;
 
 public class PostfixPrinterVisitor implements ExpressionVisitor {
 
@@ -17,17 +15,16 @@ public class PostfixPrinterVisitor implements ExpressionVisitor {
 
 	@Override
 	public void visitArgumentNode(ArgumentNode node) {
-		Token token = node.getToken();
-		if (token.getTokenType().equals(TokenType.T_NUMERIC_CONSTANT)) {
-			builder.append(((NumericToken) token).getValue());
-		}
+		ReadableArgument argument = node.getArgument();
+		if (argument.isConstantValue())
+			builder.append(argument.readValue());
 		else
-			builder.append(((LiteralToken)token).getWord());
+			builder.append("idx").append(argument.readValue());
 	}
 
 	@Override
 	public void visitOperatorNode(OperatorNode node) {
-		Token token = node.getToken();
+		Token token = node.getOperatorToken();
 		builder.append(token.getTokenType().getLexem());
 	}
 
@@ -35,7 +32,7 @@ public class PostfixPrinterVisitor implements ExpressionVisitor {
 		builder = new StringBuilder();
 	}
 
-	public String print() {
+	public String getPostfixExpression() {
 		return builder.toString();
 	}
 

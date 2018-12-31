@@ -1,12 +1,17 @@
 package expressions_module.tree;
 
 import expressions_module.visitors.ExpressionVisitor;
+import lombok.Getter;
 import tokenizer.Token;
 
 public class OperatorNode extends Node {
 
-	public OperatorNode(Node leftChild, Node rightChild, Token token) {
-		super(leftChild, rightChild, token);
+	@Getter
+	private Token operatorToken;
+
+	public OperatorNode(Node leftChild, Node rightChild, Token operatorToken) {
+		super(leftChild, rightChild);
+		this.operatorToken = operatorToken;
 	}
 
 	@Override
