@@ -35,7 +35,7 @@ public class PostfixPrinterVisitor implements ExpressionVisitor {
 		builder = new StringBuilder();
 	}
 
-	public String getPostfixExpression() {
+	public String print() {
 		return builder.toString();
 	}
 
