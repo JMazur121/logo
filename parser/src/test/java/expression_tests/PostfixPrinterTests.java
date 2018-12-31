@@ -15,7 +15,7 @@ public class PostfixPrinterTests {
 	@Test
 	public void print_simpleAddition_returnsPostfixAddition() {
 		//before
-		String postfixAddition = "35+";
+		String postfixNotation = "35+";
 		ArgumentNode left = ArgumentNode.buildConstantArgumentNode(3);
 		ArgumentNode right = ArgumentNode.buildConstantArgumentNode(5);
 		Token operator = new Token(T_ARITHMETIC_ADDITIVE_PLUS, null);
@@ -23,13 +23,13 @@ public class PostfixPrinterTests {
 		//when
 		expression.accept(visitor);
 		//then
-		assertThat(visitor.print()).isEqualTo(postfixAddition);
+		assertThat(visitor.print()).isEqualTo(postfixNotation);
 	}
 
 	@Test
 	public void print_simpleSubtraction_returnsPostfixSubtraction() {
 		//before
-		String postfixAddition = "35-";
+		String postfixNotation = "35-";
 		ArgumentNode left = ArgumentNode.buildConstantArgumentNode(3);
 		ArgumentNode right = ArgumentNode.buildConstantArgumentNode(5);
 		Token operator = new Token(T_ARITHMETIC_ADDITIVE_MINUS, null);
@@ -37,13 +37,13 @@ public class PostfixPrinterTests {
 		//when
 		expression.accept(visitor);
 		//then
-		assertThat(visitor.print()).isEqualTo(postfixAddition);
+		assertThat(visitor.print()).isEqualTo(postfixNotation);
 	}
 
 	@Test
 	public void print_simpleLessThanComparison_returnsPostfixComparison() {
 		//before
-		String postfixAddition = "35<";
+		String postfixNotation = "35<";
 		ArgumentNode left = ArgumentNode.buildConstantArgumentNode(3);
 		ArgumentNode right = ArgumentNode.buildConstantArgumentNode(5);
 		Token operator = new Token(T_RELATIONAL_LESS_THAN, null);
@@ -51,7 +51,20 @@ public class PostfixPrinterTests {
 		//when
 		expression.accept(visitor);
 		//then
-		assertThat(visitor.print()).isEqualTo(postfixAddition);
+		assertThat(visitor.print()).isEqualTo(postfixNotation);
+	}
+
+	@Test
+	public void print_simpleUnaryMinus_returnsPostfixUnaryMinus() {
+		//before
+		String postfixNotation = "5-";
+		ArgumentNode left = ArgumentNode.buildConstantArgumentNode(5);
+		Token operator = new Token(T_ARITHMETIC_ADDITIVE_MINUS, null);
+		OperatorNode expression = new OperatorNode(left, null, operator);
+		//when
+		expression.accept(visitor);
+		//then
+		assertThat(visitor.print()).isEqualTo(postfixNotation);
 	}
 
 }
