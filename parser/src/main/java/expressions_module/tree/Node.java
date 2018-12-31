@@ -1,6 +1,6 @@
 package expressions_module.tree;
 
-import expressions_module.visitors.Visitor;
+import expressions_module.visitors.ExpressionVisitor;
 import lombok.Getter;
 import tokenizer.Token;
 
@@ -17,6 +17,6 @@ public abstract class Node {
 		this.token = token;
 	}
 
-	public abstract void accept(Visitor visitor);
+	public abstract void accept(ExpressionVisitor expressionVisitor);
 
 }

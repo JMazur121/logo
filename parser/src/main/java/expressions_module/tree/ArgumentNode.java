@@ -1,6 +1,6 @@
 package expressions_module.tree;
 
-import expressions_module.visitors.Visitor;
+import expressions_module.visitors.ExpressionVisitor;
 import tokenizer.Token;
 
 public class ArgumentNode extends Node {
@@ -10,8 +10,8 @@ public class ArgumentNode extends Node {
 	}
 
 	@Override
-	public void accept(Visitor visitor) {
-		visitor.visitArgumentNode(this);
+	public void accept(ExpressionVisitor expressionVisitor) {
+		expressionVisitor.visitArgumentNode(this);
 	}
 
 }

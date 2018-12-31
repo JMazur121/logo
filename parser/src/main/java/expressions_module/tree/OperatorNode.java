@@ -1,6 +1,6 @@
 package expressions_module.tree;
 
-import expressions_module.visitors.Visitor;
+import expressions_module.visitors.ExpressionVisitor;
 import tokenizer.Token;
 
 public class OperatorNode extends Node {
@@ -10,12 +10,12 @@ public class OperatorNode extends Node {
 	}
 
 	@Override
-	public void accept(Visitor visitor) {
+	public void accept(ExpressionVisitor expressionVisitor) {
 		if (leftChild != null)
-			leftChild.accept(visitor);
+			leftChild.accept(expressionVisitor);
 		if (rightChild != null)
-			rightChild.accept(visitor);
-		visitor.visitOperatorNode(this);
+			rightChild.accept(expressionVisitor);
+		expressionVisitor.visitOperatorNode(this);
 	}
 
 }
