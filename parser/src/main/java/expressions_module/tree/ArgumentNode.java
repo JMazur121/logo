@@ -22,8 +22,12 @@ public class ArgumentNode extends Node {
 		return new ArgumentNode(dictionaryKey);
 	}
 
-	public static ArgumentNode buildIndexedArgumentNode(int value, boolean isConstantValue) {
-		return new ArgumentNode(value, isConstantValue);
+	public static ArgumentNode buildIndexedArgumentNode(int index) {
+		return new ArgumentNode(index, false);
+	}
+
+	public static ArgumentNode buildConstantArgumentNode(int value) {
+		return new ArgumentNode(value, true);
 	}
 
 	@Override

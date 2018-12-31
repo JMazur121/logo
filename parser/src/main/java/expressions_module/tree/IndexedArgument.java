@@ -28,4 +28,5 @@ public class IndexedArgument implements ReadableArgument {
 	public int readValue() {
 		return value;
 	}
+
 }
