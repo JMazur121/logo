@@ -22,7 +22,7 @@ public class ArgumentNode extends Node {
 		return new ArgumentNode(dictionaryKey);
 	}
 
-	public static ArgumentNode buildRandomAccessArgumentNode(int value, boolean isConstantValue) {
+	public static ArgumentNode buildIndexedArgumentNode(int value, boolean isConstantValue) {
 		return new ArgumentNode(value, isConstantValue);
 	}
 
