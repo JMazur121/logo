@@ -50,4 +50,22 @@ public class OperatorNode extends Node {
 		}
 	}
 
+	public boolean isLogicalOperator() {
+		switch (operatorToken.getTokenType()) {
+			case T_LOGICAL_AND:
+				return true;
+			case T_LOGICAL_OR:
+				return true;
+			case T_LOGICAL_NOT:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	public boolean isRelationalOperator() {
+		return !(isArithmeticOperator() || isLogicalOperator());
+
+	}
+
 }

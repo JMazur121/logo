@@ -81,6 +81,11 @@ public class ExpressionParser {
 		if (T_LOGICAL_NOT.equals(operatorType)) {
 			return (!leftChild.isArgumentNode() && !((OperatorNode) leftChild).isArithmeticOperator());
 		}
+		else if (T_LOGICAL_AND.equals(operatorType) || T_LOGICAL_OR.equals(operatorType)) {
+			boolean isLeftLogical = (leftChild.isOperatorNode() && ((OperatorNode)leftChild).isLogicalOperator());
+			boolean isRightLogical = (rightChild.isOperatorNode() && ((OperatorNode)rightChild).isLogicalOperator());
+			return (isLeftLogical && isRightLogical);
+		}
 		else if (T_RELATIONAL_EQUAL.equals(operatorType) || T_RELATIONAL_NOT_EQUAL.equals(operatorType)) {
 			//both children must be arithmetic or logical
 			if (leftChild.isArgumentNode() && rightChild.isArgumentNode())
