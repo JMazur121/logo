@@ -1,5 +1,6 @@
 package agent;
 
+import exceptions.LexerException;
 import exceptions.TokenBuildingException;
 import lombok.Getter;
 import tokenizer.Lexer;
@@ -26,11 +27,15 @@ public class LexerAgent {
 		lexer.handleStream(newStream);
 	}
 
-	public Token bufferAndGetToken() throws IOException, TokenBuildingException {
+	public Token bufferAndGetToken() throws LexerException {
 		if (isBufferContainingToken)
 			return bufferedToken;
 		isBufferContainingToken = true;
-		bufferedToken = lexer.nextToken();
+		try {
+			bufferedToken = lexer.nextToken();
+		} catch (IOException | TokenBuildingException e) {
+			throw new LexerException(e.getMessage());
+		}
 		return bufferedToken;
 	}
 

@@ -1,9 +1,7 @@
 package expressions_module.parser;
 
 import agent.LexerAgent;
-import exceptions.TokenBuildingException;
-import exceptions.TokenMissingException;
-import exceptions.UndefinedReferenceException;
+import exceptions.*;
 import expressions_module.tree.ArgumentNode;
 import expressions_module.tree.Node;
 import expressions_module.tree.OperatorNode;
@@ -34,30 +32,76 @@ public class ExpressionParser {
 		this.localReferences = localReferences;
 	}
 
-	public Node getArithmeticExpressionTree() {
+	public Node getArithmeticExpressionTree() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
 		isArithmetic = true;
+		Node currentRoot = getAdditiveSubtree();
+		Token nextToken = agent.bufferAndGetToken();
+		TokenType nextTokenType = nextToken.getTokenType();
+		while (isAdditiveOperator(nextTokenType)) {
+			agent.commitBufferedToken();
+			Node rightSubtree = getAdditiveSubtree();
+			currentRoot = new OperatorNode(currentRoot, rightSubtree, nextToken);
+			if (!isArithmeticOperationPossible(currentRoot))
+				throw new ExpressionCorruptedException(nextToken);
+			nextToken = agent.bufferAndGetToken();
+			nextTokenType = nextToken.getTokenType();
+		}
+		return currentRoot;
 	}
 
 	public Node getLogicalExpressionTree() {
 		isArithmetic = false;
 	}
 
-	private Node getAdditiveSubtree() {
-
+	private Node getAdditiveSubtree() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		Node currentRoot = getMultiplicativeSubtree();
+		Token nextToken = agent.bufferAndGetToken();
+		TokenType nextTokenType = nextToken.getTokenType();
+		while (isMultiplicativeOperator(nextTokenType)) {
+			agent.commitBufferedToken();
+			Node rightSubtree = getMultiplicativeSubtree();
+			currentRoot = new OperatorNode(currentRoot, rightSubtree, nextToken);
+			if (!isArithmeticOperationPossible(currentRoot))
+				throw new ExpressionCorruptedException(nextToken);
+			nextToken = agent.bufferAndGetToken();
+			nextTokenType = nextToken.getTokenType();
+		}
+		return currentRoot;
 	}
 
-	private Node getMultiplicativeSubtree() throws IOException, TokenBuildingException, UndefinedReferenceException, TokenMissingException {
-		Token nextToken = agent.bufferAndGetToken();
-		TokenType firstTokenType = nextToken.getTokenType();
+	private Node getMultiplicativeSubtree() throws UndefinedReferenceException, TokenMissingException, LexerException, ExpressionCorruptedException {
+		Token firstToken = agent.bufferAndGetToken();
+		TokenType firstTokenType = firstToken.getTokenType();
 		Node subtreeRoot;
 		if (T_ARITHMETIC_ADDITIVE_MINUS.equals(firstTokenType) || T_LOGICAL_NOT.equals(firstTokenType)) {
 			agent.commitBufferedToken();
 			subtreeRoot = getTermSubtree();
-			if ()
+			Node unaryRoot = new OperatorNode(subtreeRoot, null, firstToken);
+			if (T_ARITHMETIC_ADDITIVE_MINUS.equals(firstTokenType)) {
+				if (isArithmeticOperationPossible(unaryRoot))
+					return unaryRoot;
+				else
+					throw new ExpressionCorruptedException(firstToken);
+			}
+			else {
+				if (isLogicalOperationPossible(unaryRoot))
+					return unaryRoot;
+				else
+					throw new ExpressionCorruptedException(firstToken);
+			}
 		}
 		else
 			subtreeRoot = getTermSubtree();
 		return subtreeRoot;
+	}
+
+	private boolean isMultiplicativeOperator(TokenType type) {
+		return T_ARITHMETIC_MULT_DIVISION.equals(type) || T_ARITHMETIC_MULT_MULTIPLICATION.equals(type)
+				|| T_ARITHMETIC_MULT_MODULO.equals(type);
+	}
+
+	private boolean isAdditiveOperator(TokenType type) {
+		return T_ARITHMETIC_ADDITIVE_PLUS.equals(type) || T_ARITHMETIC_ADDITIVE_MINUS.equals(type);
 	}
 
 	private boolean isArithmeticOperationPossible(Node subtreeRoot) {
@@ -92,7 +136,7 @@ public class ExpressionParser {
 		}
 	}
 
-	private Node getTermSubtree() throws IOException, TokenBuildingException, UndefinedReferenceException, TokenMissingException {
+	private Node getTermSubtree() throws UndefinedReferenceException, TokenMissingException, LexerException {
 		Token nextToken = agent.bufferAndGetToken();
 		Node subtreeRoot;
 		if (T_NUMERIC_CONSTANT.equals(nextToken.getTokenType())) {
@@ -105,7 +149,7 @@ public class ExpressionParser {
 				subtreeRoot = ArgumentNode.buildDictionaryArgumentNode(id);
 			else {
 				Integer localIndex = localReferences.get(id);
-				if (localIndex == null)
+				if (localReferences == null || localIndex == null)
 					throw new UndefinedReferenceException(nextToken);
 				subtreeRoot = ArgumentNode.buildIndexedArgumentNode(localIndex);
 			}
@@ -116,7 +160,7 @@ public class ExpressionParser {
 		return subtreeRoot;
 	}
 
-	private Node getParenthesisSubtree() throws IOException, TokenBuildingException, TokenMissingException {
+	private Node getParenthesisSubtree() throws TokenMissingException, LexerException {
 		Token nextToken = agent.bufferAndGetToken();
 		Node subtreeRoot;
 		if (!T_LEFT_PARENTHESIS.equals(nextToken.getTokenType()))
