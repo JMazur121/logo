@@ -16,8 +16,16 @@ public abstract class Node {
 
 	public abstract void accept(ExpressionVisitor expressionVisitor);
 
-	public abstract boolean isOperatorNode();
+	public abstract boolean isArithmeticOperatorNode();
+
+	public abstract boolean isLogicalOperatorNode();
+
+	public abstract boolean isRelationalOperatorNode();
 
 	public abstract boolean isArgumentNode();
+
+	public abstract boolean returnsNumericValue();
+
+	public abstract boolean returnsBooleanValue();
 
 }

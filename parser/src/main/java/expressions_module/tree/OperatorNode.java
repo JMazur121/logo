@@ -24,16 +24,12 @@ public class OperatorNode extends Node {
 	}
 
 	@Override
-	public boolean isOperatorNode() {
-		return true;
-	}
-
-	@Override
 	public boolean isArgumentNode() {
 		return false;
 	}
 
-	public boolean isArithmeticOperator() {
+	@Override
+	public boolean isArithmeticOperatorNode() {
 		switch (operatorToken.getTokenType()) {
 			case T_ARITHMETIC_ADDITIVE_PLUS:
 				return true;
@@ -50,7 +46,8 @@ public class OperatorNode extends Node {
 		}
 	}
 
-	public boolean isLogicalOperator() {
+	@Override
+	public boolean isLogicalOperatorNode() {
 		switch (operatorToken.getTokenType()) {
 			case T_LOGICAL_AND:
 				return true;
@@ -63,9 +60,19 @@ public class OperatorNode extends Node {
 		}
 	}
 
-	public boolean isRelationalOperator() {
-		return !(isArithmeticOperator() || isLogicalOperator());
+	@Override
+	public boolean isRelationalOperatorNode() {
+		return !(isArithmeticOperatorNode() || isLogicalOperatorNode());
+	}
 
+	@Override
+	public boolean returnsNumericValue() {
+		return isArithmeticOperatorNode();
+	}
+
+	@Override
+	public boolean returnsBooleanValue() {
+		return !isArithmeticOperatorNode();
 	}
 
 }

@@ -36,13 +36,33 @@ public class ArgumentNode extends Node {
 	}
 
 	@Override
-	public boolean isOperatorNode() {
+	public boolean isArgumentNode() {
+		return true;
+	}
+
+	@Override
+	public boolean isArithmeticOperatorNode() {
 		return false;
 	}
 
 	@Override
-	public boolean isArgumentNode() {
+	public boolean isLogicalOperatorNode() {
+		return false;
+	}
+
+	@Override
+	public boolean isRelationalOperatorNode() {
+		return false;
+	}
+
+	@Override
+	public boolean returnsNumericValue() {
 		return true;
+	}
+
+	@Override
+	public boolean returnsBooleanValue() {
+		return false;
 	}
 
 }
