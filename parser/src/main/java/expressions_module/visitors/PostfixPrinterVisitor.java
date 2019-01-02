@@ -16,10 +16,13 @@ public class PostfixPrinterVisitor implements ExpressionVisitor {
 	@Override
 	public void visitArgumentNode(ArgumentNode node) {
 		ReadableArgument argument = node.getArgument();
-		if (argument.isConstantValue())
+		if (argument.isDictionaryArgument())
+			builder.append(argument.readKey());
+		else {
+			if (argument.isConstantValue())
+				builder.append("idx");
 			builder.append(argument.readValue());
-		else
-			builder.append("idx").append(argument.readValue());
+		}
 	}
 
 	@Override

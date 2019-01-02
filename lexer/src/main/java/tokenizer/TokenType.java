@@ -58,4 +58,23 @@ public enum TokenType {
 		return expectedTokens.get(stringRepresentation);
 	}
 
+	public boolean isMultiplicativeOperator() {
+		return this.equals(T_ARITHMETIC_MULT_DIVISION) || this.equals(T_ARITHMETIC_MULT_MULTIPLICATION) ||
+				this.equals(T_ARITHMETIC_MULT_MODULO);
+	}
+
+	public boolean isAdditiveOperator() {
+		return this.equals(T_ARITHMETIC_ADDITIVE_MINUS) || this.equals(T_ARITHMETIC_ADDITIVE_PLUS);
+	}
+
+	public boolean isLogicalOperator() {
+		return this.equals(T_LOGICAL_AND) || this.equals(T_LOGICAL_OR) || this.equals(T_LOGICAL_NOT);
+	}
+
+	public boolean isRelationalOperator() {
+		return this.equals(T_RELATIONAL_EQUAL) || this.equals(T_RELATIONAL_GREATER_THAN) || this.equals(T_RELATIONAL_GREATER_THAN_OR_EQUAL)
+				|| this.equals(T_RELATIONAL_LESS_THAN) || this.equals(T_RELATIONAL_LESS_THAN_OR_EQUAL)
+				|| this.equals(T_RELATIONAL_NOT_EQUAL);
+	}
+
 }

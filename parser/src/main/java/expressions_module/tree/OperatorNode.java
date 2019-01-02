@@ -3,6 +3,7 @@ package expressions_module.tree;
 import expressions_module.visitors.ExpressionVisitor;
 import lombok.Getter;
 import tokenizer.Token;
+import tokenizer.TokenType;
 
 public class OperatorNode extends Node {
 
@@ -30,34 +31,13 @@ public class OperatorNode extends Node {
 
 	@Override
 	public boolean isArithmeticOperatorNode() {
-		switch (operatorToken.getTokenType()) {
-			case T_ARITHMETIC_ADDITIVE_PLUS:
-				return true;
-			case T_ARITHMETIC_ADDITIVE_MINUS:
-				return true;
-			case T_ARITHMETIC_MULT_MULTIPLICATION:
-				return true;
-			case T_ARITHMETIC_MULT_DIVISION:
-				return true;
-			case T_ARITHMETIC_MULT_MODULO:
-				return true;
-			default:
-				return false;
-		}
+		TokenType type = operatorToken.getTokenType();
+		return type.isAdditiveOperator() || type.isMultiplicativeOperator();
 	}
 
 	@Override
 	public boolean isLogicalOperatorNode() {
-		switch (operatorToken.getTokenType()) {
-			case T_LOGICAL_AND:
-				return true;
-			case T_LOGICAL_OR:
-				return true;
-			case T_LOGICAL_NOT:
-				return true;
-			default:
-				return false;
-		}
+		return operatorToken.getTokenType().isLogicalOperator();
 	}
 
 	@Override
