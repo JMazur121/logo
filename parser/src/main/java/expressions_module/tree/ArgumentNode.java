@@ -35,4 +35,9 @@ public class ArgumentNode extends Node {
 		expressionVisitor.visitArgumentNode(this);
 	}
 
+	@Override
+	public boolean isOperatorNode() {
+		return false;
+	}
+
 }

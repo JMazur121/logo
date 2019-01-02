@@ -1,3 +1,5 @@
+package agent;
+
 import exceptions.TokenBuildingException;
 import lombok.Getter;
 import tokenizer.Lexer;

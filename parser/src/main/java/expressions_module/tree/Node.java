@@ -16,4 +16,6 @@ public abstract class Node {
 
 	public abstract void accept(ExpressionVisitor expressionVisitor);
 
+	public abstract boolean isOperatorNode();
+
 }
