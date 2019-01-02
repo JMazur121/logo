@@ -74,7 +74,34 @@ public class ExpressionParser {
 	}
 
 	private boolean isLogicalOperationPossible(Node subtreeRoot) {
-
+		Node leftChild = subtreeRoot.getLeftChild();
+		Node rightChild = subtreeRoot.getRightChild();
+		OperatorNode operatorRoot = (OperatorNode) subtreeRoot;
+		TokenType operatorType = operatorRoot.getOperatorToken().getTokenType();
+		if (T_LOGICAL_NOT.equals(operatorType)) {
+			return (!leftChild.isArgumentNode() && !((OperatorNode) leftChild).isArithmeticOperator());
+		}
+		else if (T_RELATIONAL_EQUAL.equals(operatorType) || T_RELATIONAL_NOT_EQUAL.equals(operatorType)) {
+			//both children must be arithmetic or logical
+			if (leftChild.isArgumentNode() && rightChild.isArgumentNode())
+				return true;
+			else if (leftChild.isArgumentNode() && ((OperatorNode)rightChild).isArithmeticOperator())
+				return true;
+			else if (rightChild.isArgumentNode() && ((OperatorNode)leftChild).isArithmeticOperator())
+				return true;
+			boolean differentTypes = ((OperatorNode)leftChild).isArithmeticOperator() ^ ((OperatorNode)rightChild).isArithmeticOperator();
+			//if types are different (differentTypes = true) we return false. Otherwise, we return false, so it's always !differentTypes value.
+			return !differentTypes;
+		}
+		else {
+			//both children must be of arithmetic types
+			if (leftChild.isArgumentNode() && rightChild.isArgumentNode())
+				return true;
+			else if (leftChild.isArgumentNode() && ((OperatorNode)rightChild).isArithmeticOperator())
+				return true;
+			else
+				return rightChild.isArgumentNode() && ((OperatorNode) leftChild).isArithmeticOperator();
+		}
 	}
 
 	private Node getTermSubtree() throws IOException, TokenBuildingException, UndefinedReferenceException, TokenMissingException {
