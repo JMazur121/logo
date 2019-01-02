@@ -6,6 +6,7 @@ import exceptions.TokenMissingException;
 import exceptions.UndefinedReferenceException;
 import expressions_module.tree.ArgumentNode;
 import expressions_module.tree.Node;
+import expressions_module.tree.OperatorNode;
 import lombok.Setter;
 import tokenizer.LiteralToken;
 import tokenizer.NumericToken;
@@ -57,6 +58,23 @@ public class ExpressionParser {
 		else
 			subtreeRoot = getTermSubtree();
 		return subtreeRoot;
+	}
+
+	private boolean isArithmeticOperationPossible(Node subtreeRoot) {
+		//both children should be of arithmetic type
+		boolean isLeftChildArithmetic, isRightChildArithmetic;
+		Node leftChild = subtreeRoot.getLeftChild();
+		Node rightChild = subtreeRoot.getRightChild();
+		isLeftChildArithmetic = (leftChild.isArgumentNode() || ((OperatorNode) leftChild).isArithmeticOperator());
+		if (rightChild != null)
+			isRightChildArithmetic = (rightChild.isArgumentNode() || ((OperatorNode) rightChild).isArithmeticOperator());
+		else
+			isRightChildArithmetic = true;
+		return (isLeftChildArithmetic && isRightChildArithmetic);
+	}
+
+	private boolean isLogicalOperationPossible(Node subtreeRoot) {
+
 	}
 
 	private Node getTermSubtree() throws IOException, TokenBuildingException, UndefinedReferenceException, TokenMissingException {

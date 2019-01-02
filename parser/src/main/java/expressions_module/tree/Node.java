@@ -18,4 +18,6 @@ public abstract class Node {
 
 	public abstract boolean isOperatorNode();
 
+	public abstract boolean isArgumentNode();
+
 }

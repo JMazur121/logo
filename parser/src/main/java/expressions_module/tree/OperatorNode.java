@@ -28,6 +28,11 @@ public class OperatorNode extends Node {
 		return true;
 	}
 
+	@Override
+	public boolean isArgumentNode() {
+		return false;
+	}
+
 	public boolean isArithmeticOperator() {
 		switch (operatorToken.getTokenType()) {
 			case T_ARITHMETIC_ADDITIVE_PLUS:

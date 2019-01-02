@@ -40,4 +40,9 @@ public class ArgumentNode extends Node {
 		return false;
 	}
 
+	@Override
+	public boolean isArgumentNode() {
+		return true;
+	}
+
 }
