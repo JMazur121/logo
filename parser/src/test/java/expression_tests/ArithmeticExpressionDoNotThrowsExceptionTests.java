@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 import static org.assertj.core.api.Assertions.*;
 
-public class ExpressionParserExceptionsTests {
+public class ArithmeticExpressionDoNotThrowsExceptionTests {
 
 	private LexerAgent agent = new LexerAgent();
 	private Map<String, Integer> globalVariables = new HashMap<>();
@@ -166,6 +166,17 @@ public class ExpressionParserExceptionsTests {
 	}
 
 	@Test
+	public void getArithmeticTree_unaryMinusWithParenthesis_doNotThrowsException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("-(1*2*3*4)".getBytes());
+		agent.handleStream(is);
+		//when
+		Node treeRoot = parser.getArithmeticExpressionTree();
+		//then
+		assertThat(treeRoot).isNotNull();
+	}
+
+	@Test
 	public void getArithmeticTree_unaryMinusWithGlobalVariable_doNotThrowsException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
 		//before
 		ByteArrayInputStream is = new ByteArrayInputStream("-a".getBytes());
@@ -183,6 +194,39 @@ public class ExpressionParserExceptionsTests {
 		ByteArrayInputStream is = new ByteArrayInputStream("-b".getBytes());
 		agent.handleStream(is);
 		localReferences.put("b", 15);
+		//when
+		Node treeRoot = parser.getArithmeticExpressionTree();
+		//then
+		assertThat(treeRoot).isNotNull();
+	}
+
+	@Test
+	public void getArithmeticTree_additionWithMultiplication_doNotThrowsException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("5+2*3".getBytes());
+		agent.handleStream(is);
+		//when
+		Node treeRoot = parser.getArithmeticExpressionTree();
+		//then
+		assertThat(treeRoot).isNotNull();
+	}
+
+	@Test
+	public void getArithmeticTree_nestedParenthesis_doNotThrowsException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("((5 + 2))".getBytes());
+		agent.handleStream(is);
+		//when
+		Node treeRoot = parser.getArithmeticExpressionTree();
+		//then
+		assertThat(treeRoot).isNotNull();
+	}
+
+	@Test
+	public void getArithmeticTree_multipleParenthesis_doNotThrowsException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("((1+2)+(3*5)) * 5".getBytes());
+		agent.handleStream(is);
 		//when
 		Node treeRoot = parser.getArithmeticExpressionTree();
 		//then
