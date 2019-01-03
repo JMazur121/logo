@@ -19,7 +19,7 @@ public class PostfixPrinterVisitor implements ExpressionVisitor {
 		if (argument.isDictionaryArgument())
 			builder.append(argument.readKey());
 		else {
-			if (argument.isConstantValue())
+			if (!argument.isConstantValue())
 				builder.append("idx");
 			builder.append(argument.readValue());
 		}
