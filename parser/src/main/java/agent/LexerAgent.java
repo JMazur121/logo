@@ -15,16 +15,13 @@ public class LexerAgent {
 	@Getter
 	private boolean isBufferContainingToken;
 
-	public LexerAgent(InputStream newStream) {
-		lexer.handleStream(newStream);
+	public LexerAgent() {
+		restart();
 	}
 
-	public void restart(InputStream newStream) {
-		if (lexer != null)
-			lexer.restart();
-		else
-			lexer = new Lexer();
-		lexer.handleStream(newStream);
+	public void handleStream(InputStream inputStream) {
+		lexer.restart();
+		lexer.handleStream(inputStream);
 	}
 
 	public Token bufferAndGetToken() throws LexerException {
@@ -42,6 +39,13 @@ public class LexerAgent {
 	public void commitBufferedToken() {
 		if (isBufferContainingToken)
 			isBufferContainingToken = false;
+	}
+
+	private void restart() {
+		if (lexer != null)
+			lexer.restart();
+		else
+			lexer = new Lexer();
 	}
 
 }

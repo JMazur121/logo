@@ -188,8 +188,8 @@ public class ExpressionParser {
 			if (globalVariables.containsKey(id))
 				subtreeRoot = ArgumentNode.buildDictionaryArgumentNode(id);
 			else {
-				Integer localIndex = localReferences.get(id);
-				if (localReferences == null || localIndex == null)
+				Integer localIndex;
+				if (localReferences == null || (localIndex = localReferences.get(id)) == null)
 					throw new UndefinedReferenceException(nextToken);
 				subtreeRoot = ArgumentNode.buildIndexedArgumentNode(localIndex);
 			}
