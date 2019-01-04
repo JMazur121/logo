@@ -1,12 +1,16 @@
 import agent.LexerAgent;
 import exceptions.LexerException;
 import exceptions.TokenMissingException;
+import exceptions.UndefinedReferenceException;
 import expressions_module.parser.ExpressionParser;
+import expressions_module.tree.Node;
 import instructions_module.composite.*;
 import lombok.Getter;
 import tokenizer.LiteralToken;
 import tokenizer.Token;
+import tokenizer.TokenType;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Map;
 import static tokenizer.TokenType.*;
 
@@ -54,7 +58,7 @@ public class Parser {
 				throw new TokenMissingException("Procedure definition", "identifier", nextToken);
 			String procedureIdentifier = ((LiteralToken) nextToken).getWord();
 			agent.commitBufferedToken();
-			checkLeftParenthesis("Procedure definition");
+			checkParenthesis(T_LEFT_PARENTHESIS, "Procedure definition");
 			nextToken = agent.bufferAndGetToken();
 			if (T_RIGHT_PARENTHESIS.equals(nextToken.getTokenType())) {
 				agent.commitBufferedToken();
@@ -76,12 +80,19 @@ public class Parser {
 		}
 	}
 
-	private void checkLeftParenthesis(String parsedExpression) throws LexerException, TokenMissingException {
+	private InstructionBlock buildInstructionBlock() {
+		//first check for [
+		//then try to parse as many instructions as possible
+		//check for ]
+		//return block
+	}
+
+	private void checkParenthesis(TokenType expected, String parsedExpression) throws LexerException, TokenMissingException {
 		Token nextToken = agent.bufferAndGetToken();
-		if (T_LEFT_PARENTHESIS.equals(nextToken.getTokenType()))
+		if (expected.equals(nextToken.getTokenType()))
 			agent.commitBufferedToken();
 		else
-			throw new TokenMissingException(parsedExpression, T_LEFT_PARENTHESIS.getLexem(), nextToken);
+			throw new TokenMissingException(parsedExpression, expected.getLexem(), nextToken);
 
 	}
 
@@ -95,12 +106,29 @@ public class Parser {
 		currentLocalReferences = null;
 	}
 
-	private AssignmentInstruction parseAssignmentInstruction(boolean isGlobalScope) {
+	private AssignmentInstruction parseAssignmentInstruction(boolean isGlobalScope, LiteralToken identifier) {
 		return null;
 	}
 
-	private FunctionCall parseFunctionCall() {
-		return null;
+	private FunctionCall parseFunctionCall(LiteralToken identifier) throws UndefinedReferenceException, LexerException, TokenMissingException {
+		InstructionBlock function = knownMethods.get(identifier.getWord());
+		if (function == null)
+			throw new UndefinedReferenceException(identifier);
+		checkParenthesis(T_LEFT_PARENTHESIS, "Function call");
+		Token nextToken = agent.bufferAndGetToken();
+		if (T_RIGHT_PARENTHESIS.equals(nextToken.getTokenType())) {
+			if (function.getNumberOfArguments() == 0) {
+				return new FunctionCall(identifier, null);
+			}
+			else
+				throw new TokenMissingException("Non-zero arguments function call", "function argument", nextToken);
+		}
+		else {
+			// TODO: 2019-01-04 Create function that build arguments' list of specified size.
+			ArrayList<Node> argumentsList = buildArgumentsList(function.getNumberOfArguments());
+			checkParenthesis(T_RIGHT_PARENTHESIS, "Function call");
+			return new FunctionCall(identifier, argumentsList);
+		}
 	}
 
 	private ConditionalInstruction parseConditionalInstruction() {
