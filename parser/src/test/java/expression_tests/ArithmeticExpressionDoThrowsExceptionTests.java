@@ -130,4 +130,60 @@ public class ArithmeticExpressionDoThrowsExceptionTests {
 		assertThat(treeRoot).isNotNull();
 	}
 
+	@Test(expected = TokenMissingException.class)
+	public void getArithmeticTree_multipleDivision_throwsTokenMissingException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("////////".getBytes());
+		agent.handleStream(is);
+		//when
+		Node treeRoot = parser.getArithmeticExpressionTree();
+		//then
+		assertThat(treeRoot).isNotNull();
+	}
+
+	@Test(expected = TokenMissingException.class)
+	public void getArithmeticTree_missingRightParenthesis_throwsTokenMissingException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("(1+2".getBytes());
+		agent.handleStream(is);
+		//when
+		Node treeRoot = parser.getArithmeticExpressionTree();
+		//then
+		assertThat(treeRoot).isNotNull();
+	}
+
+	@Test(expected = TokenMissingException.class)
+	public void getArithmeticTree_emptyParenthesis_throwsTokenMissingException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("( )".getBytes());
+		agent.handleStream(is);
+		//when
+		Node treeRoot = parser.getArithmeticExpressionTree();
+		//then
+		assertThat(treeRoot).isNotNull();
+	}
+
+	@Test(expected = TokenMissingException.class)
+	public void getArithmeticTree_additionWithCorruptedMultiplication_throwsTokenMissingException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("1 + 2 *".getBytes());
+		agent.handleStream(is);
+		//when
+		Node treeRoot = parser.getArithmeticExpressionTree();
+		//then
+		assertThat(treeRoot).isNotNull();
+	}
+
+	@Test(expected = UndefinedReferenceException.class)
+	public void getArithmeticTree_undefinedVariableReference_throwsUndefinedReferenceException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("zmienna".getBytes());
+		agent.handleStream(is);
+		//when
+		Node treeRoot = parser.getArithmeticExpressionTree();
+		//then
+		assertThat(treeRoot).isNotNull();
+	}
+
+
 }

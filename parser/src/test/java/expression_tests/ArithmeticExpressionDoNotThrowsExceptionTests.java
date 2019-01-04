@@ -233,4 +233,15 @@ public class ArithmeticExpressionDoNotThrowsExceptionTests {
 		assertThat(treeRoot).isNotNull();
 	}
 
+	@Test
+	public void getArithmeticTree_subtractionWithUnaryMinus_doNotThrowsException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("-1--2".getBytes());
+		agent.handleStream(is);
+		//when
+		Node treeRoot = parser.getArithmeticExpressionTree();
+		//then
+		assertThat(treeRoot).isNotNull();
+	}
+
 }
