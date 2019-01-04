@@ -309,4 +309,18 @@ public class ArithmeticExpressionsWithPostfixPrinterTests {
 		assertThat(visitor.print()).isEqualTo(postfixNotation);
 	}
 
+	@Test
+	public void print_additiveWithMultiplicativeAndParenthesis_printsPostfixNotation() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		visitor.restartPrinter();
+		String postfixNotation = "238*+-5*";
+		ByteArrayInputStream is = new ByteArrayInputStream("-(2 + 3 * 8) * 5".getBytes());
+		agent.handleStream(is);
+		//when
+		Node root = parser.getArithmeticExpressionTree();
+		root.accept(visitor);
+		//then
+		assertThat(visitor.print()).isEqualTo(postfixNotation);
+	}
+
 }
