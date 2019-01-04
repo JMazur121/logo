@@ -31,4 +31,59 @@ public class LogicalExpressionDoNotThrowsExceptionTests {
 		assertThat(treeRoot).isNotNull();
 	}
 
+	@Test
+	public void getLogicalTree_simpleEqualsOperation_doNotThrowsException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("3 == 5".getBytes());
+		agent.handleStream(is);
+		//when
+		Node treeRoot = parser.getLogicalExpressionTree();
+		//then
+		assertThat(treeRoot).isNotNull();
+	}
+
+	@Test
+	public void getLogicalTree_relationalOperationsWithParenthesis_doNotThrowsException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("(5 > 2)".getBytes());
+		agent.handleStream(is);
+		//when
+		Node treeRoot = parser.getLogicalExpressionTree();
+		//then
+		assertThat(treeRoot).isNotNull();
+	}
+
+	@Test
+	public void getLogicalTree_relationalOperationsWithNestedParenthesis_doNotThrowsException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("(((5 > 2)))".getBytes());
+		agent.handleStream(is);
+		//when
+		Node treeRoot = parser.getLogicalExpressionTree();
+		//then
+		assertThat(treeRoot).isNotNull();
+	}
+
+	@Test
+	public void getLogicalTree_relationalWithAnd_doNotThrowsException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("5 > 2 & 1 < 3".getBytes());
+		agent.handleStream(is);
+		//when
+		Node treeRoot = parser.getLogicalExpressionTree();
+		//then
+		assertThat(treeRoot).isNotNull();
+	}
+
+	@Test
+	public void getLogicalTree_relationalWithConjunctionAndParenthesis_doNotThrowsException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("(5 > 2) & (1 < 2)".getBytes());
+		agent.handleStream(is);
+		//when
+		Node treeRoot = parser.getLogicalExpressionTree();
+		//then
+		assertThat(treeRoot).isNotNull();
+	}
+
 }

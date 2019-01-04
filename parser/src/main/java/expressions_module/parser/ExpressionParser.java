@@ -73,16 +73,16 @@ public class ExpressionParser {
 		Node currentRoot = getArithmeticSubtree();
 		Token nextToken = agent.bufferAndGetToken();
 		TokenType nextTokenType = nextToken.getTokenType();
-		if (nextTokenType.isRelationalOperator()) {
+		while (nextTokenType.isRelationalOperator()) {
 			agent.commitBufferedToken();
 			Node rightSubtree = getArithmeticSubtree();
 			currentRoot = new OperatorNode(currentRoot, rightSubtree, nextToken);
 			if (!isLogicalOperationPossible(currentRoot))
 				throw new ExpressionCorruptedException(nextToken);
-			return currentRoot;
+			nextToken = agent.bufferAndGetToken();
+			nextTokenType = nextToken.getTokenType();
 		}
-		else
-			throw new TokenMissingException("Relational expression", "Relational operator", nextToken);
+		return currentRoot;
 	}
 
 	private Node getArithmeticSubtree() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
