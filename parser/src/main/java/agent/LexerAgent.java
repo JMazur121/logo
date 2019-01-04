@@ -41,7 +41,7 @@ public class LexerAgent {
 			isBufferContainingToken = false;
 	}
 
-	private void restart() {
+	public void restart() {
 		if (lexer != null)
 			lexer.restart();
 		else
