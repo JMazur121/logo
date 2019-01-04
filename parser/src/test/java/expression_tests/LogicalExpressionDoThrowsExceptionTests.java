@@ -109,6 +109,15 @@ public class LogicalExpressionDoThrowsExceptionTests {
 	}
 
 	@Test(expected = ExpressionCorruptedException.class)
+	public void getLogicalTree_logicalOnNumericWithParenthesis_throwsExpressionCorruptedException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("(1 & 2) < (3 | 10)".getBytes());
+		agent.handleStream(is);
+		//when
+		parser.getLogicalExpressionTree();
+	}
+
+	@Test(expected = ExpressionCorruptedException.class)
 	public void getLogicalTree_conjunctionOnArithmetic_throwsExpressionCorruptedException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
 		//before
 		ByteArrayInputStream is = new ByteArrayInputStream("1 + 2 & 3 * 10".getBytes());
