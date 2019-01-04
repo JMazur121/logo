@@ -1,9 +1,14 @@
 import agent.LexerAgent;
+import exceptions.LexerException;
+import exceptions.TokenMissingException;
 import expressions_module.parser.ExpressionParser;
 import instructions_module.composite.*;
 import lombok.Getter;
+import tokenizer.LiteralToken;
+import tokenizer.Token;
 import java.io.InputStream;
 import java.util.Map;
+import static tokenizer.TokenType.*;
 
 public class Parser {
 
@@ -35,12 +40,54 @@ public class Parser {
 		agent.handleStream(inputStream);
 	}
 
-	public InstructionBlock getProcedureDefinition() {
-		return null;
+	public InstructionBlock getProcedureDefinition() throws LexerException, TokenMissingException {
+		if (reachedETX)
+			return null;
+		Token nextToken = agent.bufferAndGetToken();
+		if (T_CONTROL_ETX.equals(nextToken.getTokenType())) {
+			reachedETX = true;
+			return null;
+		}
+		if (T_KEYWORD_PROC_DEFINITION.equals(nextToken.getTokenType())) {
+			nextToken = commitAndGetNext();
+			if (!T_IDENTIFIER.equals(nextToken.getTokenType()))
+				throw new TokenMissingException("Procedure definition", "identifier", nextToken);
+			String procedureIdentifier = ((LiteralToken) nextToken).getWord();
+			agent.commitBufferedToken();
+			checkLeftParenthesis("Procedure definition");
+			nextToken = agent.bufferAndGetToken();
+			if (T_RIGHT_PARENTHESIS.equals(nextToken.getTokenType())) {
+				agent.commitBufferedToken();
+				return buildProcedureWithZeroArguments(procedureIdentifier);
+			}
+			return buildProcedureWithNonZeroArguments(procedureIdentifier);
+		}
+		else
+			return null;
 	}
 
-	public BaseInstruction getNextInstruction() {
-		return null;
+	public BaseInstruction getNextInstruction() throws LexerException {
+		if (reachedETX)
+			return null;
+		Token nextToken = agent.bufferAndGetToken();
+		if (T_CONTROL_ETX.equals(nextToken.getTokenType())) {
+			reachedETX = true;
+			return null;
+		}
+	}
+
+	private void checkLeftParenthesis(String parsedExpression) throws LexerException, TokenMissingException {
+		Token nextToken = agent.bufferAndGetToken();
+		if (T_LEFT_PARENTHESIS.equals(nextToken.getTokenType()))
+			agent.commitBufferedToken();
+		else
+			throw new TokenMissingException(parsedExpression, T_LEFT_PARENTHESIS.getLexem(), nextToken);
+
+	}
+
+	private Token commitAndGetNext() throws LexerException {
+		agent.commitBufferedToken();
+		return agent.bufferAndGetToken();
 	}
 
 	private void resetLocalReferences() {
