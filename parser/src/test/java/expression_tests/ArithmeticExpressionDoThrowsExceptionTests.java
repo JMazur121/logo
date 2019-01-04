@@ -6,12 +6,10 @@ import exceptions.LexerException;
 import exceptions.TokenMissingException;
 import exceptions.UndefinedReferenceException;
 import expressions_module.parser.ExpressionParser;
-import expressions_module.tree.Node;
 import org.junit.Test;
 import java.io.ByteArrayInputStream;
 import java.util.HashMap;
 import java.util.Map;
-import static org.assertj.core.api.Assertions.*;
 
 public class ArithmeticExpressionDoThrowsExceptionTests {
 
@@ -26,9 +24,7 @@ public class ArithmeticExpressionDoThrowsExceptionTests {
 		ByteArrayInputStream is = new ByteArrayInputStream(new byte[0]);
 		agent.handleStream(is);
 		//when
-		Node treeRoot = parser.getArithmeticExpressionTree();
-		//then
-		assertThat(treeRoot).isNotNull();
+		parser.getArithmeticExpressionTree();
 	}
 
 	@Test(expected = TokenMissingException.class)
@@ -37,9 +33,7 @@ public class ArithmeticExpressionDoThrowsExceptionTests {
 		ByteArrayInputStream is = new ByteArrayInputStream("-".getBytes());
 		agent.handleStream(is);
 		//when
-		Node treeRoot = parser.getArithmeticExpressionTree();
-		//then
-		assertThat(treeRoot).isNotNull();
+		parser.getArithmeticExpressionTree();
 	}
 
 	@Test(expected = TokenMissingException.class)
@@ -48,9 +42,7 @@ public class ArithmeticExpressionDoThrowsExceptionTests {
 		ByteArrayInputStream is = new ByteArrayInputStream("--".getBytes());
 		agent.handleStream(is);
 		//when
-		Node treeRoot = parser.getArithmeticExpressionTree();
-		//then
-		assertThat(treeRoot).isNotNull();
+		parser.getArithmeticExpressionTree();
 	}
 
 	@Test(expected = TokenMissingException.class)
@@ -59,9 +51,7 @@ public class ArithmeticExpressionDoThrowsExceptionTests {
 		ByteArrayInputStream is = new ByteArrayInputStream("--------".getBytes());
 		agent.handleStream(is);
 		//when
-		Node treeRoot = parser.getArithmeticExpressionTree();
-		//then
-		assertThat(treeRoot).isNotNull();
+		parser.getArithmeticExpressionTree();
 	}
 
 	@Test(expected = TokenMissingException.class)
@@ -70,9 +60,7 @@ public class ArithmeticExpressionDoThrowsExceptionTests {
 		ByteArrayInputStream is = new ByteArrayInputStream("+".getBytes());
 		agent.handleStream(is);
 		//when
-		Node treeRoot = parser.getArithmeticExpressionTree();
-		//then
-		assertThat(treeRoot).isNotNull();
+		parser.getArithmeticExpressionTree();
 	}
 
 	@Test(expected = TokenMissingException.class)
@@ -81,9 +69,7 @@ public class ArithmeticExpressionDoThrowsExceptionTests {
 		ByteArrayInputStream is = new ByteArrayInputStream("1+".getBytes());
 		agent.handleStream(is);
 		//when
-		Node treeRoot = parser.getArithmeticExpressionTree();
-		//then
-		assertThat(treeRoot).isNotNull();
+		parser.getArithmeticExpressionTree();
 	}
 
 	@Test(expected = TokenMissingException.class)
@@ -92,9 +78,7 @@ public class ArithmeticExpressionDoThrowsExceptionTests {
 		ByteArrayInputStream is = new ByteArrayInputStream("++".getBytes());
 		agent.handleStream(is);
 		//when
-		Node treeRoot = parser.getArithmeticExpressionTree();
-		//then
-		assertThat(treeRoot).isNotNull();
+		parser.getArithmeticExpressionTree();
 	}
 
 	@Test(expected = TokenMissingException.class)
@@ -103,9 +87,7 @@ public class ArithmeticExpressionDoThrowsExceptionTests {
 		ByteArrayInputStream is = new ByteArrayInputStream("++++++".getBytes());
 		agent.handleStream(is);
 		//when
-		Node treeRoot = parser.getArithmeticExpressionTree();
-		//then
-		assertThat(treeRoot).isNotNull();
+		parser.getArithmeticExpressionTree();
 	}
 
 	@Test(expected = TokenMissingException.class)
@@ -114,9 +96,7 @@ public class ArithmeticExpressionDoThrowsExceptionTests {
 		ByteArrayInputStream is = new ByteArrayInputStream("*".getBytes());
 		agent.handleStream(is);
 		//when
-		Node treeRoot = parser.getArithmeticExpressionTree();
-		//then
-		assertThat(treeRoot).isNotNull();
+		parser.getArithmeticExpressionTree();
 	}
 
 	@Test(expected = TokenMissingException.class)
@@ -125,9 +105,7 @@ public class ArithmeticExpressionDoThrowsExceptionTests {
 		ByteArrayInputStream is = new ByteArrayInputStream("1*".getBytes());
 		agent.handleStream(is);
 		//when
-		Node treeRoot = parser.getArithmeticExpressionTree();
-		//then
-		assertThat(treeRoot).isNotNull();
+		parser.getArithmeticExpressionTree();
 	}
 
 	@Test(expected = TokenMissingException.class)
@@ -136,9 +114,7 @@ public class ArithmeticExpressionDoThrowsExceptionTests {
 		ByteArrayInputStream is = new ByteArrayInputStream("////////".getBytes());
 		agent.handleStream(is);
 		//when
-		Node treeRoot = parser.getArithmeticExpressionTree();
-		//then
-		assertThat(treeRoot).isNotNull();
+		parser.getArithmeticExpressionTree();
 	}
 
 	@Test(expected = TokenMissingException.class)
@@ -147,9 +123,7 @@ public class ArithmeticExpressionDoThrowsExceptionTests {
 		ByteArrayInputStream is = new ByteArrayInputStream("(1+2".getBytes());
 		agent.handleStream(is);
 		//when
-		Node treeRoot = parser.getArithmeticExpressionTree();
-		//then
-		assertThat(treeRoot).isNotNull();
+		parser.getArithmeticExpressionTree();
 	}
 
 	@Test(expected = TokenMissingException.class)
@@ -158,9 +132,7 @@ public class ArithmeticExpressionDoThrowsExceptionTests {
 		ByteArrayInputStream is = new ByteArrayInputStream("( )".getBytes());
 		agent.handleStream(is);
 		//when
-		Node treeRoot = parser.getArithmeticExpressionTree();
-		//then
-		assertThat(treeRoot).isNotNull();
+		parser.getArithmeticExpressionTree();
 	}
 
 	@Test(expected = TokenMissingException.class)
@@ -169,9 +141,7 @@ public class ArithmeticExpressionDoThrowsExceptionTests {
 		ByteArrayInputStream is = new ByteArrayInputStream("1 + 2 *".getBytes());
 		agent.handleStream(is);
 		//when
-		Node treeRoot = parser.getArithmeticExpressionTree();
-		//then
-		assertThat(treeRoot).isNotNull();
+		parser.getArithmeticExpressionTree();
 	}
 
 	@Test(expected = UndefinedReferenceException.class)
@@ -180,9 +150,16 @@ public class ArithmeticExpressionDoThrowsExceptionTests {
 		ByteArrayInputStream is = new ByteArrayInputStream("zmienna".getBytes());
 		agent.handleStream(is);
 		//when
-		Node treeRoot = parser.getArithmeticExpressionTree();
-		//then
-		assertThat(treeRoot).isNotNull();
+		parser.getArithmeticExpressionTree();
+	}
+
+	@Test(expected = ExpressionCorruptedException.class)
+	public void getArithmeticTree_relationalOperatorUsed_throwsExpressionCorruptedException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("1 > 2".getBytes());
+		agent.handleStream(is);
+		//when
+		parser.getArithmeticExpressionTree();
 	}
 
 
