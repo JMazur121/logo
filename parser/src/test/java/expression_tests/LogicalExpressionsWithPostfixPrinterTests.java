@@ -55,4 +55,74 @@ public class LogicalExpressionsWithPostfixPrinterTests {
 		assertThat(visitor.print()).isEqualTo(postfixNotation);
 	}
 
+	@Test
+	public void print_simpleLessThanInParenthesis_printsPostfixNotation() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		visitor.restartPrinter();
+		String postfixNotation = "21>";
+		ByteArrayInputStream is = new ByteArrayInputStream("(2 > 1)".getBytes());
+		agent.handleStream(is);
+		//when
+		Node root = parser.getLogicalExpressionTree();
+		root.accept(visitor);
+		//then
+		assertThat(visitor.print()).isEqualTo(postfixNotation);
+	}
+
+	@Test
+	public void print_simpleNegation_printsPostfixNotation() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		visitor.restartPrinter();
+		String postfixNotation = "52<!";
+		ByteArrayInputStream is = new ByteArrayInputStream("!(5 < 2)".getBytes());
+		agent.handleStream(is);
+		//when
+		Node root = parser.getLogicalExpressionTree();
+		root.accept(visitor);
+		//then
+		assertThat(visitor.print()).isEqualTo(postfixNotation);
+	}
+
+	@Test
+	public void print_relationalWithConjunction_printsPostfixNotation() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		visitor.restartPrinter();
+		String postfixNotation = "52>12<&";
+		ByteArrayInputStream is = new ByteArrayInputStream("(5 > 2) & (1 < 2)".getBytes());
+		agent.handleStream(is);
+		//when
+		Node root = parser.getLogicalExpressionTree();
+		root.accept(visitor);
+		//then
+		assertThat(visitor.print()).isEqualTo(postfixNotation);
+	}
+
+	@Test
+	public void print_relationalWithAlternative_printsPostfixNotation() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		visitor.restartPrinter();
+		String postfixNotation = "52>12<|";
+		ByteArrayInputStream is = new ByteArrayInputStream("(5 > 2) | (1 < 2)".getBytes());
+		agent.handleStream(is);
+		//when
+		Node root = parser.getLogicalExpressionTree();
+		root.accept(visitor);
+		//then
+		assertThat(visitor.print()).isEqualTo(postfixNotation);
+	}
+
+	@Test
+	public void print_conjunctionWithAlternative_printsPostfixNotation() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		visitor.restartPrinter();
+		String postfixNotation = "12>23<11==&|";
+		ByteArrayInputStream is = new ByteArrayInputStream("1 > 2 | 2 < 3 & 1 == 1".getBytes());
+		agent.handleStream(is);
+		//when
+		Node root = parser.getLogicalExpressionTree();
+		root.accept(visitor);
+		//then
+		assertThat(visitor.print()).isEqualTo(postfixNotation);
+	}
+
 }
