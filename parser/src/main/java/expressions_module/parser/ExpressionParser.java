@@ -135,26 +135,27 @@ public class ExpressionParser {
 		Token firstToken = getNextToken();
 		TokenType firstTokenType = firstToken.getTokenType();
 		Node subtreeRoot;
-		if (T_ARITHMETIC_ADDITIVE_MINUS.equals(firstTokenType) || T_LOGICAL_NOT.equals(firstTokenType)) {
+		if (T_ARITHMETIC_ADDITIVE_MINUS.equals(firstTokenType)) {
 			agent.commitBufferedToken();
 			subtreeRoot = getTermSubtree();
 			Node unaryRoot = new OperatorNode(subtreeRoot, null, firstToken);
-			if (T_ARITHMETIC_ADDITIVE_MINUS.equals(firstTokenType)) {
-				if (isArithmeticOperationPossible(unaryRoot))
-					return unaryRoot;
-				else
-					throw new ExpressionCorruptedException(firstToken);
-			}
-			else {
-				if (isLogicalOperationPossible(unaryRoot))
-					return unaryRoot;
-				else
-					throw new ExpressionCorruptedException(firstToken);
-			}
+			if (!isArithmeticOperationPossible(unaryRoot))
+				throw new ExpressionCorruptedException(firstToken);
+			return unaryRoot;
+		}
+		else if (T_LOGICAL_NOT.equals(firstTokenType)) {
+			agent.commitBufferedToken();
+			Token nextToken = getNextToken();
+			if (!T_LEFT_PARENTHESIS.equals(nextToken.getTokenType()))
+				throw new TokenMissingException("Logical expression", T_LEFT_PARENTHESIS.getLexem(), nextToken);
+			subtreeRoot = getTermSubtree();
+			Node unaryRoot = new OperatorNode(subtreeRoot, null, firstToken);
+			if (!isLogicalOperationPossible(unaryRoot))
+				throw new ExpressionCorruptedException(firstToken);
+			return unaryRoot;
 		}
 		else
-			subtreeRoot = getTermSubtree();
-		return subtreeRoot;
+			return getTermSubtree();
 	}
 
 	private boolean isArithmeticOperationPossible(Node subtreeRoot) {
