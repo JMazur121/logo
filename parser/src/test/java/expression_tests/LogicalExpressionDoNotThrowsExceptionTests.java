@@ -86,4 +86,92 @@ public class LogicalExpressionDoNotThrowsExceptionTests {
 		assertThat(treeRoot).isNotNull();
 	}
 
+	@Test
+	public void getLogicalTree_relationalWithAlternativeAndParenthesis_doNotThrowsException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("(5 > 2) | (1 < 2)".getBytes());
+		agent.handleStream(is);
+		//when
+		Node treeRoot = parser.getLogicalExpressionTree();
+		//then
+		assertThat(treeRoot).isNotNull();
+	}
+
+	@Test
+	public void getLogicalTree_alternativeWithConjunction_doNotThrowsException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("(5 > 2) & (1 < 2) | (2 < 5)".getBytes());
+		agent.handleStream(is);
+		//when
+		Node treeRoot = parser.getLogicalExpressionTree();
+		//then
+		assertThat(treeRoot).isNotNull();
+	}
+
+	@Test
+	public void getLogicalTree_multipleConjunctions_doNotThrowsException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("(5 > 2) & (1 < 2) & (3 < 5)".getBytes());
+		agent.handleStream(is);
+		//when
+		Node treeRoot = parser.getLogicalExpressionTree();
+		//then
+		assertThat(treeRoot).isNotNull();
+	}
+
+	@Test
+	public void getLogicalTree_multipleAlternatives_doNotThrowsException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("(5 > 2) | (1 < 2) | (1 < 10)".getBytes());
+		agent.handleStream(is);
+		//when
+		Node treeRoot = parser.getLogicalExpressionTree();
+		//then
+		assertThat(treeRoot).isNotNull();
+	}
+
+	@Test
+	public void getLogicalTree_unaryNot_doNotThrowsException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("!(5 > 2)".getBytes());
+		agent.handleStream(is);
+		//when
+		Node treeRoot = parser.getLogicalExpressionTree();
+		//then
+		assertThat(treeRoot).isNotNull();
+	}
+
+	@Test
+	public void getLogicalTree_unaryNotWithConjunction_doNotThrowsException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("!(5 > 2) & (1 < 10)".getBytes());
+		agent.handleStream(is);
+		//when
+		Node treeRoot = parser.getLogicalExpressionTree();
+		//then
+		assertThat(treeRoot).isNotNull();
+	}
+
+	@Test
+	public void getLogicalTree_unaryNotWithAlternative_doNotThrowsException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("!(5 > 2) | (1 < 10)".getBytes());
+		agent.handleStream(is);
+		//when
+		Node treeRoot = parser.getLogicalExpressionTree();
+		//then
+		assertThat(treeRoot).isNotNull();
+	}
+
+	@Test
+	public void getLogicalTree_unaryNotWithConjunctionAndParenthesis_doNotThrowsException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("( ( !(5 > 2) ) & ( 1 < 10 ))".getBytes());
+		agent.handleStream(is);
+		//when
+		Node treeRoot = parser.getLogicalExpressionTree();
+		//then
+		assertThat(treeRoot).isNotNull();
+	}
+
 }
