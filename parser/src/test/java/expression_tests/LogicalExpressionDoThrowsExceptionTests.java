@@ -6,12 +6,10 @@ import exceptions.LexerException;
 import exceptions.TokenMissingException;
 import exceptions.UndefinedReferenceException;
 import expressions_module.parser.ExpressionParser;
-import expressions_module.tree.Node;
 import org.junit.Test;
 import java.io.ByteArrayInputStream;
 import java.util.HashMap;
 import java.util.Map;
-import static org.assertj.core.api.Assertions.*;
 
 public class LogicalExpressionDoThrowsExceptionTests {
 
@@ -26,9 +24,88 @@ public class LogicalExpressionDoThrowsExceptionTests {
 		ByteArrayInputStream is = new ByteArrayInputStream(new byte[0]);
 		agent.handleStream(is);
 		//when
-		Node treeRoot = parser.getLogicalExpressionTree();
-		//then
-		assertThat(treeRoot).isNotNull();
+		parser.getLogicalExpressionTree();
+	}
+
+	@Test(expected = ExpressionCorruptedException.class)
+	public void getLogicalTree_singleConstant_throwsExpressionCorruptedException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("10".getBytes());
+		agent.handleStream(is);
+		//when
+		parser.getLogicalExpressionTree();
+	}
+
+	@Test(expected = ExpressionCorruptedException.class)
+	public void getLogicalTree_simpleAddition_throwsExpressionCorruptedException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("1+2".getBytes());
+		agent.handleStream(is);
+		//when
+		parser.getLogicalExpressionTree();
+	}
+
+	@Test(expected = ExpressionCorruptedException.class)
+	public void getLogicalTree_conjunctionOnNumeric_throwsExpressionCorruptedException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("1 & 2 & 3".getBytes());
+		agent.handleStream(is);
+		//when
+		parser.getLogicalExpressionTree();
+	}
+
+	@Test(expected = ExpressionCorruptedException.class)
+	public void getLogicalTree_alternativeOnNumeric_throwsExpressionCorruptedException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("1 | 2 | 3".getBytes());
+		agent.handleStream(is);
+		//when
+		parser.getLogicalExpressionTree();
+	}
+
+	@Test(expected = ExpressionCorruptedException.class)
+	public void getLogicalTree_alternativeAndConjunctionOnNumeric_throwsExpressionCorruptedException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("1 & 2 | 3".getBytes());
+		agent.handleStream(is);
+		//when
+		parser.getLogicalExpressionTree();
+	}
+
+	@Test(expected = ExpressionCorruptedException.class)
+	public void getLogicalTree_negationOnSimpleNumeric_throwsExpressionCorruptedException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("!3".getBytes());
+		agent.handleStream(is);
+		//when
+		parser.getLogicalExpressionTree();
+	}
+
+	@Test(expected = ExpressionCorruptedException.class)
+	public void getLogicalTree_negationOnArithmeticParenthesis_throwsExpressionCorruptedException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("!(1+2*5)".getBytes());
+		agent.handleStream(is);
+		//when
+		parser.getLogicalExpressionTree();
+	}
+
+	@Test(expected = ExpressionCorruptedException.class)
+	public void getLogicalTree_additionOnRelational_throwsExpressionCorruptedException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("1 > 2 + 3 < 10".getBytes());
+		agent.handleStream(is);
+		//when
+		parser.getLogicalExpressionTree();
+	}
+
+	@Test(expected = ExpressionCorruptedException.class)
+	public void getLogicalTree_additionOnRelationalWithParenthesis_throwsExpressionCorruptedException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("(1 > 2) + (3 < 10)".getBytes());
+		agent.handleStream(is);
+		//when
+		parser.getLogicalExpressionTree();
 	}
 
 }
