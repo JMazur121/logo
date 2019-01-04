@@ -10,6 +10,7 @@ public class InstructionBlock extends BaseInstruction{
 	
 	private ArrayList<BaseInstruction> instructions;
 	private int numberOfLocalVariables = 0;
+	private int numberOfArguments = 0;
 
 	@Override
 	public void accept(InstructionVisitor visitor) {
