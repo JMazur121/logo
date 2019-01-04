@@ -164,10 +164,23 @@ public class LogicalExpressionDoNotThrowsExceptionTests {
 	}
 
 	@Test
-	public void getLogicalTree_unaryNotWithConjunctionAndParenthesis_doNotThrowsException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+	public void getLogicalTree_relationalWithGlobalVariable_doNotThrowsException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
 		//before
-		ByteArrayInputStream is = new ByteArrayInputStream("( ( !(5 > 2) ) & ( 1 < 10 ))".getBytes());
+		ByteArrayInputStream is = new ByteArrayInputStream("( dlugosc > 10 )".getBytes());
 		agent.handleStream(is);
+		globalVariables.put("dlugosc", 10);
+		//when
+		Node treeRoot = parser.getLogicalExpressionTree();
+		//then
+		assertThat(treeRoot).isNotNull();
+	}
+
+	@Test
+	public void getLogicalTree_relationalWithLocalVariable_doNotThrowsException() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("( local < 10 )".getBytes());
+		agent.handleStream(is);
+		localReferences.put("local", 5);
 		//when
 		Node treeRoot = parser.getLogicalExpressionTree();
 		//then

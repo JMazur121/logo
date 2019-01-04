@@ -14,7 +14,7 @@ import static tokenizer.TokenType.*;
 
 public class Lexer {
 
-	private static final Token etxToken;
+	private Token etxToken;
 	public static final int IDENTIFIER_MAX_LENGTH = 30;
 	public static final String IDENTIFIER_TOO_LONG = "Lexer error - identifier length exceeds maximum (30).";
 	public static final String UNKNOWN_TOKEN = "Lexer error - token was not recognized.";
@@ -28,10 +28,6 @@ public class Lexer {
 	private CharacterStreamAgent agent;
 	@Getter
 	private boolean reachedEnd;
-
-	static {
-		etxToken = Token.builder().tokenType(T_CONTROL_ETX).build();
-	}
 
 	public Lexer() {
 		restart();
@@ -67,6 +63,10 @@ public class Lexer {
 		char nextChar = agent.bufferAndGetChar();
 		if (nextChar == CHAR_ETX) {
 			reachedEnd = true;
+			etxToken = Token.builder()
+					.position(buildTokenPosition())
+					.tokenType(T_CONTROL_ETX)
+					.build();
 			return etxToken;
 		}
 		TokenPosition position = buildTokenPosition();
