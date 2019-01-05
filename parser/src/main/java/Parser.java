@@ -59,7 +59,11 @@ public class Parser {
 		agent.handleStream(inputStream);
 	}
 
-	public InstructionBlock getProcedureDefinition() throws LexerException, ParserException {
+	/**
+	 * Main function
+	 * @return Executable scope or procedure definition
+	 */
+	public Scope getNetScope() throws LexerException {
 		if (reachedETX)
 			return null;
 		Token nextToken = agent.bufferAndGetToken();
@@ -67,6 +71,9 @@ public class Parser {
 			reachedETX = true;
 			return null;
 		}
+	}
+
+	public InstructionBlock getProcedureDefinition() throws LexerException, ParserException {
 		if (T_KEYWORD_PROC_DEFINITION.equals(nextToken.getTokenType())) {
 			nextToken = commitAndGetNext();
 			if (!T_IDENTIFIER.equals(nextToken.getTokenType())) {
@@ -142,32 +149,67 @@ public class Parser {
 		currentLocalReferences = new HashMap<>();
 		instructionPointer = 0;
 		currentInstructionList = new ArrayList<>();
+		expressionParser.setLocalReferences(currentLocalReferences);
 	}
 
-	private AssignmentInstruction parseAssignmentInstruction(boolean isGlobalScope, LiteralToken identifier) throws LexerException, ParserException {
+	private void parseAssignmentInstruction(boolean isGlobalScope, LiteralToken identifier) throws LexerException, ParserException {
 		checkForToken(T_ASSIGNMENT, "Assignment instruction");
 		String id = identifier.getWord();
 		Node expression;
+		AssignmentInstruction instruction;
 		if (isGlobalScope) {
 			globalVariables.putIfAbsent(id, 0);
 			expression = buildArithmeticExpression();
-			return new AssignmentInstruction(new DictionaryArgument(id), expression);
+			instruction = new AssignmentInstruction(new DictionaryArgument(id), expression);
 		}
 		else {
 			Integer globalVariable = globalVariables.get(id);
 			if (globalVariable == null) {
 				Integer localReference = currentLocalReferences.computeIfAbsent(id, k -> lastIndex++);
 				expression = buildArithmeticExpression();
-				return new AssignmentInstruction(new IndexedArgument(localReference,false), expression);
+				instruction = new AssignmentInstruction(new IndexedArgument(localReference,false), expression);
 			}
 			else {
 				expression = buildArithmeticExpression();
-				return new AssignmentInstruction(new DictionaryArgument(identifier.getWord()), expression);
+				instruction = new AssignmentInstruction(new DictionaryArgument(identifier.getWord()), expression);
 			}
 		}
+		currentInstructionList.add(instruction);
+		lastIndex++;
 	}
 
-	private FunctionCall parseFunctionCall(LiteralToken identifier) throws UndefinedReferenceException, LexerException, TokenMissingException {
+	private ArrayList<Node> buildArgumentsList(int expectedArgumentsListSize) throws ParserException, LexerException {
+		ArrayList<Node> argumentsList = new ArrayList<>(expectedArgumentsListSize);
+		argumentsList.add(buildArithmeticExpression());
+		--expectedArgumentsListSize;
+		while (expectedArgumentsListSize > 0) {
+			checkForToken(T_COMMA, "Function-call's arguments list");
+			argumentsList.add(buildArithmeticExpression());
+			--expectedArgumentsListSize;
+		}
+		return argumentsList;
+	}
+
+	private ArrayList<Node> buildLimitedArgumentsList(int maxArguments) throws ParserException, LexerException {
+		ArrayList<Node> argumentsList = new ArrayList<>(maxArguments);
+		argumentsList.add(buildArithmeticExpression());
+		int createdArguments = 1;
+		while (createdArguments < maxArguments) {
+			Token nextToken = agent.bufferAndGetToken();
+			if (T_COMMA.equals(nextToken.getTokenType())) {
+				agent.commitBufferedToken();
+				argumentsList.add(buildArithmeticExpression());
+				++createdArguments;
+			}
+			else if (T_RIGHT_PARENTHESIS.equals(nextToken.getTokenType()))
+				break;
+			else
+				throw new ParserException("Unexpected token while parsing an arguments list : " + nextToken);
+		}
+		return argumentsList;
+	}
+
+	private void parseFunctionCall(LiteralToken identifier) throws UndefinedReferenceException, LexerException, TokenMissingException {
 		InstructionBlock function = knownMethods.get(identifier.getWord());
 		if (function == null)
 			throw new UndefinedReferenceException(identifier);
