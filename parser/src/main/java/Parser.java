@@ -119,7 +119,7 @@ public class Parser {
 		}
 	}
 
-	private InstructionBlock buildInstructionBlock() {
+	private void parseInstructionBlock() {
 		// TODO: 2019-01-05 Najbardziej potrzebna funkcja
 		//first check for [
 		//then try to parse as many instructions as possible
@@ -270,8 +270,19 @@ public class Parser {
 		return null;
 	}
 
-	private WhileLoop parseWhileLoop() {
-		return null;
+	private void parseWhileLoop() throws LexerException, ParserException {
+		checkForToken(T_LEFT_PARENTHESIS, "While-loop");
+		Node expression = buildLogicalExpression();
+		checkForToken(T_RIGHT_PARENTHESIS, "While-loop");
+		JumpIfNotTrue jumpIfNotTrue = new JumpIfNotTrue(expression);
+		int jumpIfNotTrueIndex = instructionPointer;
+		currentInstructionList.add(jumpIfNotTrue);
+		++instructionPointer;
+		parseInstructionBlock();
+		BaseInstruction jumpToConditionCheck = new Jump(jumpIfNotTrueIndex);
+		currentInstructionList.add(jumpToConditionCheck);
+		++instructionPointer;
+		jumpIfNotTrue.setInstructionPointer(instructionPointer);
 	}
 
 }
