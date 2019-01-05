@@ -29,15 +29,30 @@ public class Parser {
 	private final Map<String, Integer> globalVariables;
 	private final Map<String, Scope> knownMethods;
 	private Map<String, Integer> currentLocalReferences;
-	public static final Set<String> embeddedMethods;
+	public static final Map<String, Integer> embeddedMethods;
 	private int lastIndex;
 	private int instructionPointer;
 	private ArrayList<BaseInstruction> currentInstructionList;
 
 	static {
-		embeddedMethods = Sets.newHashSet("naprzod", "wstecz", "prawo", "lewo", "czysc", "podnies",
-				"opusc", "zamaluj", "kolorPisaka", "kolorMalowania", "paleta", "foremny", "okrag", "kolo",
-				"skok", "stop");
+		embeddedMethods = ImmutableMap.<String, Integer>builder()
+				.put("naprzod", 1)
+				.put("wstecz", 1)
+				.put("lewo", 1)
+				.put("prawo", 1)
+				.put("czysc", 0)
+				.put("podnies", 0)
+				.put("opusc", 0)
+				.put("zamaluj", 0)
+				.put("kolorPisaka", 3)
+				.put("kolorMalowania", 3)
+				.put("paleta", 4)
+				.put("foremny", 1)
+				.put("okrag", 1)
+				.put("kolo", 1)
+				.put("skok", 2)
+				.put("stop", 0)
+				.build();
 	}
 
 	public Parser(Map<String, Integer> globalVariables, Map<String, Scope> knownMethods) {
@@ -175,7 +190,7 @@ public class Parser {
 			}
 		}
 		currentInstructionList.add(instruction);
-		lastIndex++;
+		++instructionPointer;
 	}
 
 	private ArrayList<Node> buildArgumentsList(int expectedArgumentsListSize) throws ParserException, LexerException {
@@ -209,25 +224,42 @@ public class Parser {
 		return argumentsList;
 	}
 
-	private void parseFunctionCall(LiteralToken identifier) throws UndefinedReferenceException, LexerException, TokenMissingException {
-		InstructionBlock function = knownMethods.get(identifier.getWord());
-		if (function == null)
-			throw new UndefinedReferenceException(identifier);
-		checkForToken(T_LEFT_PARENTHESIS, "Function call");
-		Token nextToken = agent.bufferAndGetToken();
-		if (T_RIGHT_PARENTHESIS.equals(nextToken.getTokenType())) {
-			if (function.getNumberOfArguments() == 0) {
-				return new FunctionCall(identifier, null);
+	private void parseFunctionCall(LiteralToken identifier) throws LexerException, ParserException {
+		String id = identifier.getWord();
+		BaseInstruction instruction;
+		Integer embeddedMethodArguments = embeddedMethods.get(id);
+		if (embeddedMethodArguments != null) {
+			if (embeddedMethodArguments == 0) {
+				checkForToken(T_RIGHT_PARENTHESIS, "Function-call");
+				instruction = new FunctionCall(identifier, null, true);
 			}
-			else
-				throw new TokenMissingException("Non-zero arguments function call", "function argument", nextToken);
+			else {
+				ArrayList<Node> arguments = buildLimitedArgumentsList(embeddedMethodArguments);
+				checkForToken(T_RIGHT_PARENTHESIS, "Function-call");
+				instruction = new FunctionCall(identifier, arguments, true);
+			}
 		}
 		else {
-			// TODO: 2019-01-04 Create function that build arguments' list of specified size.
-			ArrayList<Node> argumentsList = buildArgumentsList(function.getNumberOfArguments());
-			checkForToken(T_RIGHT_PARENTHESIS, "Function call");
-			return new FunctionCall(identifier, argumentsList);
+			Scope method = knownMethods.get(id);
+			if (method == null)
+				throw new ParserException("Undefined reference to : " + identifier);
+			Token nextToken = agent.bufferAndGetToken();
+			if (T_RIGHT_PARENTHESIS.equals(nextToken.getTokenType())) {
+				if (method.getNumberOfArguments() == 0)
+					instruction = new FunctionCall(identifier, null, false);
+				else {
+					TokenMissingException e = new TokenMissingException("Non-zero arguments function call", "function argument", nextToken);
+					throw new ParserException(e.getMessage());
+				}
+			}
+			else {
+				ArrayList<Node> arguments = buildArgumentsList(method.getNumberOfArguments());
+				checkForToken(T_RIGHT_PARENTHESIS, "Function call");
+				instruction = new FunctionCall(identifier, arguments, false);
+			}
 		}
+		currentInstructionList.add(instruction);
+		++instructionPointer;
 	}
 
 	private ConditionalInstruction parseConditionalInstruction() {
