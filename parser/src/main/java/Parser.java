@@ -87,43 +87,17 @@ public class Parser {
 		}
 	}
 
-	public InstructionBlock getProcedureDefinition() throws LexerException, ParserException {
-		if (T_KEYWORD_PROC_DEFINITION.equals(nextToken.getTokenType())) {
-			nextToken = commitAndGetNext();
-			if (!T_IDENTIFIER.equals(nextToken.getTokenType())) {
-				TokenMissingException e = new TokenMissingException("Procedure definition", "identifier", nextToken);
-				throw new ParserException(e.getMessage());
-			}
-			String procedureIdentifier = ((LiteralToken) nextToken).getWord();
-			agent.commitBufferedToken();
-			checkForToken(T_LEFT_PARENTHESIS, "Procedure definition");
-			nextToken = agent.bufferAndGetToken();
-			if (T_RIGHT_PARENTHESIS.equals(nextToken.getTokenType())) {
-				agent.commitBufferedToken();
-				return buildProcedureWithZeroArguments(procedureIdentifier);
-			}
-			return buildProcedureWithNonZeroArguments(procedureIdentifier);
-		}
-		else
-			return null;
-	}
-
-	public BaseInstruction getNextInstruction() throws LexerException {
-		if (reachedETX)
-			return null;
+	private void parseInstructionBlock() throws LexerException, ParserException {
+		checkForToken(T_LEFT_SQUARE_BRACKET, "Instruction block");
 		Token nextToken = agent.bufferAndGetToken();
-		if (T_CONTROL_ETX.equals(nextToken.getTokenType())) {
-			reachedETX = true;
-			return null;
-		}
-	}
-
-	private void parseInstructionBlock() {
-		// TODO: 2019-01-05 Najbardziej potrzebna funkcja
-		//first check for [
-		//then try to parse as many instructions as possible
-		//check for ]
-		//return block
+		if (T_RIGHT_SQUARE_BRACKET.equals(nextToken.getTokenType()))
+			throw new ParserException("Empty instruction block at line : " + nextToken.getPosition().getLine());
+		do {
+			parseSingleInstruction();
+			nextToken = agent.bufferAndGetToken();
+			if (T_CONTROL_ETX.equals(nextToken.getTokenType()))
+				throw new ParserException("Reached ETX before end of instruction block at line : " + nextToken.getPosition().getLine());
+		} while (!T_RIGHT_SQUARE_BRACKET.equals(nextToken.getTokenType()));
 	}
 
 	private void parseSingleInstruction() throws LexerException, ParserException {
