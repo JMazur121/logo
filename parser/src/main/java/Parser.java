@@ -1,20 +1,23 @@
 import agent.LexerAgent;
-import exceptions.ExpressionCorruptedException;
-import exceptions.LexerException;
-import exceptions.TokenMissingException;
-import exceptions.UndefinedReferenceException;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
+import exceptions.*;
 import expressions_module.parser.ExpressionParser;
 import expressions_module.tree.DictionaryArgument;
 import expressions_module.tree.IndexedArgument;
 import expressions_module.tree.Node;
 import instructions_module.composite.*;
+import instructions_module.scope.Scope;
 import lombok.Getter;
 import tokenizer.LiteralToken;
 import tokenizer.Token;
 import tokenizer.TokenType;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import static tokenizer.TokenType.*;
 
 public class Parser {
@@ -24,11 +27,20 @@ public class Parser {
 	private boolean reachedETX;
 	private ExpressionParser expressionParser;
 	private final Map<String, Integer> globalVariables;
-	private final Map<String, InstructionBlock> knownMethods;
+	private final Map<String, Scope> knownMethods;
 	private Map<String, Integer> currentLocalReferences;
+	public static final Set<String> embeddedMethods;
 	private int lastIndex;
+	private int instructionPointer;
+	private ArrayList<BaseInstruction> currentInstructionList;
 
-	public Parser(Map<String, Integer> globalVariables, Map<String, InstructionBlock> knownMethods) {
+	static {
+		embeddedMethods = Sets.newHashSet("naprzod", "wstecz", "prawo", "lewo", "czysc", "podnies",
+				"opusc", "zamaluj", "kolorPisaka", "kolorMalowania", "paleta", "foremny", "okrag", "kolo",
+				"skok", "stop");
+	}
+
+	public Parser(Map<String, Integer> globalVariables, Map<String, Scope> knownMethods) {
 		reset();
 		this.globalVariables = globalVariables;
 		this.knownMethods = knownMethods;
@@ -47,7 +59,7 @@ public class Parser {
 		agent.handleStream(inputStream);
 	}
 
-	public InstructionBlock getProcedureDefinition() throws LexerException, TokenMissingException {
+	public InstructionBlock getProcedureDefinition() throws LexerException, ParserException {
 		if (reachedETX)
 			return null;
 		Token nextToken = agent.bufferAndGetToken();
@@ -57,8 +69,10 @@ public class Parser {
 		}
 		if (T_KEYWORD_PROC_DEFINITION.equals(nextToken.getTokenType())) {
 			nextToken = commitAndGetNext();
-			if (!T_IDENTIFIER.equals(nextToken.getTokenType()))
-				throw new TokenMissingException("Procedure definition", "identifier", nextToken);
+			if (!T_IDENTIFIER.equals(nextToken.getTokenType())) {
+				TokenMissingException e = new TokenMissingException("Procedure definition", "identifier", nextToken);
+				throw new ParserException(e.getMessage());
+			}
 			String procedureIdentifier = ((LiteralToken) nextToken).getWord();
 			agent.commitBufferedToken();
 			checkForToken(T_LEFT_PARENTHESIS, "Procedure definition");
@@ -84,19 +98,38 @@ public class Parser {
 	}
 
 	private InstructionBlock buildInstructionBlock() {
+		// TODO: 2019-01-05 Najbardziej potrzebna funkcja
 		//first check for [
 		//then try to parse as many instructions as possible
 		//check for ]
 		//return block
 	}
 
-	private void checkForToken(TokenType expected, String parsedExpression) throws LexerException, TokenMissingException {
+	private void checkForToken(TokenType expected, String parsedExpression) throws LexerException, ParserException {
 		Token nextToken = agent.bufferAndGetToken();
 		if (expected.equals(nextToken.getTokenType()))
 			agent.commitBufferedToken();
-		else
-			throw new TokenMissingException(parsedExpression, expected.getLexem(), nextToken);
+		else {
+			TokenMissingException e = new TokenMissingException(parsedExpression, expected.getLexem(), nextToken);
+			throw new ParserException(e.getMessage());
+		}
 
+	}
+
+	private Node buildArithmeticExpression() throws ParserException {
+		try {
+			return expressionParser.getArithmeticExpressionTree();
+		} catch (LexerException | ExpressionCorruptedException | TokenMissingException | UndefinedReferenceException e) {
+			throw new ParserException(e.getMessage());
+		}
+	}
+
+	private Node buildLogicalExpression() throws ParserException {
+		try {
+			return expressionParser.getLogicalExpressionTree();
+		} catch (LexerException | ExpressionCorruptedException | TokenMissingException | UndefinedReferenceException e) {
+			throw new ParserException(e.getMessage());
+		}
 	}
 
 	private Token commitAndGetNext() throws LexerException {
@@ -106,27 +139,29 @@ public class Parser {
 
 	private void resetLocalReferences() {
 		lastIndex = 0;
-		currentLocalReferences = null;
+		currentLocalReferences = new HashMap<>();
+		instructionPointer = 0;
+		currentInstructionList = new ArrayList<>();
 	}
 
-	private AssignmentInstruction parseAssignmentInstruction(boolean isGlobalScope, LiteralToken identifier) throws LexerException, TokenMissingException, UndefinedReferenceException, ExpressionCorruptedException {
+	private AssignmentInstruction parseAssignmentInstruction(boolean isGlobalScope, LiteralToken identifier) throws LexerException, ParserException {
 		checkForToken(T_ASSIGNMENT, "Assignment instruction");
 		String id = identifier.getWord();
 		Node expression;
 		if (isGlobalScope) {
 			globalVariables.putIfAbsent(id, 0);
-			expression = expressionParser.getArithmeticExpressionTree();
+			expression = buildArithmeticExpression();
 			return new AssignmentInstruction(new DictionaryArgument(id), expression);
 		}
 		else {
 			Integer globalVariable = globalVariables.get(id);
 			if (globalVariable == null) {
 				Integer localReference = currentLocalReferences.computeIfAbsent(id, k -> lastIndex++);
-				expression = expressionParser.getArithmeticExpressionTree();
+				expression = buildArithmeticExpression();
 				return new AssignmentInstruction(new IndexedArgument(localReference,false), expression);
 			}
 			else {
-				expression = expressionParser.getArithmeticExpressionTree();
+				expression = buildArithmeticExpression();
 				return new AssignmentInstruction(new DictionaryArgument(identifier.getWord()), expression);
 			}
 		}

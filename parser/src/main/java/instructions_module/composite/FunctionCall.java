@@ -13,6 +13,7 @@ public class FunctionCall extends BaseInstruction{
 
 	private Token identifier;
 	private ArrayList<Node> arguments;
+	private boolean isEmbeddedMethodCall;
 
 	@Override
 	public void accept(InstructionVisitor visitor) {
