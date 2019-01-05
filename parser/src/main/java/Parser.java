@@ -31,6 +31,7 @@ public class Parser {
 	private int lastIndex;
 	private int instructionPointer;
 	private ArrayList<BaseInstruction> currentInstructionList;
+	private boolean isGlobalScope;
 
 	static {
 		embeddedMethods = ImmutableMap.<String, Integer>builder()
@@ -125,6 +126,36 @@ public class Parser {
 		//return block
 	}
 
+	private void parseSingleInstruction() throws LexerException, ParserException {
+		Token nextToken = agent.bufferAndGetToken();
+		TokenType type = nextToken.getTokenType();
+		agent.commitBufferedToken();
+		switch (type) {
+			case T_IDENTIFIER:
+				LiteralToken identifier = (LiteralToken)nextToken;
+				nextToken = agent.bufferAndGetToken();
+				agent.commitBufferedToken();
+				if (T_ASSIGNMENT.equals(nextToken.getTokenType()))
+					parseAssignmentInstruction(identifier);
+				else if (T_LEFT_PARENTHESIS.equals(nextToken.getTokenType()))
+					parseFunctionCall(identifier);
+				else
+					throw new ParserException("Expected \":=\" or \"(\", but found" + nextToken);
+				break;
+			case T_KEYWORD_ITERATION_LOOP:
+				parseForLoop();
+				break;
+			case T_KEYWORD_WHILE_LOOP:
+				parseWhileLoop();
+				break;
+			case T_KEYWORD_IF:
+				parseConditionalInstruction();
+				break;
+			default:
+				throw new ParserException("Expected new instruction but found : " + nextToken);
+		}
+	}
+
 	private void checkForToken(TokenType expected, String parsedExpression) throws LexerException, ParserException {
 		Token nextToken = agent.bufferAndGetToken();
 		if (expected.equals(nextToken.getTokenType()))
@@ -170,8 +201,7 @@ public class Parser {
 		expressionParser.setLocalReferences(currentLocalReferences);
 	}
 
-	private void parseAssignmentInstruction(boolean isGlobalScope, LiteralToken identifier) throws LexerException, ParserException {
-		checkForToken(T_ASSIGNMENT, "Assignment instruction");
+	private void parseAssignmentInstruction(LiteralToken identifier) throws LexerException, ParserException {
 		String id = identifier.getWord();
 		Node expression;
 		AssignmentInstruction instruction;
@@ -413,12 +443,10 @@ public class Parser {
 		checkForToken(T_RIGHT_PARENTHESIS, "While-loop");
 		JumpIfNotTrue jumpIfNotTrue = new JumpIfNotTrue(expression);
 		int jumpIfNotTrueIndex = instructionPointer;
-		currentInstructionList.add(jumpIfNotTrue);
-		++instructionPointer;
+		addInstructionToList(jumpIfNotTrue);
 		parseInstructionBlock();
-		BaseInstruction jumpToConditionCheck = new Jump(jumpIfNotTrueIndex);
-		currentInstructionList.add(jumpToConditionCheck);
-		++instructionPointer;
+		Jump jumpToConditionCheck = new Jump(jumpIfNotTrueIndex);
+		addInstructionToList(jumpToConditionCheck);
 		jumpIfNotTrue.setInstructionPointer(instructionPointer);
 	}
 
