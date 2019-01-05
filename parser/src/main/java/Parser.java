@@ -263,11 +263,20 @@ public class Parser {
 	}
 
 	private ConditionalInstruction parseConditionalInstruction() {
-		return null;
+
 	}
 
-	private ForLoop parseForLoop() {
-		return null;
+	private void parseForLoop() throws LexerException, ParserException {
+		checkForToken(T_LEFT_PARENTHESIS, "While-loop");
+		Token nextToken = agent.bufferAndGetToken();
+		if (!T_IDENTIFIER.equals(nextToken.getTokenType())) {
+			TokenMissingException e = new TokenMissingException("For-loop", "identifier", nextToken);
+			throw new ParserException(e.getMessage());
+		}
+		String index = ((LiteralToken) nextToken).getWord();
+		if (globalVariables.containsKey(index) || currentLocalReferences.containsKey(index))
+			throw new ParserException("For-loop's index-identifier must be unique. Received token : " + nextToken);
+		agent.commitBufferedToken();
 	}
 
 	private void parseWhileLoop() throws LexerException, ParserException {
