@@ -268,8 +268,32 @@ public class Parser {
 		++instructionPointer;
 	}
 
-	private ConditionalInstruction parseConditionalInstruction() {
-
+	private void parseConditionalInstruction() throws LexerException, ParserException {
+		checkForToken(T_LEFT_PARENTHESIS, "Conditional instruction");
+		Node logicalExpression = buildLogicalExpression();
+		checkForToken(T_RIGHT_PARENTHESIS, "Conditional instruction");
+		JumpIfNotTrue jumpIfNotTrue = new JumpIfNotTrue(logicalExpression);
+		addInstructionToList(jumpIfNotTrue);
+		Token nextToken = agent.bufferAndGetToken();
+		if (T_LEFT_SQUARE_BRACKET.equals(nextToken.getTokenType()))
+			parseInstructionBlock();
+		else
+			parseSingleInstruction();
+		Jump jumpFromConditionalTree = new Jump();
+		addInstructionToList(jumpFromConditionalTree);
+		jumpIfNotTrue.setInstructionPointer(instructionPointer);
+		nextToken = agent.bufferAndGetToken();
+		if (T_KEYWORD_ELSE.equals(nextToken.getTokenType())) {
+			agent.commitBufferedToken();
+			nextToken = agent.bufferAndGetToken();
+			if (T_KEYWORD_IF.equals(nextToken.getTokenType()))
+				parseConditionalInstruction();
+			else if (T_LEFT_SQUARE_BRACKET.equals(nextToken.getTokenType()))
+				parseInstructionBlock();
+			else
+				parseSingleInstruction();
+		}
+		jumpFromConditionalTree.setInstructionPointer(instructionPointer);
 	}
 
 	private void parseForLoop() throws LexerException, ParserException {
