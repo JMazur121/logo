@@ -15,7 +15,7 @@ public class AssignmentInstruction extends BaseInstruction {
 
 	@Override
 	public void accept(InstructionVisitor visitor) {
-		visitor.visit(this);
+		visitor.visitAssignmentInstruction(this);
 	}
 
 }

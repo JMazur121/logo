@@ -16,7 +16,7 @@ public class Jump extends BaseInstruction{
 
 	@Override
 	public void accept(InstructionVisitor visitor) {
-
+		visitor.visitJump(this);
 	}
 
 }

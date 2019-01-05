@@ -20,7 +20,7 @@ public class ForConditionalJump extends BaseInstruction {
 
 	@Override
 	public void accept(InstructionVisitor visitor) {
-
+		visitor.visitForConditionalJump(this);
 	}
 
 }

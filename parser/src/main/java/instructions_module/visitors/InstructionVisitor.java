@@ -4,10 +4,11 @@ import instructions_module.composite.*;
 
 public interface InstructionVisitor {
 
-	void visit(AssignmentInstruction assignmentInstruction);
-	void visit(FunctionCall functionCall);
-	void visit(ConditionalInstruction conditionalInstruction);
-	void visit(ForLoop forLoop);
-	void visit(WhileLoop whileLoop);
+	void visitAssignmentInstruction(AssignmentInstruction assignmentInstruction);
+	void visitFunctionCall(FunctionCall functionCall);
+	void visitForConditionalJump(ForConditionalJump forConditionalJump);
+	void visitJump(Jump jump);
+	void visitJumpIfNotTrue(JumpIfNotTrue jumpIfNotTrue);
+	void visitStop(Stop stop);
 
 }

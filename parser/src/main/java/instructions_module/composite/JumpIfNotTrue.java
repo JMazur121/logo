@@ -2,7 +2,6 @@ package instructions_module.composite;
 
 import expressions_module.tree.Node;
 import instructions_module.visitors.InstructionVisitor;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,7 +18,7 @@ public class JumpIfNotTrue extends BaseInstruction{
 
 	@Override
 	public void accept(InstructionVisitor visitor) {
-
+		visitor.visitJumpIfNotTrue(this);
 	}
 
 }

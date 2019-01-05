@@ -1,14 +1,14 @@
 package instructions_module.scope;
 
 import instructions_module.composite.BaseInstruction;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 import java.util.ArrayList;
 
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
+@Setter
 public class Scope {
 
 	private boolean isFunctionDefinition;

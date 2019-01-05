@@ -1,7 +1,5 @@
 import agent.LexerAgent;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import exceptions.*;
 import expressions_module.parser.ExpressionParser;
 import expressions_module.tree.*;
@@ -15,7 +13,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import static tokenizer.TokenType.*;
 
 public class Parser {
@@ -75,9 +72,10 @@ public class Parser {
 
 	/**
 	 * Main function
+	 *
 	 * @return Executable scope or procedure definition
 	 */
-	public Scope getNetScope() throws LexerException {
+	public Scope getNetScope() throws LexerException, ParserException {
 		if (reachedETX)
 			return null;
 		Token nextToken = agent.bufferAndGetToken();
@@ -85,6 +83,52 @@ public class Parser {
 			reachedETX = true;
 			return null;
 		}
+		resetLocalReferences();
+		if (T_KEYWORD_PROC_DEFINITION.equals(nextToken.getTokenType())) {
+			isGlobalScope = false;
+			agent.commitBufferedToken();
+			Scope methodScope = new Scope();
+			parseProcedureDefinition(methodScope);
+			return methodScope;
+		}
+		else {
+			isGlobalScope = true;
+			parseSingleInstruction();
+			return Scope.builder()
+					.numberOfArguments(0)
+					.numberOfLocalVariables(currentLocalReferences.size())
+					.isFunctionDefinition(false)
+					.instructions(currentInstructionList)
+					.build();
+		}
+	}
+
+	private void parseProcedureDefinition(Scope methodScope) throws LexerException, ParserException {
+		Token nextToken = agent.bufferAndGetToken();
+		if (T_IDENTIFIER.equals(nextToken.getTokenType())) {
+			LiteralToken identifier = (LiteralToken) nextToken;
+			if (knownMethods.containsKey(identifier.getWord()))
+				throw new ParserException("Procedure name already in use : " + identifier);
+			agent.commitBufferedToken();
+			checkForToken(T_LEFT_PARENTHESIS, "Procedure definition");
+			nextToken = agent.bufferAndGetToken();
+			if (T_RIGHT_PARENTHESIS.equals(nextToken.getTokenType())) {
+				agent.commitBufferedToken();
+				parseInstructionBlock();
+				methodScope.setNumberOfArguments(0);
+			}
+			else {
+				checkForToken(T_LEFT_PARENTHESIS, "Procedure definition");
+				buildUnlimitedArgumentsList();
+				parseInstructionBlock();
+				methodScope.setNumberOfArguments(currentLocalReferences.size());
+			}
+			methodScope.setFunctionDefinition(true);
+			methodScope.setInstructions(currentInstructionList);
+			methodScope.setNumberOfLocalVariables(currentLocalReferences.size());
+		}
+		else
+			throw new ParserException("Expected method identifier but found : " + nextToken);
 	}
 
 	private void parseInstructionBlock() throws LexerException, ParserException {
@@ -106,7 +150,7 @@ public class Parser {
 		agent.commitBufferedToken();
 		switch (type) {
 			case T_IDENTIFIER:
-				LiteralToken identifier = (LiteralToken)nextToken;
+				LiteralToken identifier = (LiteralToken) nextToken;
 				nextToken = agent.bufferAndGetToken();
 				agent.commitBufferedToken();
 				if (T_ASSIGNMENT.equals(nextToken.getTokenType()))
@@ -189,7 +233,7 @@ public class Parser {
 			if (globalVariable == null) {
 				Integer localReference = currentLocalReferences.computeIfAbsent(id, k -> lastIndex++);
 				expression = buildArithmeticExpression();
-				instruction = new AssignmentInstruction(new IndexedArgument(localReference,false), expression);
+				instruction = new AssignmentInstruction(new IndexedArgument(localReference, false), expression);
 			}
 			else {
 				expression = buildArithmeticExpression();
@@ -198,6 +242,43 @@ public class Parser {
 		}
 		currentInstructionList.add(instruction);
 		++instructionPointer;
+	}
+
+	private void buildUnlimitedArgumentsList() throws LexerException, ParserException {
+		Token nextToken = agent.bufferAndGetToken();
+		if (T_IDENTIFIER.equals(nextToken.getTokenType())) {
+			nextToken = addToLocalReferencesAndGetNext((LiteralToken) nextToken);
+			boolean isWorkToDo = true;
+			TokenType type = nextToken.getTokenType();
+			while (isWorkToDo) {
+				if (T_CONTROL_ETX.equals(type))
+					throw new ParserException("Found ETX before end of arguments' list at line : " + nextToken.getPosition().getLine());
+				if (T_RIGHT_PARENTHESIS.equals(type)) {
+					isWorkToDo = false;
+					agent.commitBufferedToken();
+				}
+				else {
+					checkForToken(T_COMMA, "Method-definition's arguments list");
+					nextToken = agent.bufferAndGetToken();
+					type = nextToken.getTokenType();
+					if (T_IDENTIFIER.equals(type)) {
+						nextToken = addToLocalReferencesAndGetNext((LiteralToken) nextToken);
+						type = nextToken.getTokenType();
+					}
+					else
+						throw new ParserException("Expected argument's identifier, but found : " + nextToken);
+				}
+			}
+		}
+		else
+			throw new ParserException("Expected argument's identifier, but found : " + nextToken);
+	}
+
+	private Token addToLocalReferencesAndGetNext(LiteralToken token) throws ParserException, LexerException {
+		if (currentLocalReferences.containsKey(token.getWord()))
+			throw new ParserException("Argument's identifier already in use : " + token);
+		currentLocalReferences.put(token.getWord(), lastIndex++);
+		return commitAndGetNext();
 	}
 
 	private ArrayList<Node> buildArgumentsList(int expectedArgumentsListSize) throws ParserException, LexerException {
@@ -344,7 +425,7 @@ public class Parser {
 		addInstructionToList(assignmentInstruction);
 	}
 
-	private void parseForLoopWithDefaultStep(LiteralToken identifier, ArrayList<Node> expressions) {
+	private void parseForLoopWithDefaultStep(LiteralToken identifier, ArrayList<Node> expressions) throws LexerException, ParserException {
 		//references
 		int loopIndexReference = lastIndex++;
 		currentLocalReferences.put(identifier.getWord(), loopIndexReference);
@@ -367,7 +448,7 @@ public class Parser {
 		conditionalJump.setInstructionPointer(instructionPointer);
 	}
 
-	private void parseBoundedForLoopWithDefaultStep(LiteralToken identifier, ArrayList<Node> expressions) {
+	private void parseBoundedForLoopWithDefaultStep(LiteralToken identifier, ArrayList<Node> expressions) throws LexerException, ParserException {
 		//references
 		int loopIndexReference = lastIndex++;
 		currentLocalReferences.put(identifier.getWord(), loopIndexReference);
@@ -389,7 +470,7 @@ public class Parser {
 		conditionalJump.setInstructionPointer(instructionPointer);
 	}
 
-	private void parseBoundedForLoopWithDefinedStep(LiteralToken identifier, ArrayList<Node> expressions) {
+	private void parseBoundedForLoopWithDefinedStep(LiteralToken identifier, ArrayList<Node> expressions) throws LexerException, ParserException {
 		//references
 		int loopIndexReference = lastIndex++;
 		currentLocalReferences.put(identifier.getWord(), loopIndexReference);
