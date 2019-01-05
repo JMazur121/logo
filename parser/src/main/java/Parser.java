@@ -4,9 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import exceptions.*;
 import expressions_module.parser.ExpressionParser;
-import expressions_module.tree.DictionaryArgument;
-import expressions_module.tree.IndexedArgument;
-import expressions_module.tree.Node;
+import expressions_module.tree.*;
 import instructions_module.composite.*;
 import instructions_module.scope.Scope;
 import lombok.Getter;
@@ -207,10 +205,13 @@ public class Parser {
 
 	private ArrayList<Node> buildLimitedArgumentsList(int maxArguments) throws ParserException, LexerException {
 		ArrayList<Node> argumentsList = new ArrayList<>(maxArguments);
+		Token nextToken = agent.bufferAndGetToken();
+		if (T_RIGHT_PARENTHESIS.equals(nextToken.getTokenType()))
+			return argumentsList;
 		argumentsList.add(buildArithmeticExpression());
 		int createdArguments = 1;
 		while (createdArguments < maxArguments) {
-			Token nextToken = agent.bufferAndGetToken();
+			nextToken = agent.bufferAndGetToken();
 			if (T_COMMA.equals(nextToken.getTokenType())) {
 				agent.commitBufferedToken();
 				argumentsList.add(buildArithmeticExpression());
@@ -267,16 +268,75 @@ public class Parser {
 	}
 
 	private void parseForLoop() throws LexerException, ParserException {
-		checkForToken(T_LEFT_PARENTHESIS, "While-loop");
+		checkForToken(T_LEFT_PARENTHESIS, "For-loop");
 		Token nextToken = agent.bufferAndGetToken();
 		if (!T_IDENTIFIER.equals(nextToken.getTokenType())) {
 			TokenMissingException e = new TokenMissingException("For-loop", "identifier", nextToken);
 			throw new ParserException(e.getMessage());
 		}
-		String index = ((LiteralToken) nextToken).getWord();
-		if (globalVariables.containsKey(index) || currentLocalReferences.containsKey(index))
+		LiteralToken index = (LiteralToken) nextToken;
+		if (globalVariables.containsKey(index.getWord()) || currentLocalReferences.containsKey(index.getWord()))
 			throw new ParserException("For-loop's index-identifier must be unique. Received token : " + nextToken);
 		agent.commitBufferedToken();
+		checkForToken(T_COMMA, "For-loop");
+		ArrayList<Node> expressions = buildLimitedArgumentsList(3);
+		if (expressions.isEmpty())
+			throw new ParserException("Too few arguments in for-loop statement in line : " + nextToken.getPosition().getLine());
+		checkForToken(T_RIGHT_PARENTHESIS, "For-loop");
+		switch (expressions.size()) {
+			case 1:
+				parseForLoopWithDefaultStep(index, expressions);
+				break;
+			case 2:
+				parseBoundedForLoopWithDefaultStep(index, expressions);
+				break;
+			default:
+				parseBoundedForLoopWithDefinedStep(index, expressions);
+		}
+	}
+
+	private void parseForLoopWithDefaultStep(LiteralToken identifier, ArrayList<Node> expressions) {
+		//references
+		int loopIndexReference = lastIndex++;
+		currentLocalReferences.put(identifier.getWord(), loopIndexReference);
+		int rightBoundIndex = lastIndex++;
+		//init right bound with expression
+		IndexedArgument rightBound = new IndexedArgument(rightBoundIndex, false);
+		AssignmentInstruction rightBoundAssignment = new AssignmentInstruction(rightBound, expressions.get(0));
+		addInstructionToList(rightBoundAssignment);
+		//init index with zero
+		ArgumentNode constZero = ArgumentNode.buildConstantArgumentNode(0);
+		IndexedArgument loopIndex = new IndexedArgument(loopIndexReference, false);
+		AssignmentInstruction indexAssignment = new AssignmentInstruction(loopIndex, constZero);
+		addInstructionToList(indexAssignment);
+		//conditional jumps
+		ForConditionalJump conditionalJump = new ForConditionalJump(loopIndex, rightBound);
+		int conditionalJumpIndex = instructionPointer;
+		addInstructionToList(conditionalJump);
+		parseInstructionBlock();
+		//index incrementation
+		ArgumentNode indexNode = ArgumentNode.buildIndexedArgumentNode(loopIndexReference);
+		ArgumentNode constOne = ArgumentNode.buildConstantArgumentNode(1);
+		Token operator = new Token(T_ARITHMETIC_ADDITIVE_PLUS, null);
+		OperatorNode incrementation = new OperatorNode(indexNode, constOne, operator);
+		AssignmentInstruction indexIncrement = new AssignmentInstruction(loopIndex, incrementation);
+		//jump to condition check
+		Jump jumpToCheck = new Jump(conditionalJumpIndex);
+		addInstructionToList(jumpToCheck);
+		conditionalJump.setInstructionPointer(instructionPointer);
+	}
+
+	private void addInstructionToList(BaseInstruction instruction) {
+		currentInstructionList.add(instruction);
+		++instructionPointer;
+	}
+
+	private void parseBoundedForLoopWithDefaultStep(LiteralToken identifier, ArrayList<Node> expressions) {
+
+	}
+
+	private void parseBoundedForLoopWithDefinedStep(LiteralToken identifier, ArrayList<Node> expressions) {
+
 	}
 
 	private void parseWhileLoop() throws LexerException, ParserException {

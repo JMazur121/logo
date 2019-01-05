@@ -12,7 +12,7 @@ public class Token {
 
 	@Override
 	public String toString() {
-		return position.toString() + " -> " + tokenType.toString();
+		return String.format("%s -> %s", position, tokenType);
 	}
 
 }
