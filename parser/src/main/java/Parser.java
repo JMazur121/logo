@@ -300,32 +300,39 @@ public class Parser {
 		}
 	}
 
+	private IndexedArgument addIndexedArgumentAssignment(int index, Node expression) {
+		IndexedArgument leftValue = new IndexedArgument(index, false);
+		AssignmentInstruction instruction = new AssignmentInstruction(leftValue, expression);
+		addInstructionToList(instruction);
+		return leftValue;
+	}
+
+	private void addSimpleAddition(int leftIndex, Node expression) {
+		ArgumentNode indexNode = ArgumentNode.buildIndexedArgumentNode(leftIndex);
+		Token operator = new Token(T_ARITHMETIC_ADDITIVE_PLUS, null);
+		OperatorNode addition = new OperatorNode(indexNode, expression, operator);
+		IndexedArgument leftValue = new IndexedArgument(leftIndex, false);
+		AssignmentInstruction assignmentInstruction = new AssignmentInstruction(leftValue, addition);
+		addInstructionToList(assignmentInstruction);
+	}
+
 	private void parseForLoopWithDefaultStep(LiteralToken identifier, ArrayList<Node> expressions) {
 		//references
 		int loopIndexReference = lastIndex++;
 		currentLocalReferences.put(identifier.getWord(), loopIndexReference);
 		int rightBoundIndex = lastIndex++;
 		//init right bound with expression
-		IndexedArgument rightBound = new IndexedArgument(rightBoundIndex, false);
-		AssignmentInstruction rightBoundAssignment = new AssignmentInstruction(rightBound, expressions.get(0));
-		addInstructionToList(rightBoundAssignment);
+		IndexedArgument rightBound = addIndexedArgumentAssignment(rightBoundIndex, expressions.get(0));
 		//init index with zero
 		ArgumentNode constZero = ArgumentNode.buildConstantArgumentNode(0);
-		IndexedArgument loopIndex = new IndexedArgument(loopIndexReference, false);
-		AssignmentInstruction indexAssignment = new AssignmentInstruction(loopIndex, constZero);
-		addInstructionToList(indexAssignment);
+		IndexedArgument loopIndex = addIndexedArgumentAssignment(loopIndexReference, constZero);
 		//conditional jumps
 		ForConditionalJump conditionalJump = new ForConditionalJump(loopIndex, rightBound);
 		int conditionalJumpIndex = instructionPointer;
 		addInstructionToList(conditionalJump);
 		parseInstructionBlock();
 		//index incrementation
-		ArgumentNode indexNode = ArgumentNode.buildIndexedArgumentNode(loopIndexReference);
-		ArgumentNode constOne = ArgumentNode.buildConstantArgumentNode(1);
-		Token operator = new Token(T_ARITHMETIC_ADDITIVE_PLUS, null);
-		OperatorNode incrementation = new OperatorNode(indexNode, constOne, operator);
-		AssignmentInstruction indexIncrement = new AssignmentInstruction(loopIndex, incrementation);
-		addInstructionToList(indexIncrement);
+		addSimpleAddition(loopIndexReference, ArgumentNode.buildConstantArgumentNode(1));
 		//jump to condition check
 		Jump jumpToCheck = new Jump(conditionalJumpIndex);
 		addInstructionToList(jumpToCheck);
@@ -338,25 +345,16 @@ public class Parser {
 		currentLocalReferences.put(identifier.getWord(), loopIndexReference);
 		int rightBoundIndex = lastIndex++;
 		//init right bound with expression
-		IndexedArgument rightBound = new IndexedArgument(rightBoundIndex, false);
-		AssignmentInstruction rightBoundAssignment = new AssignmentInstruction(rightBound, expressions.get(1));
-		addInstructionToList(rightBoundAssignment);
+		IndexedArgument rightBound = addIndexedArgumentAssignment(rightBoundIndex, expressions.get(1));
 		//init index with expression
-		IndexedArgument loopIndex = new IndexedArgument(loopIndexReference, false);
-		AssignmentInstruction loopIndexAssignment = new AssignmentInstruction(loopIndex, expressions.get(0));
-		addInstructionToList(loopIndexAssignment);
+		IndexedArgument loopIndex = addIndexedArgumentAssignment(loopIndexReference, expressions.get(0));
 		//conditional jumps
 		ForConditionalJump conditionalJump = new ForConditionalJump(loopIndex, rightBound);
 		int conditionalJumpIndex = instructionPointer;
 		addInstructionToList(conditionalJump);
 		parseInstructionBlock();
 		//index incrementation
-		ArgumentNode indexNode = ArgumentNode.buildIndexedArgumentNode(loopIndexReference);
-		ArgumentNode constOne = ArgumentNode.buildConstantArgumentNode(1);
-		Token operator = new Token(T_ARITHMETIC_ADDITIVE_PLUS, null);
-		OperatorNode incrementation = new OperatorNode(indexNode, constOne, operator);
-		AssignmentInstruction indexIncrement = new AssignmentInstruction(loopIndex, incrementation);
-		addInstructionToList(indexIncrement);
+		addSimpleAddition(loopIndexReference, ArgumentNode.buildConstantArgumentNode(1));
 		//jump to condition check
 		Jump jumpToCheck = new Jump(conditionalJumpIndex);
 		addInstructionToList(jumpToCheck);
@@ -369,24 +367,16 @@ public class Parser {
 		currentLocalReferences.put(identifier.getWord(), loopIndexReference);
 		int rightBoundIndex = lastIndex++;
 		//init right bound with expression
-		IndexedArgument rightBound = new IndexedArgument(rightBoundIndex, false);
-		AssignmentInstruction rightBoundAssignment = new AssignmentInstruction(rightBound, expressions.get(1));
-		addInstructionToList(rightBoundAssignment);
+		IndexedArgument rightBound = addIndexedArgumentAssignment(rightBoundIndex, expressions.get(1));
 		//init index with expression
-		IndexedArgument loopIndex = new IndexedArgument(loopIndexReference, false);
-		AssignmentInstruction loopIndexAssignment = new AssignmentInstruction(loopIndex, expressions.get(0));
-		addInstructionToList(loopIndexAssignment);
+		IndexedArgument loopIndex = addIndexedArgumentAssignment(loopIndexReference, expressions.get(0));
 		//conditional jumps
 		ForConditionalJump conditionalJump = new ForConditionalJump(loopIndex, rightBound);
 		int conditionalJumpIndex = instructionPointer;
 		addInstructionToList(conditionalJump);
 		parseInstructionBlock();
 		//index incrementation
-		ArgumentNode indexNode = ArgumentNode.buildIndexedArgumentNode(loopIndexReference);
-		Token operator = new Token(T_ARITHMETIC_ADDITIVE_PLUS, null);
-		OperatorNode stepAddition = new OperatorNode(indexNode, expressions.get(2), operator);
-		AssignmentInstruction indexIncrement = new AssignmentInstruction(loopIndex, stepAddition);
-		addInstructionToList(indexIncrement);
+		addSimpleAddition(loopIndexReference, expressions.get(2));
 		//jump to condition check
 		Jump jumpToCheck = new Jump(conditionalJumpIndex);
 		addInstructionToList(jumpToCheck);
