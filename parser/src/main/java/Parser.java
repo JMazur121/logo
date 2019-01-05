@@ -152,6 +152,11 @@ public class Parser {
 		}
 	}
 
+	private void addInstructionToList(BaseInstruction instruction) {
+		currentInstructionList.add(instruction);
+		++instructionPointer;
+	}
+
 	private Token commitAndGetNext() throws LexerException {
 		agent.commitBufferedToken();
 		return agent.bufferAndGetToken();
@@ -320,23 +325,72 @@ public class Parser {
 		Token operator = new Token(T_ARITHMETIC_ADDITIVE_PLUS, null);
 		OperatorNode incrementation = new OperatorNode(indexNode, constOne, operator);
 		AssignmentInstruction indexIncrement = new AssignmentInstruction(loopIndex, incrementation);
+		addInstructionToList(indexIncrement);
 		//jump to condition check
 		Jump jumpToCheck = new Jump(conditionalJumpIndex);
 		addInstructionToList(jumpToCheck);
 		conditionalJump.setInstructionPointer(instructionPointer);
 	}
 
-	private void addInstructionToList(BaseInstruction instruction) {
-		currentInstructionList.add(instruction);
-		++instructionPointer;
-	}
-
 	private void parseBoundedForLoopWithDefaultStep(LiteralToken identifier, ArrayList<Node> expressions) {
-
+		//references
+		int loopIndexReference = lastIndex++;
+		currentLocalReferences.put(identifier.getWord(), loopIndexReference);
+		int rightBoundIndex = lastIndex++;
+		//init right bound with expression
+		IndexedArgument rightBound = new IndexedArgument(rightBoundIndex, false);
+		AssignmentInstruction rightBoundAssignment = new AssignmentInstruction(rightBound, expressions.get(1));
+		addInstructionToList(rightBoundAssignment);
+		//init index with expression
+		IndexedArgument loopIndex = new IndexedArgument(loopIndexReference, false);
+		AssignmentInstruction loopIndexAssignment = new AssignmentInstruction(loopIndex, expressions.get(0));
+		addInstructionToList(loopIndexAssignment);
+		//conditional jumps
+		ForConditionalJump conditionalJump = new ForConditionalJump(loopIndex, rightBound);
+		int conditionalJumpIndex = instructionPointer;
+		addInstructionToList(conditionalJump);
+		parseInstructionBlock();
+		//index incrementation
+		ArgumentNode indexNode = ArgumentNode.buildIndexedArgumentNode(loopIndexReference);
+		ArgumentNode constOne = ArgumentNode.buildConstantArgumentNode(1);
+		Token operator = new Token(T_ARITHMETIC_ADDITIVE_PLUS, null);
+		OperatorNode incrementation = new OperatorNode(indexNode, constOne, operator);
+		AssignmentInstruction indexIncrement = new AssignmentInstruction(loopIndex, incrementation);
+		addInstructionToList(indexIncrement);
+		//jump to condition check
+		Jump jumpToCheck = new Jump(conditionalJumpIndex);
+		addInstructionToList(jumpToCheck);
+		conditionalJump.setInstructionPointer(instructionPointer);
 	}
 
 	private void parseBoundedForLoopWithDefinedStep(LiteralToken identifier, ArrayList<Node> expressions) {
-
+		//references
+		int loopIndexReference = lastIndex++;
+		currentLocalReferences.put(identifier.getWord(), loopIndexReference);
+		int rightBoundIndex = lastIndex++;
+		//init right bound with expression
+		IndexedArgument rightBound = new IndexedArgument(rightBoundIndex, false);
+		AssignmentInstruction rightBoundAssignment = new AssignmentInstruction(rightBound, expressions.get(1));
+		addInstructionToList(rightBoundAssignment);
+		//init index with expression
+		IndexedArgument loopIndex = new IndexedArgument(loopIndexReference, false);
+		AssignmentInstruction loopIndexAssignment = new AssignmentInstruction(loopIndex, expressions.get(0));
+		addInstructionToList(loopIndexAssignment);
+		//conditional jumps
+		ForConditionalJump conditionalJump = new ForConditionalJump(loopIndex, rightBound);
+		int conditionalJumpIndex = instructionPointer;
+		addInstructionToList(conditionalJump);
+		parseInstructionBlock();
+		//index incrementation
+		ArgumentNode indexNode = ArgumentNode.buildIndexedArgumentNode(loopIndexReference);
+		Token operator = new Token(T_ARITHMETIC_ADDITIVE_PLUS, null);
+		OperatorNode stepAddition = new OperatorNode(indexNode, expressions.get(2), operator);
+		AssignmentInstruction indexIncrement = new AssignmentInstruction(loopIndex, stepAddition);
+		addInstructionToList(indexIncrement);
+		//jump to condition check
+		Jump jumpToCheck = new Jump(conditionalJumpIndex);
+		addInstructionToList(jumpToCheck);
+		conditionalJump.setInstructionPointer(instructionPointer);
 	}
 
 	private void parseWhileLoop() throws LexerException, ParserException {
