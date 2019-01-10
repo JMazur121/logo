@@ -86,7 +86,6 @@ public class Parser {
 		resetLocalReferences();
 		if (T_KEYWORD_PROC_DEFINITION.equals(nextToken.getTokenType())) {
 			isGlobalScope = false;
-			agent.commitBufferedToken();
 			Scope methodScope = new Scope();
 			parseProcedureDefinition(methodScope);
 			return methodScope;
@@ -143,6 +142,7 @@ public class Parser {
 			if (T_CONTROL_ETX.equals(nextToken.getTokenType()))
 				throw new ParserException("Reached ETX before end of instruction block at line : " + nextToken.getPosition().getLine());
 		} while (!T_RIGHT_SQUARE_BRACKET.equals(nextToken.getTokenType()));
+		agent.commitBufferedToken();
 	}
 
 	private void parseSingleInstruction() throws LexerException, ParserException {
@@ -347,8 +347,7 @@ public class Parser {
 				instruction = new FunctionCall(identifier, arguments, false);
 			}
 		}
-		currentInstructionList.add(instruction);
-		++instructionPointer;
+		addInstructionToList(instruction);
 	}
 
 	private void parseConditionalInstruction() throws LexerException, ParserException {
