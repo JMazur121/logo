@@ -118,10 +118,10 @@ public class Parser {
 				methodScope.setNumberOfArguments(0);
 			}
 			else {
-				checkForToken(T_LEFT_PARENTHESIS, "Procedure definition");
 				buildUnlimitedArgumentsList();
-				parseInstructionBlock();
+				checkForToken(T_RIGHT_PARENTHESIS, "Procedure definition");
 				methodScope.setNumberOfArguments(currentLocalReferences.size());
+				parseInstructionBlock();
 			}
 			methodScope.setFunctionDefinition(true);
 			methodScope.setInstructions(currentInstructionList);
@@ -132,6 +132,7 @@ public class Parser {
 	}
 
 	private void parseInstructionBlock() throws LexerException, ParserException {
+		isGlobalScope = false;
 		checkForToken(T_LEFT_SQUARE_BRACKET, "Instruction block");
 		Token nextToken = agent.bufferAndGetToken();
 		if (T_RIGHT_SQUARE_BRACKET.equals(nextToken.getTokenType()))
@@ -240,8 +241,7 @@ public class Parser {
 				instruction = new AssignmentInstruction(new DictionaryArgument(identifier.getWord()), expression);
 			}
 		}
-		currentInstructionList.add(instruction);
-		++instructionPointer;
+		addInstructionToList(instruction);
 	}
 
 	private void buildUnlimitedArgumentsList() throws LexerException, ParserException {
@@ -253,10 +253,8 @@ public class Parser {
 			while (isWorkToDo) {
 				if (T_CONTROL_ETX.equals(type))
 					throw new ParserException("Found ETX before end of arguments' list at line : " + nextToken.getPosition().getLine());
-				if (T_RIGHT_PARENTHESIS.equals(type)) {
+				if (T_RIGHT_PARENTHESIS.equals(type))
 					isWorkToDo = false;
-					agent.commitBufferedToken();
-				}
 				else {
 					checkForToken(T_COMMA, "Method-definition's arguments list");
 					nextToken = agent.bufferAndGetToken();
