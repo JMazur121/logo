@@ -66,8 +66,10 @@ public class CalculationVisitor implements ExpressionVisitor {
 		if (node.isArithmeticOperatorNode()) {
 			visitArithmeticBinaryNode(leftOperand.getValue(), rightOperand.getValue(), node.getOperatorType());
 		}
-		else
+		else if(node.isLogicalOperatorNode())
 			visitLogicalBinaryNode(leftOperand.getBooleanValue(), rightOperand.getBooleanValue(), node.getOperatorType());
+		else
+			visitRelationalBinaryNode(leftOperand.getValue(), rightOperand.getValue(), node.getOperatorType());
 	}
 
 	private void visitArithmeticBinaryNode(int left, int right, TokenType operatorType) {
@@ -97,6 +99,29 @@ public class CalculationVisitor implements ExpressionVisitor {
 				break;
 			case T_LOGICAL_OR:
 				evaluationStack.push(newBooleanBag(left || right));
+				break;
+		}
+	}
+
+	private void visitRelationalBinaryNode(int left, int right, TokenType operatorType) {
+		switch (operatorType) {
+			case T_RELATIONAL_EQUAL:
+				evaluationStack.push(newBooleanBag(left == right));
+				break;
+			case T_RELATIONAL_NOT_EQUAL:
+				evaluationStack.push(newBooleanBag(left != right));
+				break;
+			case T_RELATIONAL_LESS_THAN_OR_EQUAL:
+				evaluationStack.push(newBooleanBag(left <= right));
+				break;
+			case T_RELATIONAL_GREATER_THAN_OR_EQUAL:
+				evaluationStack.push(newBooleanBag(left >= right));
+				break;
+			case T_RELATIONAL_LESS_THAN:
+				evaluationStack.push(newBooleanBag(left < right));
+				break;
+			case T_RELATIONAL_GREATER_THAN:
+				evaluationStack.push(newBooleanBag(left > right));
 				break;
 		}
 	}
