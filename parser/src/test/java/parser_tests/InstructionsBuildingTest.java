@@ -3,13 +3,13 @@ package parser_tests;
 import exceptions.LexerException;
 import exceptions.ParserException;
 import instructions.*;
-import instructions_module.scope.Scope;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Test;
 import parser.Parser;
+import scope.Scope;
 import static org.assertj.core.api.Assertions.*;
 
 public class InstructionsBuildingTest {

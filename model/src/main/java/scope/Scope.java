@@ -1,4 +1,4 @@
-package instructions_module.scope;
+package scope;
 
 import instructions.BaseInstruction;
 import lombok.*;
