@@ -151,7 +151,7 @@ public class ArithmeticExpressionsCalculationTest {
 	}
 
 	@Test
-	public void calculate_multiplicationWithDivision() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+	public void calculate_multiplicationWithDivision_returnsValue() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
 		//before
 		ByteArrayInputStream is = new ByteArrayInputStream("3 * 10 / 2".getBytes());
 		agent.handleStream(is);
@@ -161,6 +161,19 @@ public class ArithmeticExpressionsCalculationTest {
 		//then
 		assertThat(result.isNumeric()).isTrue();
 		assertThat(result.getValue()).isEqualTo(15);
+	}
+
+	@Test
+	public void calculate_additiveWithMultiplicative_returnsValue() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("(3+4) * 5 + 12 * 1".getBytes());
+		agent.handleStream(is);
+		Node expression = parser.getArithmeticExpressionTree();
+		//when
+		EvaluationBag result = visitor.calculate(expression);
+		//then
+		assertThat(result.isNumeric()).isTrue();
+		assertThat(result.getValue()).isEqualTo(47);
 	}
 
 }

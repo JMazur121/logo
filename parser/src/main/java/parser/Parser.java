@@ -50,6 +50,7 @@ public class Parser {
 				.put("kolo", 1)
 				.put("skok", 2)
 				.put("stop", 0)
+				.put("wypisz", 1)
 				.build();
 	}
 
