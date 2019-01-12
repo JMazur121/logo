@@ -11,7 +11,7 @@ import java.util.ArrayList;
 @AllArgsConstructor
 public class FunctionCall extends BaseInstruction{
 
-	private Token identifier;
+	private String identifier;
 	private ArrayList<Node> arguments;
 	private boolean isEmbeddedMethodCall;
 

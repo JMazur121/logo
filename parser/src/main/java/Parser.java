@@ -52,15 +52,14 @@ public class Parser {
 	}
 
 	public Parser(Map<String, Integer> globalVariables, Map<String, Scope> knownMethods) {
-		reset();
+		agent = new LexerAgent();
+		expressionParser = new ExpressionParser(agent, globalVariables);
 		this.globalVariables = globalVariables;
 		this.knownMethods = knownMethods;
-		expressionParser = new ExpressionParser(agent, globalVariables);
+		reset();
 	}
 
 	public void reset() {
-		if (agent == null)
-			agent = new LexerAgent();
 		reachedETX = false;
 		resetLocalReferences();
 		agent.restart();
@@ -86,6 +85,7 @@ public class Parser {
 		resetLocalReferences();
 		if (T_KEYWORD_PROC_DEFINITION.equals(nextToken.getTokenType())) {
 			isGlobalScope = false;
+			agent.commitBufferedToken();
 			Scope methodScope = new Scope();
 			parseProcedureDefinition(methodScope);
 			return methodScope;
@@ -113,14 +113,19 @@ public class Parser {
 			nextToken = agent.bufferAndGetToken();
 			if (T_RIGHT_PARENTHESIS.equals(nextToken.getTokenType())) {
 				agent.commitBufferedToken();
-				parseInstructionBlock();
 				methodScope.setNumberOfArguments(0);
 			}
 			else {
 				buildUnlimitedArgumentsList();
 				checkForToken(T_RIGHT_PARENTHESIS, "Procedure definition");
 				methodScope.setNumberOfArguments(currentLocalReferences.size());
+			}
+			knownMethods.put(identifier.getWord(), methodScope);
+			try {
 				parseInstructionBlock();
+			} catch (Exception e) {
+				knownMethods.remove(identifier.getWord());
+				throw new ParserException(e.getMessage());
 			}
 			methodScope.setFunctionDefinition(true);
 			methodScope.setInstructions(currentInstructionList);
@@ -180,8 +185,8 @@ public class Parser {
 		if (expected.equals(nextToken.getTokenType()))
 			agent.commitBufferedToken();
 		else {
-			TokenMissingException e = new TokenMissingException(parsedExpression, expected.getLexem(), nextToken);
-			throw new ParserException(e.getMessage());
+			throw new ParserException("Error while parsing " + parsedExpression +". expected: " + expected.getLexem()
+			+ " but got " + nextToken);
 		}
 
 	}
@@ -238,7 +243,7 @@ public class Parser {
 			}
 			else {
 				expression = buildArithmeticExpression();
-				instruction = new AssignmentInstruction(new DictionaryArgument(identifier.getWord()), expression);
+				instruction = new AssignmentInstruction(new DictionaryArgument(id), expression);
 			}
 		}
 		addInstructionToList(instruction);
@@ -320,12 +325,12 @@ public class Parser {
 		if (embeddedMethodArguments != null) {
 			if (embeddedMethodArguments == 0) {
 				checkForToken(T_RIGHT_PARENTHESIS, "Function-call");
-				instruction = new FunctionCall(identifier, null, true);
+				instruction = new FunctionCall(id, null, true);
 			}
 			else {
 				ArrayList<Node> arguments = buildLimitedArgumentsList(embeddedMethodArguments);
 				checkForToken(T_RIGHT_PARENTHESIS, "Function-call");
-				instruction = new FunctionCall(identifier, arguments, true);
+				instruction = new FunctionCall(id, arguments, true);
 			}
 		}
 		else {
@@ -335,7 +340,7 @@ public class Parser {
 			Token nextToken = agent.bufferAndGetToken();
 			if (T_RIGHT_PARENTHESIS.equals(nextToken.getTokenType())) {
 				if (method.getNumberOfArguments() == 0)
-					instruction = new FunctionCall(identifier, null, false);
+					instruction = new FunctionCall(id, null, false);
 				else {
 					TokenMissingException e = new TokenMissingException("Non-zero arguments function call", "function argument", nextToken);
 					throw new ParserException(e.getMessage());
@@ -344,7 +349,7 @@ public class Parser {
 			else {
 				ArrayList<Node> arguments = buildArgumentsList(method.getNumberOfArguments());
 				checkForToken(T_RIGHT_PARENTHESIS, "Function call");
-				instruction = new FunctionCall(identifier, arguments, false);
+				instruction = new FunctionCall(id, arguments, false);
 			}
 		}
 		addInstructionToList(instruction);
