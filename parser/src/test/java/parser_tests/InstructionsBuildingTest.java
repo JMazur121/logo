@@ -144,4 +144,30 @@ public class InstructionsBuildingTest {
 		assertThat(lastCall.getIdentifier()).isEqualTo("stop");
 	}
 
+	@Test
+	public void getNextScope_basicForLoop_returnsForLoopScope() throws LexerException, ParserException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("powtarzaj(idx1,10) [czysc()]".getBytes());
+		parser.handleStream(is);
+		//when
+		Scope scope = parser.getNetScope();
+		//then
+		assertThat(scope).isNotNull();
+		assertThat(scope.isFunctionDefinition()).isFalse();
+		ArrayList<BaseInstruction> instructions = scope.getInstructions();
+		assertThat(instructions).hasSize(6);
+		BaseInstruction rightBoundAssignment = instructions.get(0);
+		assertThat(rightBoundAssignment).isInstanceOf(AssignmentInstruction.class);
+		BaseInstruction indexAssignment = instructions.get(1);
+		assertThat(indexAssignment).isInstanceOf(AssignmentInstruction.class);
+		ForConditionalJump forJump = (ForConditionalJump)instructions.get(2);
+		assertThat(forJump.getInstructionPointer()).isEqualTo(6);
+		FunctionCall call = (FunctionCall)instructions.get(3);
+		assertThat(call.getIdentifier()).isEqualTo("czysc");
+		BaseInstruction indexIncrement = instructions.get(4);
+		assertThat(indexIncrement).isInstanceOf(AssignmentInstruction.class);
+		Jump jumpToCondition = (Jump)instructions.get(5);
+		assertThat(jumpToCondition.getInstructionPointer()).isEqualTo(2);
+	}
+
 }
