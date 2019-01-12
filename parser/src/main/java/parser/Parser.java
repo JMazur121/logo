@@ -1,3 +1,5 @@
+package parser;
+
 import agent.LexerAgent;
 import com.google.common.collect.ImmutableMap;
 import exceptions.*;
@@ -66,6 +68,7 @@ public class Parser {
 	}
 
 	public void handleStream(InputStream inputStream) {
+		reset();
 		agent.handleStream(inputStream);
 	}
 
@@ -185,8 +188,8 @@ public class Parser {
 		if (expected.equals(nextToken.getTokenType()))
 			agent.commitBufferedToken();
 		else {
-			throw new ParserException("Error while parsing " + parsedExpression +". expected: " + expected.getLexem()
-			+ " but got " + nextToken);
+			throw new ParserException("Error while parsing " + parsedExpression + ". expected: " + expected.getLexem()
+					+ " but got " + nextToken);
 		}
 
 	}
