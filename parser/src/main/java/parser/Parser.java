@@ -425,8 +425,7 @@ public class Parser {
 
 	private void addSimpleAddition(int leftIndex, Node expression) {
 		ArgumentNode indexNode = ArgumentNode.buildIndexedArgumentNode(leftIndex);
-		Token operator = new Token(T_ARITHMETIC_ADDITIVE_PLUS, null);
-		OperatorNode addition = new OperatorNode(indexNode, expression, operator);
+		OperatorNode addition = new OperatorNode(indexNode, expression, T_ARITHMETIC_ADDITIVE_PLUS);
 		IndexedArgument leftValue = new IndexedArgument(leftIndex, false);
 		AssignmentInstruction assignmentInstruction = new AssignmentInstruction(leftValue, addition);
 		addInstructionToList(assignmentInstruction);

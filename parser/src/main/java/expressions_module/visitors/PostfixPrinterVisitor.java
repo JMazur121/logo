@@ -28,8 +28,7 @@ public class PostfixPrinterVisitor implements ExpressionVisitor {
 
 	@Override
 	public void visitOperatorNode(OperatorNode node) {
-		Token token = node.getOperatorToken();
-		builder.append(token.getTokenType().getLexem());
+		builder.append(node.getOperatorType().getLexem());
 	}
 
 	public void restartPrinter() {

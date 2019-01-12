@@ -24,8 +24,12 @@ public class EvaluationBag {
 			return new EvaluationBag(0, true);
 	}
 
-	public boolean readValue() {
+	public boolean getBooleanValue() {
 		return value == 1;
+	}
+
+	public boolean isNumeric() {
+		return !isBoolean;
 	}
 
 }

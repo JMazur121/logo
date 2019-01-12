@@ -8,11 +8,11 @@ import visitors.ExpressionVisitor;
 public class OperatorNode extends Node {
 
 	@Getter
-	private Token operatorToken;
+	private TokenType operatorType;
 
-	public OperatorNode(Node leftChild, Node rightChild, Token operatorToken) {
+	public OperatorNode(Node leftChild, Node rightChild, TokenType operatorType) {
 		super(leftChild, rightChild);
-		this.operatorToken = operatorToken;
+		this.operatorType = operatorType;
 	}
 
 	@Override
@@ -31,13 +31,12 @@ public class OperatorNode extends Node {
 
 	@Override
 	public boolean isArithmeticOperatorNode() {
-		TokenType type = operatorToken.getTokenType();
-		return type.isAdditiveOperator() || type.isMultiplicativeOperator();
+		return operatorType.isAdditiveOperator() || operatorType.isMultiplicativeOperator();
 	}
 
 	@Override
 	public boolean isLogicalOperatorNode() {
-		return operatorToken.getTokenType().isLogicalOperator();
+		return operatorType.isLogicalOperator();
 	}
 
 	@Override
@@ -53,6 +52,10 @@ public class OperatorNode extends Node {
 	@Override
 	public boolean returnsBooleanValue() {
 		return !isArithmeticOperatorNode();
+	}
+
+	public boolean isBinaryOperator() {
+		return rightChild != null;
 	}
 
 }
