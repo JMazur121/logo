@@ -1,32 +1,31 @@
-package expressions_module.tree;
+package tree;
 
 import lombok.AllArgsConstructor;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 @AllArgsConstructor
-public class IndexedArgument implements ReadableArgument {
+public class DictionaryArgument implements ReadableArgument {
 
-	private int value;
-	private boolean isConstantValue;
+	private String dictionaryKey;
 
 	@Override
 	public boolean isDictionaryArgument() {
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean isConstantValue() {
-		return isConstantValue;
+		return false;
 	}
 
 	@Override
 	public String readKey() {
-		throw new NotImplementedException();
+		return dictionaryKey;
 	}
 
 	@Override
 	public int readValue() {
-		return value;
+		throw new NotImplementedException();
 	}
 
 }

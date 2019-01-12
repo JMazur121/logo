@@ -1,6 +1,6 @@
-package instructions_module.visitors;
+package visitors;
 
-import instructions_module.composite.*;
+import instructions.*;
 
 public interface InstructionVisitor {
 

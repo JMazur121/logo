@@ -1,9 +1,9 @@
-package expressions_module.tree;
+package tree;
 
-import expressions_module.visitors.ExpressionVisitor;
 import lombok.Getter;
 import tokenizer.Token;
 import tokenizer.TokenType;
+import visitors.ExpressionVisitor;
 
 public class OperatorNode extends Node {
 

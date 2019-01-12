@@ -1,10 +1,10 @@
-package instructions_module.composite;
+package instructions;
 
-import instructions_module.visitors.InstructionVisitor;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import visitors.InstructionVisitor;
 
 @Getter
 @Setter

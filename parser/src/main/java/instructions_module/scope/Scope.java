@@ -1,6 +1,6 @@
 package instructions_module.scope;
 
-import instructions_module.composite.BaseInstruction;
+import instructions.BaseInstruction;
 import lombok.*;
 import java.util.ArrayList;
 

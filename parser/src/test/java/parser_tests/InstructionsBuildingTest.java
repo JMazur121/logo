@@ -2,8 +2,7 @@ package parser_tests;
 
 import exceptions.LexerException;
 import exceptions.ParserException;
-import expressions_module.tree.Node;
-import instructions_module.composite.*;
+import instructions.*;
 import instructions_module.scope.Scope;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;

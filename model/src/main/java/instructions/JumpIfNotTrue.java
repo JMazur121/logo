@@ -1,9 +1,9 @@
-package instructions_module.composite;
+package instructions;
 
-import expressions_module.tree.Node;
-import instructions_module.visitors.InstructionVisitor;
 import lombok.Getter;
 import lombok.Setter;
+import tree.Node;
+import visitors.InstructionVisitor;
 
 @Getter
 @Setter

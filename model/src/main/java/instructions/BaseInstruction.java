@@ -1,6 +1,6 @@
-package instructions_module.composite;
+package instructions;
 
-import instructions_module.visitors.InstructionVisitor;
+import visitors.InstructionVisitor;
 
 public abstract class BaseInstruction {
 

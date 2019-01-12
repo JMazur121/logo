@@ -2,14 +2,14 @@ package expressions_module.parser;
 
 import agent.LexerAgent;
 import exceptions.*;
-import expressions_module.tree.ArgumentNode;
-import expressions_module.tree.Node;
-import expressions_module.tree.OperatorNode;
 import lombok.Setter;
 import tokenizer.LiteralToken;
 import tokenizer.NumericToken;
 import tokenizer.Token;
 import tokenizer.TokenType;
+import tree.ArgumentNode;
+import tree.Node;
+import tree.OperatorNode;
 import java.util.Map;
 import static tokenizer.TokenType.*;
 

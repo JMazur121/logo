@@ -1,4 +1,4 @@
-package expressions_module.tree;
+package tree;
 
 public interface ReadableArgument {
 

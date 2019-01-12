@@ -1,10 +1,10 @@
-package instructions_module.composite;
+package instructions;
 
-import expressions_module.tree.Node;
-import expressions_module.tree.ReadableArgument;
-import instructions_module.visitors.InstructionVisitor;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import tree.Node;
+import tree.ReadableArgument;
+import visitors.InstructionVisitor;
 
 @Getter
 @AllArgsConstructor

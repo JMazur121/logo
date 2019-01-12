@@ -1,10 +1,10 @@
 package expression_tests;
 
-import expressions_module.tree.ArgumentNode;
-import expressions_module.tree.OperatorNode;
 import expressions_module.visitors.PostfixPrinterVisitor;
 import org.junit.Test;
 import tokenizer.Token;
+import tree.ArgumentNode;
+import tree.OperatorNode;
 import static org.assertj.core.api.Assertions.*;
 import static tokenizer.TokenType.*;
 

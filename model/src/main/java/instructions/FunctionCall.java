@@ -1,10 +1,9 @@
-package instructions_module.composite;
+package instructions;
 
-import expressions_module.tree.Node;
-import instructions_module.visitors.InstructionVisitor;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import tokenizer.Token;
+import tree.Node;
+import visitors.InstructionVisitor;
 import java.util.ArrayList;
 
 @Getter

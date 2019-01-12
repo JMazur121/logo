@@ -1,7 +1,7 @@
-package expressions_module.tree;
+package tree;
 
-import expressions_module.visitors.ExpressionVisitor;
 import lombok.Getter;
+import visitors.ExpressionVisitor;
 
 @Getter
 public abstract class Node {

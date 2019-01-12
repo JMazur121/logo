@@ -1,9 +1,10 @@
 package expressions_module.visitors;
 
-import expressions_module.tree.ArgumentNode;
-import expressions_module.tree.OperatorNode;
-import expressions_module.tree.ReadableArgument;
 import tokenizer.Token;
+import tree.ArgumentNode;
+import tree.OperatorNode;
+import tree.ReadableArgument;
+import visitors.ExpressionVisitor;
 
 public class PostfixPrinterVisitor implements ExpressionVisitor {
 
