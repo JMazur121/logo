@@ -170,4 +170,25 @@ public class InstructionsBuildingTest {
 		assertThat(jumpToCondition.getInstructionPointer()).isEqualTo(2);
 	}
 
+	@Test
+	public void getNextScope_whileLoop_returnsWhileLoopScope() throws LexerException, ParserException {
+		//before
+		globalVars.put("varW", 100);
+		ByteArrayInputStream is = new ByteArrayInputStream("tdj(varW > 10) [czysc()]".getBytes());
+		parser.handleStream(is);
+		//when
+		Scope scope = parser.getNetScope();
+		//then
+		assertThat(scope).isNotNull();
+		assertThat(scope.isFunctionDefinition()).isFalse();
+		ArrayList<BaseInstruction> instructions = scope.getInstructions();
+		assertThat(instructions).hasSize(3);
+		JumpIfNotTrue jint = (JumpIfNotTrue)instructions.get(0);
+		assertThat(jint.getInstructionPointer()).isEqualTo(3);
+		FunctionCall call = (FunctionCall)instructions.get(1);
+		assertThat(call.getIdentifier()).isEqualTo("czysc");
+		Jump jump = (Jump)instructions.get(2);
+		assertThat(jump.getInstructionPointer()).isEqualTo(0);
+	}
+
 }
