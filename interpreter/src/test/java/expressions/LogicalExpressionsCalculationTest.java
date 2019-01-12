@@ -33,4 +33,69 @@ public class LogicalExpressionsCalculationTest {
 		assertThat(result.getBooleanValue()).isTrue();
 	}
 
+	@Test
+	public void calculate_simpleNegation_returnsValue() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("!(10 == 10)".getBytes());
+		agent.handleStream(is);
+		Node expression = parser.getLogicalExpressionTree();
+		//when
+		EvaluationBag result = visitor.calculate(expression);
+		//then
+		assertThat(result.isBoolean()).isTrue();
+		assertThat(result.getBooleanValue()).isFalse();
+	}
+
+	@Test
+	public void calculate_simpleLogicalAnd_returnsValue() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("10 < 100 & 1 == 1".getBytes());
+		agent.handleStream(is);
+		Node expression = parser.getLogicalExpressionTree();
+		//when
+		EvaluationBag result = visitor.calculate(expression);
+		//then
+		assertThat(result.isBoolean()).isTrue();
+		assertThat(result.getBooleanValue()).isTrue();
+	}
+
+	@Test
+	public void calculate_simpleLogicalOr_returnsValue() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("10 > 100 | 1 == 1".getBytes());
+		agent.handleStream(is);
+		Node expression = parser.getLogicalExpressionTree();
+		//when
+		EvaluationBag result = visitor.calculate(expression);
+		//then
+		assertThat(result.isBoolean()).isTrue();
+		assertThat(result.getBooleanValue()).isTrue();
+	}
+
+	@Test
+	public void calculate_logicalAndMixedWithOr_returnsValue() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("1>10 & 1==1 | 0<12".getBytes());
+		agent.handleStream(is);
+		Node expression = parser.getLogicalExpressionTree();
+		//when
+		EvaluationBag result = visitor.calculate(expression);
+		//then
+		assertThat(result.isBoolean()).isTrue();
+		assertThat(result.getBooleanValue()).isTrue();
+	}
+
+	@Test
+	public void calculate_logicalAndWithOrAndParenthesis_returnsValue() throws LexerException, ExpressionCorruptedException, UndefinedReferenceException, TokenMissingException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("1>10 & (1==1 | 0<12)".getBytes());
+		agent.handleStream(is);
+		Node expression = parser.getLogicalExpressionTree();
+		//when
+		EvaluationBag result = visitor.calculate(expression);
+		//then
+		assertThat(result.isBoolean()).isTrue();
+		assertThat(result.getBooleanValue()).isFalse();
+	}
+
 }
