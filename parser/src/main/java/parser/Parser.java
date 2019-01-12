@@ -376,8 +376,10 @@ public class Parser {
 		if (T_KEYWORD_ELSE.equals(nextToken.getTokenType())) {
 			agent.commitBufferedToken();
 			nextToken = agent.bufferAndGetToken();
-			if (T_KEYWORD_IF.equals(nextToken.getTokenType()))
+			if (T_KEYWORD_IF.equals(nextToken.getTokenType())) {
+				agent.commitBufferedToken();
 				parseConditionalInstruction();
+			}
 			else if (T_LEFT_SQUARE_BRACKET.equals(nextToken.getTokenType()))
 				parseInstructionBlock();
 			else
