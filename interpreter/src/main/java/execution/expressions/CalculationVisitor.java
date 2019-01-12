@@ -2,10 +2,7 @@ package execution.expressions;
 
 import lombok.Setter;
 import tokenizer.TokenType;
-import tree.ArgumentNode;
-import tree.IndexedArgument;
-import tree.OperatorNode;
-import tree.ReadableArgument;
+import tree.*;
 import visitors.ExpressionVisitor;
 import java.util.Map;
 import java.util.Stack;
@@ -33,8 +30,11 @@ public class CalculationVisitor implements ExpressionVisitor {
 		return !evaluationStack.empty();
 	}
 
-	public EvaluationBag returnValue() {
-		return evaluationStack.pop();
+	public EvaluationBag calculate(Node node) {
+		node.accept(this);
+		EvaluationBag evaluationBag = evaluationStack.pop();
+		evaluationStack.clear();
+		return evaluationBag;
 	}
 
 	@Override
