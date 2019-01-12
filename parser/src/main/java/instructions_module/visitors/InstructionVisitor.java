@@ -9,6 +9,5 @@ public interface InstructionVisitor {
 	void visitForConditionalJump(ForConditionalJump forConditionalJump);
 	void visitJump(Jump jump);
 	void visitJumpIfNotTrue(JumpIfNotTrue jumpIfNotTrue);
-	void visitStop(Stop stop);
 
 }

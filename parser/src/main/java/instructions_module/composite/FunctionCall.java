@@ -20,4 +20,12 @@ public class FunctionCall extends BaseInstruction{
 		visitor.visitFunctionCall(this);
 	}
 
+	public boolean hasArguments() {
+		return arguments != null;
+	}
+
+	public boolean isStopCall() {
+		return "stop".equals(identifier);
+	}
+
 }
