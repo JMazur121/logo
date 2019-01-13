@@ -88,7 +88,12 @@ public class ScopeExecutor implements InstructionVisitor{
 
 	@Override
 	public void visitForConditionalJump(ForConditionalJump forConditionalJump) {
-
+		int currentLoopIndex = currentLocalVariables[forConditionalJump.getIndex().readValue()];
+		int bound = currentLocalVariables[forConditionalJump.getEnd().readValue()];
+		if (currentLoopIndex < bound)
+			incrementPointer();
+		else
+			setPointer(forConditionalJump.getInstructionPointer());
 	}
 
 	@Override
