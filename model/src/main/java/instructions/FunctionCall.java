@@ -20,7 +20,7 @@ public class FunctionCall extends BaseInstruction{
 	}
 
 	public boolean hasArguments() {
-		return arguments != null;
+		return !arguments.isEmpty();
 	}
 
 	public boolean isStopCall() {

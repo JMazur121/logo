@@ -5,6 +5,7 @@ import execution.expressions.CalculationVisitor;
 import execution.expressions.EvaluationBag;
 import instructions.*;
 import scope.Scope;
+import tree.Node;
 import tree.ReadableArgument;
 import visitors.InstructionVisitor;
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Stack;
 
-public class ScopeExecutor implements InstructionVisitor{
+public class ScopeExecutor implements InstructionVisitor {
 
 	private Stack<ExecutionContext> contextStack;
 	private int currentInstructionPointer;
@@ -31,12 +32,13 @@ public class ScopeExecutor implements InstructionVisitor{
 		this.globalVariables = globalVariables;
 		this.knownMethods = knownMethods;
 		calculationVisitor = new CalculationVisitor(globalVariables);
+		currentLocalVariables = null;
 	}
 
-	public void executeScope(Scope scope) {
+	public void executeScope(Scope scope, boolean firstCall) {
 		currentInstructionPointer = 0;
 		int sizeOfVariablesTable = scope.getNumberOfLocalVariables();
-		if (sizeOfVariablesTable > 0) {
+		if (firstCall && sizeOfVariablesTable > 0) {
 			currentLocalVariables = new int[sizeOfVariablesTable];
 			calculationVisitor.setLocalVariables(currentLocalVariables);
 		}
@@ -49,10 +51,11 @@ public class ScopeExecutor implements InstructionVisitor{
 
 	public void reset() {
 		contextStack.clear();
+		calculationVisitor.reset();
 	}
 
 	private void saveCurrentContext() {
-		contextStack.push(new ExecutionContext(currentInstructionPointer + 1, currentLocalVariables));
+		contextStack.push(new ExecutionContext(currentInstructionPointer, currentLocalVariables));
 	}
 
 	private void restoreContext() {
@@ -83,7 +86,29 @@ public class ScopeExecutor implements InstructionVisitor{
 
 	@Override
 	public void visitFunctionCall(FunctionCall functionCall) {
+		if (functionCall.isEmbeddedMethodCall())
+			visitEmbeddedMethodCall(functionCall);
+		else
+			visitDefinedMethodCall(functionCall);
+	}
 
+	public void visitEmbeddedMethodCall(FunctionCall functionCall) {
+		
+	}
+
+	public void visitDefinedMethodCall(FunctionCall functionCall) {
+		Scope scope = knownMethods.get(functionCall.getIdentifier());
+		int[] newLocalVariables = new int[scope.getNumberOfLocalVariables()];
+		ArrayList<Node> arguments = functionCall.getArguments();
+		for (int i = 0; i < arguments.size(); i++) {
+			EvaluationBag result = calculationVisitor.calculate(arguments.get(i));
+			newLocalVariables[i] = result.getValue();
+		}
+		saveCurrentContext();
+		currentLocalVariables = newLocalVariables;
+		executeScope(scope, false);
+		restoreContext();
+		incrementPointer();
 	}
 
 	@Override

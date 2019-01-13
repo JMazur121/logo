@@ -2,6 +2,7 @@ package parser;
 
 import agent.LexerAgent;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import exceptions.*;
 import expressions_module.parser.ExpressionParser;
 import instructions.*;
@@ -14,6 +15,7 @@ import tree.*;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import static tokenizer.TokenType.*;
 
@@ -329,7 +331,7 @@ public class Parser {
 		if (embeddedMethodArguments != null) {
 			if (embeddedMethodArguments == 0) {
 				checkForToken(T_RIGHT_PARENTHESIS, "Function-call");
-				instruction = new FunctionCall(id, null, true);
+				instruction = new FunctionCall(id, Lists.newArrayList(), true);
 			}
 			else {
 				ArrayList<Node> arguments = buildLimitedArgumentsList(embeddedMethodArguments);
@@ -344,7 +346,7 @@ public class Parser {
 			Token nextToken = agent.bufferAndGetToken();
 			if (T_RIGHT_PARENTHESIS.equals(nextToken.getTokenType())) {
 				if (method.getNumberOfArguments() == 0)
-					instruction = new FunctionCall(id, null, false);
+					instruction = new FunctionCall(id, Lists.newArrayList(), false);
 				else {
 					TokenMissingException e = new TokenMissingException("Non-zero arguments function call", "function argument", nextToken);
 					throw new ParserException(e.getMessage());
