@@ -1,6 +1,5 @@
 package execution.instructions;
 
-import exceptions.InterpreterException;
 import exceptions.LexerException;
 import exceptions.ParserException;
 import execution.dispatching.GraphicExecutor;
@@ -13,6 +12,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ParserExecutor {
 
@@ -23,14 +23,16 @@ public class ParserExecutor {
 	private GraphicExecutor graphicExecutor;
 	private BlockingQueue<Runnable> graphicalTasksQueue;
 	private ScopeExecutor scopeExecutor;
+	private AtomicBoolean isWorkToDo;
 
-	public ParserExecutor(GraphicExecutor graphicExecutor, BlockingQueue<Runnable> graphicalTasksQueue) {
+	public ParserExecutor(GraphicExecutor graphicExecutor, BlockingQueue<Runnable> graphicalTasksQueue, AtomicBoolean isWorkToDo) {
 		executor = Executors.newSingleThreadExecutor();
 		globalVariables = new HashMap<>();
 		knownMethods = new HashMap<>();
 		parser = new Parser(globalVariables, knownMethods);
 		this.graphicExecutor = graphicExecutor;
 		this.graphicalTasksQueue = graphicalTasksQueue;
+		this.isWorkToDo = isWorkToDo;
 		scopeExecutor = new ScopeExecutor(graphicExecutor, graphicalTasksQueue, globalVariables, knownMethods);
 	}
 
@@ -38,7 +40,7 @@ public class ParserExecutor {
 		executor.execute(() -> {
 			parser.handleStream(inputStream);
 			scopeExecutor.reset();
-			while (!parser.isReachedETX()) {
+			while (!parser.isReachedETX() && isWorkToDo.get()) {
 				Scope scope;
 				try {
 					scope = parser.getNextScope();
@@ -48,6 +50,7 @@ public class ParserExecutor {
 				}
 				if (scope == null) {
 					graphicalTasksQueue.offer(() -> graphicExecutor.print("Unexpected parsing error"));
+					break;
 				}
 				try {
 					scopeExecutor.executeScope(scope, true);

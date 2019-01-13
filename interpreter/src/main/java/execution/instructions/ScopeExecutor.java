@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ScopeExecutor implements InstructionVisitor {
 
