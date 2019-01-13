@@ -15,6 +15,7 @@ import tree.Node;
 import tree.ReadableArgument;
 import visitors.InstructionVisitor;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.BlockingQueue;
@@ -46,33 +47,32 @@ public class ScopeExecutor implements InstructionVisitor {
 
 	private void buildEmbeddedTasks() {
 		embeddedTasks = HashMultimap.create();
-		embeddedTasks.put("naprzod", new Pair<>(1, (identifier, args, executor) -> () -> executor.drawAlong(args[0])));
-		embeddedTasks.put("wstecz", new Pair<>(1, (identifier, args, executor) -> () -> executor.drawAlong(-args[0])));
-		embeddedTasks.put("prawo", new Pair<>(1, (identifier, args, executor) -> () -> executor.rotate(args[0])));
-		embeddedTasks.put("lewo", new Pair<>(1, (identifier, args, executor) -> () -> executor.rotate(-args[0])));
-		embeddedTasks.put("czysc", new Pair<>(0, (identifier, args, executor) -> executor::clear));
-		embeddedTasks.put("podnies", new Pair<>(0, (identifier, args, executor) -> executor::drawerUp));
-		embeddedTasks.put("opusc", new Pair<>(0, (identifier, args, executor) -> executor::drawerDown));
-		embeddedTasks.put("zamaluj", new Pair<>(0, (identifier, args, executor) -> executor::fill));
-		embeddedTasks.put("kolorPisaka", new Pair<>(1, (identifier, args, executor) -> () -> executor.setStroke(identifier)));
-		embeddedTasks.put("kolorPisaka", new Pair<>(3, (identifier, args, executor) -> () -> executor.setStroke(args[0], args[1], args[2])));
-		embeddedTasks.put("kolorMalowania", new Pair<>(1, (identifier, args, executor) -> () -> executor.setFill(identifier)));
-		embeddedTasks.put("kolorMalowania", new Pair<>(3, (identifier, args, executor) -> () -> executor.setFill(args[0], args[1], args[2])));
-		embeddedTasks.put("paleta", new Pair<>(4, (identifier, args, executor) -> () -> executor.defineColour(identifier, args[0], args[1], args[2])));
-		embeddedTasks.put("foremny", new Pair<>(1, (identifier, args, executor) -> () -> executor.fillPolygon(args[0])));
-		embeddedTasks.put("okrag", new Pair<>(1, (identifier, args, executor) -> () -> executor.strokeCircle(args[0])));
-		embeddedTasks.put("kolo", new Pair<>(1, ((identifier, args, executor) -> () -> executor.fillCircle(args[0]))));
-		embeddedTasks.put("skok", new Pair<>(2, (identifier, args, executor) -> () -> executor.moveDrawer(args[0], args[1])));
-		embeddedTasks.put("wypisz", new Pair<>(1, (identifier, args, executor) -> () -> executor.print(Integer.toString(args[0]))));
+		embeddedTasks.put("naprzod", new Pair<>(1, (args, executor) -> () -> executor.drawAlong(args[0])));
+		embeddedTasks.put("wstecz", new Pair<>(1, (args, executor) -> () -> executor.drawAlong(-args[0])));
+		embeddedTasks.put("prawo", new Pair<>(1, (args, executor) -> () -> executor.rotate(args[0])));
+		embeddedTasks.put("lewo", new Pair<>(1, (args, executor) -> () -> executor.rotate(-args[0])));
+		embeddedTasks.put("czysc", new Pair<>(0, (args, executor) -> executor::clear));
+		embeddedTasks.put("podnies", new Pair<>(0, (args, executor) -> executor::drawerUp));
+		embeddedTasks.put("opusc", new Pair<>(0, (args, executor) -> executor::drawerDown));
+		embeddedTasks.put("zamaluj", new Pair<>(0, (args, executor) -> executor::fill));
+		embeddedTasks.put("foremny", new Pair<>(1, (args, executor) -> () -> executor.fillPolygon(args[0])));
+		embeddedTasks.put("okrag", new Pair<>(1, (args, executor) -> () -> executor.strokeCircle(args[0])));
+		embeddedTasks.put("kolo", new Pair<>(1, (args, executor) -> () -> executor.fillCircle(args[0])));
+		embeddedTasks.put("skok", new Pair<>(2, (args, executor) -> () -> executor.moveDrawer(args[0], args[1])));
+		embeddedTasks.put("wypisz", new Pair<>(1, (args, executor) -> () -> executor.print(Integer.toString(args[0]))));
 	}
 
-	public static boolean isNotExpectedLength(int[] args, int expectedSize) {
-		return args.length != expectedSize;
-	}
-
-	public static boolean areNotPositive(int[] args) {
+	public boolean areNotPositive(int[] args) {
 		for (int arg : args) {
 			if (arg < 0)
+				return true;
+		}
+		return false;
+	}
+
+	public boolean exceedLimit(int[] args, int limit) {
+		for (int arg : args) {
+			if (arg > limit)
 				return true;
 		}
 		return false;
@@ -132,16 +132,11 @@ public class ScopeExecutor implements InstructionVisitor {
 		if (functionCall.isEmbeddedMethodCall()) {
 			if ("stop".equals(functionCall.getIdentifier()))
 				setPointer(Integer.MAX_VALUE);
-			else if (functionCall.hasArguments()) {
-				String id = functionCall.getIdentifier();
-				if (isColourChangeOperation(id))
+			else {
+				if (isColourChangeOperation(functionCall.getIdentifier()))
 					callEmbeddedColourChange(functionCall);
 				else
-					callEmbeddedMethodWithArguments(functionCall);
-				incrementPointer();
-			}
-			else {
-				callEmbeddedMethodWithNoArguments(functionCall);
+					callEmbeddedMethod(functionCall);
 				incrementPointer();
 			}
 		}
@@ -149,28 +144,22 @@ public class ScopeExecutor implements InstructionVisitor {
 			visitDefinedMethodCall(functionCall);
 	}
 
-	private void callEmbeddedMethodWithArguments(FunctionCall call) throws InterpreterException {
+	private void callEmbeddedMethod(FunctionCall call) throws InterpreterException {
 		ArrayList<Node> arguments = call.getArguments();
-		int[] args = new int[arguments.size()];
-		calcArguments(arguments, args, 0);
-		String id = call.getIdentifier();
-		Runnable newTask;
-		if (arguments.size() == 1) {
-			if (args[0] < 0)
-				throw new InterpreterException(wrongArgumentsTypeMessage(id));
-			switch (id) {
-				case "naprzod":
-					newTask = () -> graphicExecutor.drawAlong(args[0]);
-					break;
-				case "wstecz":
-					newTask = () -> graphicExecutor.drawAlong(-args[0]);
-					break;
-				case "prawo":
-					newTask = () -> graphicExecutor.rotate(args[0]);
-					break;
+		Collection<Pair<Integer, BaseTask>> methods = embeddedTasks.get(call.getIdentifier());
+		BaseTask taskToDo = null;
+		for (Pair<Integer, BaseTask> task : methods) {
+			if (task.getKey() == arguments.size()) {
+				taskToDo = task.getValue();
 			}
 		}
-		queueNewTask(newTask);
+		if (taskToDo == null)
+			throw new InterpreterException(wrongNumberOfArgumentsMessage(call.getIdentifier()));
+		int[] args = new int[arguments.size()];
+		calcArguments(arguments, args, 0);
+		if (areNotPositive(args))
+			throw new InterpreterException(wrongArgumentsTypeMessage(call.getIdentifier()));
+		queueNewTask(taskToDo.newTask(args, graphicExecutor));
 	}
 
 	private String checkForIdentifierNode(Node node, String methodID) throws InterpreterException {
@@ -226,25 +215,6 @@ public class ScopeExecutor implements InstructionVisitor {
 
 	private String wrongArgumentsTypeMessage(String functionName) {
 		return String.format("Interpreter error - wrong arguments type for \"%s\" call", functionName);
-	}
-
-	private void callEmbeddedMethodWithNoArguments(FunctionCall call) {
-		Runnable newTask;
-		switch (call.getIdentifier()) {
-			case "czysc":
-				newTask = () -> graphicExecutor.clear();
-				break;
-			case "podnies":
-				newTask = () -> graphicExecutor.drawerUp();
-				break;
-			case "opusc":
-				newTask = () -> graphicExecutor.drawerDown();
-				break;
-			default:
-				newTask = () -> graphicExecutor.fill();
-				break;
-		}
-		queueNewTask(newTask);
 	}
 
 	private void queueNewTask(Runnable r) {
