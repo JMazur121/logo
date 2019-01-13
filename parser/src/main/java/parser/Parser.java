@@ -80,7 +80,7 @@ public class Parser {
 	 *
 	 * @return Executable scope or procedure definition
 	 */
-	public Scope getNetScope() throws LexerException, ParserException {
+	public Scope getNextScope() throws LexerException, ParserException {
 		if (reachedETX)
 			return null;
 		Token nextToken = agent.bufferAndGetToken();

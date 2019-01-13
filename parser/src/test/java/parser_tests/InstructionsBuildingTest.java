@@ -26,7 +26,7 @@ public class InstructionsBuildingTest {
 		parser.reset();
 		parser.handleStream(is);
 		//when
-		Scope scope = parser.getNetScope();
+		Scope scope = parser.getNextScope();
 		//then
 		assertThat(scope).isNull();
 		assertThat(parser.isReachedETX()).isTrue();
@@ -38,7 +38,7 @@ public class InstructionsBuildingTest {
 		ByteArrayInputStream is = new ByteArrayInputStream("czysc()".getBytes());
 		parser.handleStream(is);
 		//when
-		Scope scope = parser.getNetScope();
+		Scope scope = parser.getNextScope();
 		//then
 		assertThat(scope).isNotNull();
 		assertThat(scope.isFunctionDefinition()).isFalse();
@@ -58,7 +58,7 @@ public class InstructionsBuildingTest {
 		ByteArrayInputStream is = new ByteArrayInputStream("skok(10,20)".getBytes());
 		parser.handleStream(is);
 		//when
-		Scope scope = parser.getNetScope();
+		Scope scope = parser.getNextScope();
 		//then
 		assertThat(scope).isNotNull();
 		assertThat(scope.isFunctionDefinition()).isFalse();
@@ -79,7 +79,7 @@ public class InstructionsBuildingTest {
 		ByteArrayInputStream is = new ByteArrayInputStream("var1 := 100".getBytes());
 		parser.handleStream(is);
 		//when
-		Scope scope = parser.getNetScope();
+		Scope scope = parser.getNextScope();
 		//then
 		assertThat(scope).isNotNull();
 		assertThat(scope.isFunctionDefinition()).isFalse();
@@ -99,7 +99,7 @@ public class InstructionsBuildingTest {
 		ByteArrayInputStream is = new ByteArrayInputStream("jesli(var2 > 0) stop()".getBytes());
 		parser.handleStream(is);
 		//when
-		Scope scope = parser.getNetScope();
+		Scope scope = parser.getNextScope();
 		//then
 		assertThat(scope).isNotNull();
 		assertThat(scope.isFunctionDefinition()).isFalse();
@@ -121,7 +121,7 @@ public class InstructionsBuildingTest {
 				"wpw jesli(var3 < 0) [czysc()] wpw stop()").getBytes());
 		parser.handleStream(is);
 		//when
-		Scope scope = parser.getNetScope();
+		Scope scope = parser.getNextScope();
 		//then
 		assertThat(scope).isNotNull();
 		assertThat(scope.isFunctionDefinition()).isFalse();
@@ -149,7 +149,7 @@ public class InstructionsBuildingTest {
 		ByteArrayInputStream is = new ByteArrayInputStream("powtarzaj(idx1,10) [czysc()]".getBytes());
 		parser.handleStream(is);
 		//when
-		Scope scope = parser.getNetScope();
+		Scope scope = parser.getNextScope();
 		//then
 		assertThat(scope).isNotNull();
 		assertThat(scope.isFunctionDefinition()).isFalse();
@@ -176,7 +176,7 @@ public class InstructionsBuildingTest {
 		ByteArrayInputStream is = new ByteArrayInputStream("tdj(varW > 10) [czysc()]".getBytes());
 		parser.handleStream(is);
 		//when
-		Scope scope = parser.getNetScope();
+		Scope scope = parser.getNextScope();
 		//then
 		assertThat(scope).isNotNull();
 		assertThat(scope.isFunctionDefinition()).isFalse();

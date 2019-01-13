@@ -1,8 +1,12 @@
 package execution.instructions;
 
+import exceptions.InterpreterException;
+import exceptions.LexerException;
+import exceptions.ParserException;
 import execution.dispatching.GraphicExecutor;
 import parser.Parser;
 import scope.Scope;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -18,6 +22,7 @@ public class ParserExecutor {
 	private Map<String, Scope> knownMethods;
 	private GraphicExecutor graphicExecutor;
 	private BlockingQueue<Runnable> graphicalTasksQueue;
+	private ScopeExecutor scopeExecutor;
 
 	public ParserExecutor(GraphicExecutor graphicExecutor, BlockingQueue<Runnable> graphicalTasksQueue) {
 		executor = Executors.newSingleThreadExecutor();
@@ -26,9 +31,33 @@ public class ParserExecutor {
 		parser = new Parser(globalVariables, knownMethods);
 		this.graphicExecutor = graphicExecutor;
 		this.graphicalTasksQueue = graphicalTasksQueue;
+		scopeExecutor = new ScopeExecutor(graphicExecutor, graphicalTasksQueue, globalVariables, knownMethods);
 	}
 
-
+	public void nextStream(InputStream inputStream) {
+		executor.execute(() -> {
+			parser.handleStream(inputStream);
+			scopeExecutor.reset();
+			while (!parser.isReachedETX()) {
+				Scope scope;
+				try {
+					scope = parser.getNextScope();
+				} catch (LexerException | ParserException e) {
+					graphicalTasksQueue.offer(() -> graphicExecutor.print(e.getMessage()));
+					break;
+				}
+				if (scope == null) {
+					graphicalTasksQueue.offer(() -> graphicExecutor.print("Unexpected parsing error"));
+				}
+				try {
+					scopeExecutor.executeScope(scope, true);
+				} catch (Exception e) {
+					graphicalTasksQueue.offer(() -> graphicExecutor.print(e.getMessage()));
+					break;
+				}
+			}
+		});
+	}
 
 	public void stop() {
 		executor.shutdown();
@@ -39,6 +68,5 @@ public class ParserExecutor {
 			executor.shutdownNow();
 		}
 	}
-
 
 }

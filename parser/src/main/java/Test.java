@@ -17,7 +17,7 @@ public class Test {
 		parser.handleStream(in);
 		while (!parser.isReachedETX()) {
 			try {
-				parser.getNetScope();
+				parser.getNextScope();
 			} catch (LexerException | ParserException e) {
 				System.out.println(e.getMessage());
 				break;

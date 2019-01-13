@@ -62,22 +62,6 @@ public class ScopeExecutor implements InstructionVisitor {
 		embeddedTasks.put("wypisz", new Pair<>(1, (args, executor) -> () -> executor.print(Integer.toString(args[0]))));
 	}
 
-	public boolean areNotPositive(int[] args) {
-		for (int arg : args) {
-			if (arg < 0)
-				return true;
-		}
-		return false;
-	}
-
-	public boolean exceedLimit(int[] args, int limit) {
-		for (int arg : args) {
-			if (arg > limit)
-				return true;
-		}
-		return false;
-	}
-
 	public void executeScope(Scope scope, boolean firstCall) throws InterpreterException {
 		currentInstructionPointer = 0;
 		int sizeOfVariablesTable = scope.getNumberOfLocalVariables();
@@ -157,8 +141,6 @@ public class ScopeExecutor implements InstructionVisitor {
 			throw new InterpreterException(wrongNumberOfArgumentsMessage(call.getIdentifier()));
 		int[] args = new int[arguments.size()];
 		calcArguments(arguments, args, 0);
-		if (areNotPositive(args))
-			throw new InterpreterException(wrongArgumentsTypeMessage(call.getIdentifier()));
 		queueNewTask(taskToDo.newTask(args, graphicExecutor));
 	}
 
