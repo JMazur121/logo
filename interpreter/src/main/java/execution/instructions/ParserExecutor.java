@@ -5,7 +5,7 @@ import parser.Parser;
 import scope.Scope;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -17,9 +17,9 @@ public class ParserExecutor {
 	private Map<String, Integer> globalVariables;
 	private Map<String, Scope> knownMethods;
 	private GraphicExecutor graphicExecutor;
-	private Queue<Runnable> graphicalTasksQueue;
+	private BlockingQueue<Runnable> graphicalTasksQueue;
 
-	public ParserExecutor(GraphicExecutor graphicExecutor, Queue<Runnable> graphicalTasksQueue) {
+	public ParserExecutor(GraphicExecutor graphicExecutor, BlockingQueue<Runnable> graphicalTasksQueue) {
 		executor = Executors.newSingleThreadExecutor();
 		globalVariables = new HashMap<>();
 		knownMethods = new HashMap<>();

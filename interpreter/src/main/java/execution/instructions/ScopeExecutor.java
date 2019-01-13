@@ -1,5 +1,7 @@
 package execution.instructions;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import execution.dispatching.GraphicExecutor;
 import execution.expressions.CalculationVisitor;
 import execution.expressions.EvaluationBag;
@@ -10,8 +12,8 @@ import tree.ReadableArgument;
 import visitors.InstructionVisitor;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Stack;
+import java.util.concurrent.BlockingQueue;
 
 public class ScopeExecutor implements InstructionVisitor {
 
@@ -19,12 +21,12 @@ public class ScopeExecutor implements InstructionVisitor {
 	private int currentInstructionPointer;
 	private int[] currentLocalVariables;
 	private GraphicExecutor graphicExecutor;
-	private Queue<Runnable> graphicalTasksQueue;
+	private BlockingQueue<Runnable> graphicalTasksQueue;
 	private Map<String, Integer> globalVariables;
 	private Map<String, Scope> knownMethods;
 	private CalculationVisitor calculationVisitor;
 
-	public ScopeExecutor(GraphicExecutor graphicExecutor, Queue<Runnable> graphicalTasksQueue,
+	public ScopeExecutor(GraphicExecutor graphicExecutor, BlockingQueue<Runnable> graphicalTasksQueue,
 						 Map<String, Integer> globalVariables, Map<String, Scope> knownMethods) {
 		contextStack = new Stack<>();
 		this.graphicExecutor = graphicExecutor;
@@ -86,17 +88,47 @@ public class ScopeExecutor implements InstructionVisitor {
 
 	@Override
 	public void visitFunctionCall(FunctionCall functionCall) {
-		if (functionCall.isEmbeddedMethodCall())
-			visitEmbeddedMethodCall(functionCall);
+		if (functionCall.isEmbeddedMethodCall()) {
+			if ("stop".equals(functionCall.getIdentifier()))
+				setPointer(Integer.MAX_VALUE);
+			else if (functionCall.hasArguments()) {
+				
+			}
+			else {
+				callEmbeddedMethodWithNoArguments(functionCall);
+				incrementPointer();
+			}
+		}
 		else
 			visitDefinedMethodCall(functionCall);
 	}
 
-	public void visitEmbeddedMethodCall(FunctionCall functionCall) {
-		
+	private void callEmbeddedMethodWithNoArguments(FunctionCall call) {
+		Runnable newTask;
+		switch (call.getIdentifier()) {
+			case "czysc" :
+				newTask = () -> graphicExecutor.clear();
+				break;
+			case "podnies" :
+				newTask = () -> graphicExecutor.drawerUp();
+				break;
+			case "opusc" :
+				newTask = () -> graphicExecutor.drawerDown();
+				break;
+			default:
+				newTask = () -> graphicExecutor.fill();
+				break;
+		}
+		putNewTask(newTask);
 	}
 
-	public void visitDefinedMethodCall(FunctionCall functionCall) {
+	private void putNewTask(Runnable r) {
+		try {
+			graphicalTasksQueue.put(r);
+		} catch (InterruptedException ignored) {}
+	}
+
+	private void visitDefinedMethodCall(FunctionCall functionCall) {
 		Scope scope = knownMethods.get(functionCall.getIdentifier());
 		int[] newLocalVariables = new int[scope.getNumberOfLocalVariables()];
 		ArrayList<Node> arguments = functionCall.getArguments();
