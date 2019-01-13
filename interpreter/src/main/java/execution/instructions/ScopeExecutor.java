@@ -1,6 +1,5 @@
 package execution.instructions;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import exceptions.InterpreterException;
@@ -55,9 +54,16 @@ public class ScopeExecutor implements InstructionVisitor {
 		embeddedTasks.put("podnies", new Pair<>(0, (identifier, args, executor) -> executor::drawerUp));
 		embeddedTasks.put("opusc", new Pair<>(0, (identifier, args, executor) -> executor::drawerDown));
 		embeddedTasks.put("zamaluj", new Pair<>(0, (identifier, args, executor) -> executor::fill));
-		embeddedTasks.put("kolorPisaka", new Pair<>(1, (identifier, args, executor) -> {
-			if (Strings.isNullOrEmpty(identifier))
-		}));
+		embeddedTasks.put("kolorPisaka", new Pair<>(1, (identifier, args, executor) -> () -> executor.setStroke(identifier)));
+		embeddedTasks.put("kolorPisaka", new Pair<>(3, (identifier, args, executor) -> () -> executor.setStroke(args[0], args[1], args[2])));
+		embeddedTasks.put("kolorMalowania", new Pair<>(1, (identifier, args, executor) -> () -> executor.setFill(identifier)));
+		embeddedTasks.put("kolorMalowania", new Pair<>(3, (identifier, args, executor) -> () -> executor.setFill(args[0], args[1], args[2])));
+		embeddedTasks.put("paleta", new Pair<>(4, (identifier, args, executor) -> () -> executor.defineColour(identifier, args[0], args[1], args[2])));
+		embeddedTasks.put("foremny", new Pair<>(1, (identifier, args, executor) -> () -> executor.fillPolygon(args[0])));
+		embeddedTasks.put("okrag", new Pair<>(1, (identifier, args, executor) -> () -> executor.strokeCircle(args[0])));
+		embeddedTasks.put("kolo", new Pair<>(1, ((identifier, args, executor) -> () -> executor.fillCircle(args[0]))));
+		embeddedTasks.put("skok", new Pair<>(2, (identifier, args, executor) -> () -> executor.moveDrawer(args[0], args[1])));
+		embeddedTasks.put("wypisz", new Pair<>(1, (identifier, args, executor) -> () -> executor.print(Integer.toString(args[0]))));
 	}
 
 	public static boolean isNotExpectedLength(int[] args, int expectedSize) {
@@ -153,13 +159,13 @@ public class ScopeExecutor implements InstructionVisitor {
 			if (args[0] < 0)
 				throw new InterpreterException(wrongArgumentsTypeMessage(id));
 			switch (id) {
-				case "naprzod" :
+				case "naprzod":
 					newTask = () -> graphicExecutor.drawAlong(args[0]);
 					break;
-				case "wstecz" :
+				case "wstecz":
 					newTask = () -> graphicExecutor.drawAlong(-args[0]);
 					break;
-				case "prawo" :
+				case "prawo":
 					newTask = () -> graphicExecutor.rotate(args[0]);
 					break;
 			}
@@ -170,7 +176,7 @@ public class ScopeExecutor implements InstructionVisitor {
 	private String checkForIdentifierNode(Node node, String methodID) throws InterpreterException {
 		if (!node.isArgumentNode())
 			throw new InterpreterException(wrongArgumentsTypeMessage(methodID));
-		ArgumentNode argument = (ArgumentNode)node;
+		ArgumentNode argument = (ArgumentNode) node;
 		if (!argument.getArgument().isDictionaryArgument())
 			throw new InterpreterException(wrongArgumentsTypeMessage(methodID));
 		return argument.getArgument().readKey();
@@ -225,13 +231,13 @@ public class ScopeExecutor implements InstructionVisitor {
 	private void callEmbeddedMethodWithNoArguments(FunctionCall call) {
 		Runnable newTask;
 		switch (call.getIdentifier()) {
-			case "czysc" :
+			case "czysc":
 				newTask = () -> graphicExecutor.clear();
 				break;
-			case "podnies" :
+			case "podnies":
 				newTask = () -> graphicExecutor.drawerUp();
 				break;
-			case "opusc" :
+			case "opusc":
 				newTask = () -> graphicExecutor.drawerDown();
 				break;
 			default:
@@ -244,11 +250,12 @@ public class ScopeExecutor implements InstructionVisitor {
 	private void queueNewTask(Runnable r) {
 		try {
 			graphicalTasksQueue.put(r);
-		} catch (InterruptedException ignored) {}
+		} catch (InterruptedException ignored) {
+		}
 	}
 
 	private void calcArguments(ArrayList<Node> args, int[] tab, int argsOffset) {
-		for (int i=argsOffset; i < args.size(); i++) {
+		for (int i = argsOffset; i < args.size(); i++) {
 			EvaluationBag result = calculationVisitor.calculate(args.get(i));
 			tab[i] = result.getValue();
 		}
