@@ -12,9 +12,12 @@ public interface GraphicExecutor {
 	void setFill(String colourName);
 	void setFill(int r, int g, int b);
 	void fill();
-	void polygon(double[] xPoints, double[] yPoints);
-	void strokeRound(int radius);
-	void drawCircle(int radius);
+	void strokePolygon(double[] xPoints, double[] yPoints);
+	void fillPolygon(double[] xPoints, double[] yPoints);
+	void strokeCircle(int radius);
+	void fillCircle(int radius);
 	void moveDrawer(int xTranslation, int yTranslation);
+	void nop();
+	void print(String message);
 
 }
