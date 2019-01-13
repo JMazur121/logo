@@ -13,7 +13,6 @@ public interface GraphicExecutor {
 	void setFill(int r, int g, int b);
 	void defineColour(String name, int r, int g, int b);
 	void fill();
-	void strokePolygon(double[] xPoints, double[] yPoints);
 	void fillPolygon(double[] xPoints, double[] yPoints);
 	void strokeCircle(int radius);
 	void fillCircle(int radius);

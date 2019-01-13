@@ -1,10 +1,15 @@
 package execution.instructions;
 
+import com.google.common.base.Strings;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import exceptions.InterpreterException;
+import execution.dispatching.BaseTask;
 import execution.dispatching.GraphicExecutor;
 import execution.expressions.CalculationVisitor;
 import execution.expressions.EvaluationBag;
 import instructions.*;
+import javafx.util.Pair;
 import scope.Scope;
 import tree.ArgumentNode;
 import tree.Node;
@@ -26,6 +31,8 @@ public class ScopeExecutor implements InstructionVisitor {
 	private Map<String, Scope> knownMethods;
 	private CalculationVisitor calculationVisitor;
 
+	private Multimap<String, Pair<Integer, BaseTask>> embeddedTasks;
+
 	public ScopeExecutor(GraphicExecutor graphicExecutor, BlockingQueue<Runnable> graphicalTasksQueue,
 						 Map<String, Integer> globalVariables, Map<String, Scope> knownMethods) {
 		contextStack = new Stack<>();
@@ -35,6 +42,34 @@ public class ScopeExecutor implements InstructionVisitor {
 		this.knownMethods = knownMethods;
 		calculationVisitor = new CalculationVisitor(globalVariables);
 		currentLocalVariables = null;
+		buildEmbeddedTasks();
+	}
+
+	private void buildEmbeddedTasks() {
+		embeddedTasks = HashMultimap.create();
+		embeddedTasks.put("naprzod", new Pair<>(1, (identifier, args, executor) -> () -> executor.drawAlong(args[0])));
+		embeddedTasks.put("wstecz", new Pair<>(1, (identifier, args, executor) -> () -> executor.drawAlong(-args[0])));
+		embeddedTasks.put("prawo", new Pair<>(1, (identifier, args, executor) -> () -> executor.rotate(args[0])));
+		embeddedTasks.put("lewo", new Pair<>(1, (identifier, args, executor) -> () -> executor.rotate(-args[0])));
+		embeddedTasks.put("czysc", new Pair<>(0, (identifier, args, executor) -> executor::clear));
+		embeddedTasks.put("podnies", new Pair<>(0, (identifier, args, executor) -> executor::drawerUp));
+		embeddedTasks.put("opusc", new Pair<>(0, (identifier, args, executor) -> executor::drawerDown));
+		embeddedTasks.put("zamaluj", new Pair<>(0, (identifier, args, executor) -> executor::fill));
+		embeddedTasks.put("kolorPisaka", new Pair<>(1, (identifier, args, executor) -> {
+			if (Strings.isNullOrEmpty(identifier))
+		}));
+	}
+
+	public static boolean isNotExpectedLength(int[] args, int expectedSize) {
+		return args.length != expectedSize;
+	}
+
+	public static boolean areNotPositive(int[] args) {
+		for (int arg : args) {
+			if (arg < 0)
+				return true;
+		}
+		return false;
 	}
 
 	public void executeScope(Scope scope, boolean firstCall) throws InterpreterException {
@@ -106,6 +141,30 @@ public class ScopeExecutor implements InstructionVisitor {
 		}
 		else
 			visitDefinedMethodCall(functionCall);
+	}
+
+	private void callEmbeddedMethodWithArguments(FunctionCall call) throws InterpreterException {
+		ArrayList<Node> arguments = call.getArguments();
+		int[] args = new int[arguments.size()];
+		calcArguments(arguments, args, 0);
+		String id = call.getIdentifier();
+		Runnable newTask;
+		if (arguments.size() == 1) {
+			if (args[0] < 0)
+				throw new InterpreterException(wrongArgumentsTypeMessage(id));
+			switch (id) {
+				case "naprzod" :
+					newTask = () -> graphicExecutor.drawAlong(args[0]);
+					break;
+				case "wstecz" :
+					newTask = () -> graphicExecutor.drawAlong(-args[0]);
+					break;
+				case "prawo" :
+					newTask = () -> graphicExecutor.rotate(args[0]);
+					break;
+			}
+		}
+		queueNewTask(newTask);
 	}
 
 	private String checkForIdentifierNode(Node node, String methodID) throws InterpreterException {
