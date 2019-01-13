@@ -1,5 +1,6 @@
 package instructions;
 
+import exceptions.InterpreterException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import tree.Node;
@@ -15,7 +16,7 @@ public class FunctionCall extends BaseInstruction{
 	private boolean isEmbeddedMethodCall;
 
 	@Override
-	public void accept(InstructionVisitor visitor) {
+	public void accept(InstructionVisitor visitor) throws InterpreterException {
 		visitor.visitFunctionCall(this);
 	}
 

@@ -3,7 +3,7 @@ package exceptions;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
-public class ExecutionException extends Exception {
+public class InterpreterException extends Exception {
 
 	private String message;
 
