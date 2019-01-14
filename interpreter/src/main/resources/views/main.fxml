@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="198.0" prefWidth="127.0" xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1" fx:controller="execution.controller.MainViewController">
+   <center>
+      <VBox alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="200.0" prefWidth="100.0" spacing="20.0" BorderPane.alignment="CENTER">
+         <children>
+            <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="Logo-interpreter" textAlignment="CENTER" />
+            <Separator prefWidth="200.0" />
+            <Button fx:id="scriptButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#workWithScriptPressed" text="Praca ze skryptem" />
+            <Button fx:id="consoleButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#workWithConsolePressed" text="Praca z konsolą" />
+            <Button fx:id="exitButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#exitPressed" text="Zakończ" />
+         </children>
+      </VBox>
+   </center>
+</BorderPane>
