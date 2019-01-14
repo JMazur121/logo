@@ -83,7 +83,7 @@ public class GraphicExecutionController implements GraphicExecutor {
 	public void rotate(int angle) {
 		drawerContext.clearRect(0, 0, drawerCanvas.getWidth(), drawerCanvas.getHeight());
 		currentAngle += angle;
-		// TODO: 2019-01-15 Dodać to rysowanie obróconych obrazków 
+		// TODO: 2019-01-15 Dodać to rysowanie obróconych obrazków
 	}
 
 	@Override
@@ -170,7 +170,10 @@ public class GraphicExecutionController implements GraphicExecutor {
 
 	@Override
 	public void moveDrawer(int xTranslation, int yTranslation) {
-
+		drawerContext.clearRect(0, 0, drawerCanvas.getWidth(), drawerCanvas.getHeight());
+		// TODO: 2019-01-15 Dopisac rysowanie, które też może wymagać tego obrotu
+		Point2D translation = new Point2D(xTranslation, yTranslation);
+		
 	}
 
 	@Override
