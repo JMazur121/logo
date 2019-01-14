@@ -100,6 +100,14 @@ public class ScopeExecutor implements InstructionVisitor {
 		currentInstructionPointer = value;
 	}
 
+	private boolean areNegative(int[] args) {
+		for (int arg : args) {
+			if (arg < 0)
+				return true;
+		}
+		return false;
+	}
+
 	@Override
 	public void visitAssignmentInstruction(AssignmentInstruction assignmentInstruction) {
 		EvaluationBag result = calculationVisitor.calculate(assignmentInstruction.getArithmeticExpression());
@@ -141,6 +149,8 @@ public class ScopeExecutor implements InstructionVisitor {
 			throw new InterpreterException(wrongNumberOfArgumentsMessage(call.getIdentifier()));
 		int[] args = new int[arguments.size()];
 		calcArguments(arguments, args, 0);
+		if (!"wypisz".equals(call.getIdentifier()) && areNegative(args))
+			throw new InterpreterException(wrongArgumentsTypeMessage(call.getIdentifier()));
 		queueNewTask(taskToDo.newTask(args, graphicExecutor));
 	}
 

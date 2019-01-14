@@ -7,7 +7,10 @@ import javafx.geometry.VPos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 public class ScriptViewController implements Initializable {
@@ -24,11 +27,13 @@ public class ScriptViewController implements Initializable {
 
 	private ResizableCanvas drawerCanvas;
 	private ResizableCanvas backgroundCanvas;
+	private Map<String, Color> definedColours;
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		createCanvas();
 		drawerCanvas.setOnMouseMoved(event -> mousePositionField.setText(String.format("(%d,%d)", (int) event.getX(), (int) event.getY())));
+		definedColours = new HashMap<>();
 	}
 
 	public void setCloseRequestHandler() {

@@ -1,21 +1,44 @@
 package execution.controller;
 
 import execution.dispatching.GraphicExecutor;
+import javafx.application.Platform;
+import javafx.geometry.Point2D;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+import java.util.Map;
 
 public class GraphicExecutionController implements GraphicExecutor {
 
 	private GraphicsContext drawerContext;
 	private GraphicsContext backgroundContext;
+	private Point2D directionVersor;
+	private Point2D currentPosition;
+	private int currentAngle;
+	private boolean isDrawerDown;
+	private Map<String, Color> definedColours;
 
-	public GraphicExecutionController(GraphicsContext drawerContext, GraphicsContext backgroundContext) {
+	public GraphicExecutionController(GraphicsContext drawerContext, GraphicsContext backgroundContext,
+									  Map<String, Color> definedColours) {
 		this.drawerContext = drawerContext;
 		this.backgroundContext = backgroundContext;
+		this.definedColours = definedColours;
+		restartDirections();
+	}
+
+	private void restartDirections() {
+		Canvas canvas = drawerContext.getCanvas();
+		directionVersor = new Point2D(0, -1);
+		currentPosition = new Point2D(canvas.getWidth() / 2, canvas.getHeight() / 2);
+		currentAngle = 0;
+		isDrawerDown = true;
 	}
 
 	@Override
 	public void drawAlong(int pathDirection) {
-
+		Point2D translation = directionVersor.multiply(pathDirection);
+		Point2D endPoint = currentPosition.add(translation);
 	}
 
 	@Override
@@ -30,32 +53,54 @@ public class GraphicExecutionController implements GraphicExecutor {
 
 	@Override
 	public void drawerUp() {
-
+		isDrawerDown = false;
 	}
 
 	@Override
 	public void drawerDown() {
-
+		isDrawerDown = true;
 	}
 
 	@Override
 	public void setStroke(String colourName) {
-
+		Platform.runLater(() -> {
+			Color color = definedColours.get(colourName);
+			if (color == null)
+				print("Nie zdefiniowano koloru o nazwie \"" + colourName + "\"");
+			else
+				backgroundContext.setStroke(color);
+		});
 	}
 
 	@Override
 	public void setStroke(int r, int g, int b) {
-
+		Platform.runLater(() -> {
+			if (r > 255 || g > 255 || b > 255)
+				print("Wartości składowych RGB nie mogą przekraczać 255");
+			else
+				backgroundContext.setStroke(Color.rgb(r, g, b));
+		});
 	}
 
 	@Override
 	public void setFill(String colourName) {
-
+		Platform.runLater(() -> {
+			Color color = definedColours.get(colourName);
+			if (color == null)
+				print("Nie zdefiniowano koloru o nazwie \"" + colourName + "\"");
+			else
+				backgroundContext.setFill(color);
+		});
 	}
 
 	@Override
 	public void setFill(int r, int g, int b) {
-
+		Platform.runLater(() -> {
+			if (r > 255 || g > 255 || b > 255)
+				print("Wartości składowych RGB nie mogą przekraczać 255");
+			else
+				backgroundContext.setFill(Color.rgb(r, g, b));
+		});
 	}
 
 	@Override
