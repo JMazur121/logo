@@ -5,6 +5,7 @@ import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.ColorPicker;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import java.util.Map;
@@ -19,11 +20,16 @@ public class GraphicExecutionController implements GraphicExecutor {
 	private boolean isDrawerDown;
 	private Map<String, Color> definedColours;
 
+	private ColorPicker drawerColorPicker;
+	private ColorPicker fillColorPicker;
+
 	public GraphicExecutionController(GraphicsContext drawerContext, GraphicsContext backgroundContext,
-									  Map<String, Color> definedColours) {
+									  Map<String, Color> definedColours, ColorPicker drawerColorPicker, ColorPicker fillColorPicker) {
 		this.drawerContext = drawerContext;
 		this.backgroundContext = backgroundContext;
 		this.definedColours = definedColours;
+		this.drawerColorPicker = drawerColorPicker;
+		this.fillColorPicker = fillColorPicker;
 		restartDirections();
 	}
 
@@ -67,8 +73,10 @@ public class GraphicExecutionController implements GraphicExecutor {
 			Color color = definedColours.get(colourName);
 			if (color == null)
 				print("Nie zdefiniowano koloru o nazwie \"" + colourName + "\"");
-			else
+			else {
 				backgroundContext.setStroke(color);
+				drawerColorPicker.setValue(color);
+			}
 		});
 	}
 
@@ -77,8 +85,11 @@ public class GraphicExecutionController implements GraphicExecutor {
 		Platform.runLater(() -> {
 			if (r > 255 || g > 255 || b > 255)
 				print("Wartości składowych RGB nie mogą przekraczać 255");
-			else
-				backgroundContext.setStroke(Color.rgb(r, g, b));
+			else {
+				Color color = Color.rgb(r, g, b);
+				backgroundContext.setStroke(color);
+				drawerColorPicker.setValue(color);
+			}
 		});
 	}
 
@@ -88,8 +99,10 @@ public class GraphicExecutionController implements GraphicExecutor {
 			Color color = definedColours.get(colourName);
 			if (color == null)
 				print("Nie zdefiniowano koloru o nazwie \"" + colourName + "\"");
-			else
+			else {
 				backgroundContext.setFill(color);
+				fillColorPicker.setValue(color);
+			}
 		});
 	}
 
@@ -98,8 +111,11 @@ public class GraphicExecutionController implements GraphicExecutor {
 		Platform.runLater(() -> {
 			if (r > 255 || g > 255 || b > 255)
 				print("Wartości składowych RGB nie mogą przekraczać 255");
-			else
-				backgroundContext.setFill(Color.rgb(r, g, b));
+			else {
+				Color color = Color.rgb(r, g, b);
+				backgroundContext.setFill(color);
+				fillColorPicker.setValue(color);
+			}
 		});
 	}
 

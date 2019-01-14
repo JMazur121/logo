@@ -34,6 +34,8 @@ public class ScriptViewController implements Initializable {
 		createCanvas();
 		drawerCanvas.setOnMouseMoved(event -> mousePositionField.setText(String.format("(%d,%d)", (int) event.getX(), (int) event.getY())));
 		definedColours = new HashMap<>();
+		drawerColourPicker.setValue(Color.BLACK);
+		fillColourPicker.setValue(Color.WHITE);
 	}
 
 	public void setCloseRequestHandler() {

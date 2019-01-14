@@ -35,6 +35,8 @@ public class ConsoleViewController implements Initializable {
 	public void initialize(URL location, ResourceBundle resources) {
 		createCanvas();
 		drawerCanvas.setOnMouseMoved(event -> mousePositionField.setText(String.format("(%d,%d)", (int) event.getX(), (int) event.getY())));
+		drawerColourPicker.setOnAction(event -> backgroundCanvas.getGraphicsContext2D().setStroke(drawerColourPicker.getValue()));
+		fillColourPicker.setOnAction(event -> backgroundCanvas.getGraphicsContext2D().setFill(fillColourPicker.getValue()));
 	}
 
 	public void setCloseRequestHandler() {
