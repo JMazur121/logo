@@ -1,30 +1,27 @@
 package execution.controller;
 
-import javafx.event.EventHandler;
 import javafx.fxml.Initializable;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
-import javafx.stage.WindowEvent;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class ConsoleViewController implements Initializable {
+public class ScriptViewController implements Initializable {
 
+	public Button openFileButton;
 	public TextField drawerPositionField;
 	public TextField mousePositionField;
 	public ComboBox latencyComboBox;
 	public ColorPicker drawerColourPicker;
 	public ColorPicker fillColourPicker;
 	public Button endButton;
-	public Button submitButton;
 	public TextField responseField;
-	public TextArea codeTextArea;
 	public GridPane centerPane;
-
-
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+
 	}
 
 	public void setCloseRequestHandler() {
@@ -32,14 +29,14 @@ public class ConsoleViewController implements Initializable {
 			Alert alert = new Alert(Alert.AlertType.INFORMATION);
 			alert.setTitle("Zakończenie");
 			alert.setHeaderText(null);
-			alert.setContentText("Opuszczasz tryb pracy z konsolą. Poczekaj na zamknięcie okna");
+			alert.setContentText("Opuszczasz tryb pracy ze skryptem. Poczekaj na zamknięcie okna");
 			alert.showAndWait();
-			closeConsole();
+			closeScriptView();
 		});
 	}
 
-	private void closeConsole() {
+	private void closeScriptView() {
 
 	}
-
+	
 }
