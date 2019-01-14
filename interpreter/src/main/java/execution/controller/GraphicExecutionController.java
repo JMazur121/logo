@@ -20,20 +20,18 @@ public class GraphicExecutionController implements GraphicExecutor {
 	private boolean isDrawerDown;
 	private Map<String, Color> definedColours;
 
-	private ColorPicker drawerColorPicker;
-	private ColorPicker fillColorPicker;
+	private GenericController controller;
 
 	public GraphicExecutionController(GraphicsContext drawerContext, GraphicsContext backgroundContext,
-									  Map<String, Color> definedColours, ColorPicker drawerColorPicker, ColorPicker fillColorPicker) {
+									  Map<String, Color> definedColours, GenericController controller) {
 		this.drawerContext = drawerContext;
 		this.backgroundContext = backgroundContext;
 		this.definedColours = definedColours;
-		this.drawerColorPicker = drawerColorPicker;
-		this.fillColorPicker = fillColorPicker;
+		this.controller = controller;
 		restartDirections();
 	}
 
-	private void restartDirections() {
+	public void restartDirections() {
 		Canvas canvas = drawerContext.getCanvas();
 		directionVersor = new Point2D(0, -1);
 		currentPosition = new Point2D(canvas.getWidth() / 2, canvas.getHeight() / 2);
@@ -45,11 +43,12 @@ public class GraphicExecutionController implements GraphicExecutor {
 	public void drawAlong(int pathDirection) {
 		Point2D translation = directionVersor.multiply(pathDirection);
 		Point2D endPoint = currentPosition.add(translation);
+
 	}
 
 	@Override
 	public void clear() {
-
+		restartDirections();
 	}
 
 	@Override
@@ -69,59 +68,50 @@ public class GraphicExecutionController implements GraphicExecutor {
 
 	@Override
 	public void setStroke(String colourName) {
-		Platform.runLater(() -> {
-			Color color = definedColours.get(colourName);
-			if (color == null)
-				print("Nie zdefiniowano koloru o nazwie \"" + colourName + "\"");
-			else {
-				backgroundContext.setStroke(color);
-				drawerColorPicker.setValue(color);
-			}
-		});
+		Color color = definedColours.get(colourName);
+		if (color == null)
+			print("Nie zdefiniowano koloru o nazwie \"" + colourName + "\"");
+		else {
+			backgroundContext.setStroke(color);
+			controller.setStrokeColor(color);
+		}
 	}
 
 	@Override
 	public void setStroke(int r, int g, int b) {
-		Platform.runLater(() -> {
-			if (r > 255 || g > 255 || b > 255)
-				print("Wartości składowych RGB nie mogą przekraczać 255");
-			else {
-				Color color = Color.rgb(r, g, b);
-				backgroundContext.setStroke(color);
-				drawerColorPicker.setValue(color);
-			}
-		});
+		if (r > 255 || g > 255 || b > 255)
+			print("Wartości składowych RGB nie mogą przekraczać 255");
+		else {
+			Color color = Color.rgb(r, g, b);
+			backgroundContext.setStroke(color);
+			controller.setStrokeColor(color);
+		}
 	}
 
 	@Override
 	public void setFill(String colourName) {
-		Platform.runLater(() -> {
-			Color color = definedColours.get(colourName);
-			if (color == null)
-				print("Nie zdefiniowano koloru o nazwie \"" + colourName + "\"");
-			else {
-				backgroundContext.setFill(color);
-				fillColorPicker.setValue(color);
-			}
-		});
+		Color color = definedColours.get(colourName);
+		if (color == null)
+			print("Nie zdefiniowano koloru o nazwie \"" + colourName + "\"");
+		else {
+			backgroundContext.setFill(color);
+			controller.setFillColor(color);
+		}
 	}
 
 	@Override
 	public void setFill(int r, int g, int b) {
-		Platform.runLater(() -> {
-			if (r > 255 || g > 255 || b > 255)
-				print("Wartości składowych RGB nie mogą przekraczać 255");
-			else {
-				Color color = Color.rgb(r, g, b);
-				backgroundContext.setFill(color);
-				fillColorPicker.setValue(color);
-			}
-		});
+		if (r > 255 || g > 255 || b > 255)
+			print("Wartości składowych RGB nie mogą przekraczać 255");
+		else {
+			Color color = Color.rgb(r, g, b);
+			backgroundContext.setFill(color);
+			controller.setFillColor(color);
+		}
 	}
 
 	@Override
 	public void defineColour(String name, int r, int g, int b) {
-
 	}
 
 	@Override
@@ -136,12 +126,16 @@ public class GraphicExecutionController implements GraphicExecutor {
 
 	@Override
 	public void strokeCircle(int radius) {
-
+		double x = currentPosition.getX() - radius;
+		double y = currentPosition.getY() - radius;
+		backgroundContext.strokeOval(x, y, radius, radius);
 	}
 
 	@Override
 	public void fillCircle(int radius) {
-
+		double x = currentPosition.getX() - radius;
+		double y = currentPosition.getY() - radius;
+		backgroundContext.fillOval(x, y ,radius, radius);
 	}
 
 	@Override
@@ -150,13 +144,11 @@ public class GraphicExecutionController implements GraphicExecutor {
 	}
 
 	@Override
-	public void nop() {
-
-	}
+	public void nop() {}
 
 	@Override
 	public void print(String message) {
-
+		controller.showMessage(message);
 	}
 
 }
