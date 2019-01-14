@@ -9,6 +9,7 @@ import javafx.scene.control.ColorPicker;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import javafx.scene.transform.Rotate;
 import lombok.Setter;
 import java.util.Map;
 
@@ -57,6 +58,18 @@ public class GraphicExecutionController implements GraphicExecutor {
 		return new Point2D(currentPosition.getX() - imageWidth / 2, currentPosition.getY() - imageHeight / 2);
 	}
 
+	private void rotate(double angle, double px, double py) {
+		Rotate r = new Rotate(angle, px, py);
+		drawerContext.setTransform(r.getMxx(), r.getMyx(), r.getMxy(), r.getMyy(), r.getTx(), r.getTy());
+	}
+
+	private void drawRotatedImage(double angle, double tlpx, double tlpy) {
+		drawerContext.save();
+		rotate(angle, currentPosition.getX(), currentPosition.getY());
+		drawerContext.drawImage(drawerImage, tlpx, tlpy);
+		drawerContext.restore();
+	}
+
 	@Override
 	public void drawAlong(int pathDirection) {
 		Point2D translation = directionVersor.multiply(pathDirection);
@@ -75,7 +88,7 @@ public class GraphicExecutionController implements GraphicExecutor {
 		backgroundContext.strokeRect(0, 0, backgroundCanvas.getWidth(), backgroundCanvas.getHeight());
 		Point2D corner = getLeftTopCornerOfDrawer();
 		drawerContext.clearRect(0, 0, drawerCanvas.getWidth(), drawerCanvas.getHeight());
-		drawerContext.drawImage(drawerImage, corner.getX(), corner.getY());
+		drawRotatedImage(0, corner.getX(), corner.getY());
 		controller.setDrawerPosition(currentPosition.getX(), currentPosition.getY());
 	}
 
@@ -173,7 +186,7 @@ public class GraphicExecutionController implements GraphicExecutor {
 		drawerContext.clearRect(0, 0, drawerCanvas.getWidth(), drawerCanvas.getHeight());
 		// TODO: 2019-01-15 Dopisac rysowanie, które też może wymagać tego obrotu
 		Point2D translation = new Point2D(xTranslation, yTranslation);
-		
+
 	}
 
 	@Override
