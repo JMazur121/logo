@@ -1,6 +1,9 @@
 package execution.controller;
 
+import execution.utils.ResizableCanvas;
 import javafx.fxml.Initializable;
+import javafx.geometry.HPos;
+import javafx.geometry.VPos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
@@ -21,7 +24,6 @@ public class ScriptViewController implements Initializable {
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-
 	}
 
 	public void setCloseRequestHandler() {
