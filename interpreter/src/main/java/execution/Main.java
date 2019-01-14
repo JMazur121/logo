@@ -14,9 +14,9 @@ public class Main extends Application {
 
 	public static final String MAIN_VIEW_URL = "/views/main.fxml";
 	public static final String WINDOW_TITLE = "Logo-interpreter";
-	public static final String PICTURE_URL = "gallardo.png";
-	public static final int PICTURE_WIDTH = 16;
-	public static final int PICTURE_HEIGHT = 30;
+	public static final String PICTURE_URL = "f1.png";
+	public static final int PICTURE_WIDTH = 20;
+	public static final int PICTURE_HEIGHT = 50;
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {

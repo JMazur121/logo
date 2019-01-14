@@ -6,8 +6,10 @@ import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ColorPicker;
+import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import lombok.Setter;
 import java.util.Map;
 
 public class GraphicExecutionController implements GraphicExecutor {
@@ -21,6 +23,9 @@ public class GraphicExecutionController implements GraphicExecutor {
 	private Map<String, Color> definedColours;
 
 	private GenericController controller;
+	private Image drawerImage;
+	private double imageWidth;
+	private double imageHeight;
 
 	public GraphicExecutionController(GraphicsContext drawerContext, GraphicsContext backgroundContext,
 									  Map<String, Color> definedColours, GenericController controller) {
@@ -31,12 +36,22 @@ public class GraphicExecutionController implements GraphicExecutor {
 		restartDirections();
 	}
 
+	public void setImage(Image image) {
+		drawerImage = image;
+		imageWidth = image.getWidth();
+		imageHeight = image.getHeight();
+	}
+
 	public void restartDirections() {
 		Canvas canvas = drawerContext.getCanvas();
 		directionVersor = new Point2D(0, -1);
 		currentPosition = new Point2D(canvas.getWidth() / 2, canvas.getHeight() / 2);
 		currentAngle = 0;
 		isDrawerDown = true;
+	}
+
+	private Point2D getLeftTopCornerOfDrawer() {
+		return new Point2D(currentPosition.getX() - imageWidth / 2, currentPosition.getY() - imageHeight / 2);
 	}
 
 	@Override
@@ -53,6 +68,12 @@ public class GraphicExecutionController implements GraphicExecutor {
 		backgroundContext.setFill(Color.WHITE);
 		controller.setStrokeColor(Color.BLACK);
 		controller.setFillColor(Color.WHITE);
+		Canvas canvas = backgroundContext.getCanvas();
+		backgroundContext.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+		backgroundContext.strokeRect(0, 0, canvas.getWidth(), canvas.getHeight());
+//		Point2D corner = getLeftTopCornerOfDrawer();
+		drawerContext.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+//		drawerContext.drawImage(drawerImage, corner.getX(), corner.getY());
 	}
 
 	@Override
@@ -139,7 +160,7 @@ public class GraphicExecutionController implements GraphicExecutor {
 	public void fillCircle(int radius) {
 		double x = currentPosition.getX() - radius;
 		double y = currentPosition.getY() - radius;
-		backgroundContext.fillOval(x, y ,radius, radius);
+		backgroundContext.fillOval(x, y, radius, radius);
 	}
 
 	@Override
@@ -148,7 +169,8 @@ public class GraphicExecutionController implements GraphicExecutor {
 	}
 
 	@Override
-	public void nop() {}
+	public void nop() {
+	}
 
 	@Override
 	public void print(String message) {

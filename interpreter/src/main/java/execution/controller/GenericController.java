@@ -10,6 +10,7 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
+import lombok.Getter;
 import lombok.Setter;
 import java.net.URL;
 import java.util.HashMap;
@@ -27,7 +28,6 @@ public abstract class GenericController implements Initializable {
 	public TextField responseField;
 	public GridPane centerPane;
 
-	@Setter
 	protected Image drawerImage;
 	protected ResizableCanvas drawerCanvas;
 	protected ResizableCanvas backgroundCanvas;
@@ -61,13 +61,18 @@ public abstract class GenericController implements Initializable {
 		fillColourPicker.setValue(color);
 	}
 
+	public void setDrawerImage(Image image) {
+		drawerImage = image;
+		executionController.setImage(image);
+	}
+
 	public void clearCanvas() {
 		double w = backgroundCanvas.getWidth();
 		double h = backgroundCanvas.getHeight();
 		GraphicsContext context = backgroundCanvas.getGraphicsContext2D();
 		context.fillRect(0, 0, backgroundCanvas.getWidth(), backgroundCanvas.getHeight());
 		setDrawerPosition(w / 2, h / 2);
-		context.drawImage(drawerImage, w / 2 - drawerImage.getWidth() / 2, h / 2 - drawerImage.getHeight());
+		drawerCanvas.getGraphicsContext2D().drawImage(drawerImage, w / 2 - drawerImage.getWidth() / 2, h / 2 - drawerImage.getHeight() / 2);
 	}
 
 	public void setDrawerPosition(double x, double y) {
