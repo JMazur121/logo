@@ -22,8 +22,13 @@ public class ScriptViewController implements Initializable {
 	public TextField responseField;
 	public GridPane centerPane;
 
+	private ResizableCanvas drawerCanvas;
+	private ResizableCanvas backgroundCanvas;
+
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		createCanvas();
+		drawerCanvas.setOnMouseMoved(event -> mousePositionField.setText(String.format("(%d,%d)", (int) event.getX(), (int) event.getY())));
 	}
 
 	public void setCloseRequestHandler() {
@@ -35,6 +40,24 @@ public class ScriptViewController implements Initializable {
 			alert.showAndWait();
 			closeScriptView();
 		});
+	}
+
+	private void createCanvas() {
+		drawerCanvas = new ResizableCanvas();
+		backgroundCanvas = new ResizableCanvas();
+		centerPane.getColumnConstraints().get(0).setHalignment(HPos.CENTER);
+		centerPane.getRowConstraints().get(0).setValignment(VPos.CENTER);
+		centerPane.add(drawerCanvas, 0, 0);
+		centerPane.add(backgroundCanvas, 0, 0);
+		drawerCanvas.widthProperty().bind(
+				centerPane.widthProperty());
+		drawerCanvas.heightProperty().bind(
+				centerPane.heightProperty().subtract(5));
+		backgroundCanvas.widthProperty().bind(
+				centerPane.widthProperty());
+		backgroundCanvas.heightProperty().bind(
+				centerPane.heightProperty().subtract(5));
+		drawerCanvas.toFront();
 	}
 
 	private void closeScriptView() {
