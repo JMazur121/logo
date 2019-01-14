@@ -3,10 +3,14 @@ package execution.controller;
 import execution.utils.ResizableCanvas;
 import javafx.fxml.Initializable;
 import javafx.geometry.HPos;
+import javafx.geometry.Point2D;
 import javafx.geometry.VPos;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
+import lombok.Setter;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,6 +27,8 @@ public abstract class GenericController implements Initializable {
 	public TextField responseField;
 	public GridPane centerPane;
 
+	@Setter
+	protected Image drawerImage;
 	protected ResizableCanvas drawerCanvas;
 	protected ResizableCanvas backgroundCanvas;
 	protected Map<String, Color> definedColours;
@@ -32,23 +38,40 @@ public abstract class GenericController implements Initializable {
 	public void initialize(URL location, ResourceBundle resources) {
 		createCanvas();
 		executionController = new GraphicExecutionController(drawerCanvas.getGraphicsContext2D(), backgroundCanvas.getGraphicsContext2D(),
-				definedColours,this);
+				definedColours, this);
 		drawerCanvas.setOnMouseMoved(event -> mousePositionField.setText(String.format("(%d,%d)", (int) event.getX(), (int) event.getY())));
 		definedColours = new HashMap<>();
 		drawerColourPicker.setValue(Color.BLACK);
 		fillColourPicker.setValue(Color.WHITE);
 		drawerColourPicker.setOnAction(event -> backgroundCanvas.getGraphicsContext2D().setStroke(drawerColourPicker.getValue()));
 		fillColourPicker.setOnAction(event -> backgroundCanvas.getGraphicsContext2D().setFill(fillColourPicker.getValue()));
+		drawerCanvas.widthProperty().addListener((observable, oldValue, newValue) -> executionController.clear());
+		drawerCanvas.heightProperty().addListener((observable, oldValue, newValue) -> executionController.clear());
 	}
 
 	public void showMessage(String message) {
 		responseField.setText(message);
 	}
+
 	public void setStrokeColor(Color color) {
 		drawerColourPicker.setValue(color);
 	}
+
 	public void setFillColor(Color color) {
 		fillColourPicker.setValue(color);
+	}
+
+	public void clearCanvas() {
+		double w = backgroundCanvas.getWidth();
+		double h = backgroundCanvas.getHeight();
+		GraphicsContext context = backgroundCanvas.getGraphicsContext2D();
+		context.fillRect(0, 0, backgroundCanvas.getWidth(), backgroundCanvas.getHeight());
+		setDrawerPosition(w / 2, h / 2);
+		context.drawImage(drawerImage, w / 2 - drawerImage.getWidth() / 2, h / 2 - drawerImage.getHeight());
+	}
+
+	public void setDrawerPosition(double x, double y) {
+		drawerPositionField.setText(String.format("(%d,%d)", (int) x, (int) y));
 	}
 
 	private void createCanvas() {
@@ -67,6 +90,8 @@ public abstract class GenericController implements Initializable {
 		backgroundCanvas.heightProperty().bind(
 				centerPane.heightProperty().subtract(5));
 		drawerCanvas.toFront();
+		backgroundCanvas.getGraphicsContext2D().setStroke(Color.BLACK);
+		backgroundCanvas.getGraphicsContext2D().setFill(Color.WHITE);
 	}
 
 	public abstract void setCloseRequestHandler();

@@ -49,6 +49,10 @@ public class GraphicExecutionController implements GraphicExecutor {
 	@Override
 	public void clear() {
 		restartDirections();
+		backgroundContext.setStroke(Color.BLACK);
+		backgroundContext.setFill(Color.WHITE);
+		controller.setStrokeColor(Color.BLACK);
+		controller.setFillColor(Color.WHITE);
 	}
 
 	@Override

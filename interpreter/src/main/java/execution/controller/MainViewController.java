@@ -7,8 +7,10 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.image.Image;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import lombok.Setter;
 import java.io.IOException;
 
 public class MainViewController {
@@ -18,6 +20,9 @@ public class MainViewController {
 	public Button exitButton;
 	public static final String CONSOLE_VIEW_URL = "/views/console.fxml";
 	public static final String SCRIPT_VIEW_URL = "/views/script.fxml";
+
+	@Setter
+	private Image drawerImage;
 
 	public void exitPressed(ActionEvent event) {
 		System.exit(0);
@@ -35,6 +40,8 @@ public class MainViewController {
 			stage.initOwner(((Node) event.getSource()).getScene().getWindow());
 			stage.show();
 			controller.setCloseRequestHandler();
+			controller.setDrawerImage(drawerImage);
+			controller.clearCanvas();
 		} catch (IOException e) {
 			showOpeningErrorDialog();
 		}
@@ -52,6 +59,8 @@ public class MainViewController {
 			stage.initOwner(((Node) event.getSource()).getScene().getWindow());
 			stage.show();
 			viewController.setCloseRequestHandler();
+			viewController.setDrawerImage(drawerImage);
+			viewController.clearCanvas();
 		} catch (IOException e) {
 			showOpeningErrorDialog();
 		}
