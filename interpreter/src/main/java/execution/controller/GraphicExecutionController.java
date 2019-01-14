@@ -26,6 +26,8 @@ public class GraphicExecutionController implements GraphicExecutor {
 	private Image drawerImage;
 	private double imageWidth;
 	private double imageHeight;
+	private Canvas drawerCanvas;
+	private Canvas backgroundCanvas;
 
 	public GraphicExecutionController(GraphicsContext drawerContext, GraphicsContext backgroundContext,
 									  Map<String, Color> definedColours, GenericController controller) {
@@ -33,6 +35,8 @@ public class GraphicExecutionController implements GraphicExecutor {
 		this.backgroundContext = backgroundContext;
 		this.definedColours = definedColours;
 		this.controller = controller;
+		drawerCanvas = drawerContext.getCanvas();
+		backgroundCanvas = backgroundContext.getCanvas();
 		restartDirections();
 	}
 
@@ -43,9 +47,8 @@ public class GraphicExecutionController implements GraphicExecutor {
 	}
 
 	public void restartDirections() {
-		Canvas canvas = drawerContext.getCanvas();
 		directionVersor = new Point2D(0, -1);
-		currentPosition = new Point2D(canvas.getWidth() / 2, canvas.getHeight() / 2);
+		currentPosition = new Point2D(drawerCanvas.getWidth() / 2, drawerCanvas.getHeight() / 2);
 		currentAngle = 0;
 		isDrawerDown = true;
 	}
@@ -58,7 +61,7 @@ public class GraphicExecutionController implements GraphicExecutor {
 	public void drawAlong(int pathDirection) {
 		Point2D translation = directionVersor.multiply(pathDirection);
 		Point2D endPoint = currentPosition.add(translation);
-
+		// TODO: 2019-01-15 Zrobić rzeczywiste rysowanie i aktualizowanie pozycji.
 	}
 
 	@Override
@@ -68,18 +71,19 @@ public class GraphicExecutionController implements GraphicExecutor {
 		backgroundContext.setFill(Color.WHITE);
 		controller.setStrokeColor(Color.BLACK);
 		controller.setFillColor(Color.WHITE);
-		Canvas canvas = backgroundContext.getCanvas();
-		backgroundContext.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-		backgroundContext.strokeRect(0, 0, canvas.getWidth(), canvas.getHeight());
+		backgroundContext.clearRect(0, 0, backgroundCanvas.getWidth(), backgroundCanvas.getHeight());
+		backgroundContext.strokeRect(0, 0, backgroundCanvas.getWidth(), backgroundCanvas.getHeight());
 		Point2D corner = getLeftTopCornerOfDrawer();
-		drawerContext.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+		drawerContext.clearRect(0, 0, drawerCanvas.getWidth(), drawerCanvas.getHeight());
 		drawerContext.drawImage(drawerImage, corner.getX(), corner.getY());
 		controller.setDrawerPosition(currentPosition.getX(), currentPosition.getY());
 	}
 
 	@Override
 	public void rotate(int angle) {
-
+		drawerContext.clearRect(0, 0, drawerCanvas.getWidth(), drawerCanvas.getHeight());
+		currentAngle += angle;
+		// TODO: 2019-01-15 Dodać to rysowanie obróconych obrazków 
 	}
 
 	@Override
@@ -142,7 +146,7 @@ public class GraphicExecutionController implements GraphicExecutor {
 
 	@Override
 	public void fill() {
-
+		// TODO: 2019-01-15 Trzeba sie zastanowic czy damy rade to zaimplementować
 	}
 
 	@Override

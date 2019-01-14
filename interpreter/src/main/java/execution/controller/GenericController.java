@@ -10,8 +10,6 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
-import lombok.Getter;
-import lombok.Setter;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
