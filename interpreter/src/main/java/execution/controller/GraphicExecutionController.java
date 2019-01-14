@@ -71,9 +71,10 @@ public class GraphicExecutionController implements GraphicExecutor {
 		Canvas canvas = backgroundContext.getCanvas();
 		backgroundContext.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
 		backgroundContext.strokeRect(0, 0, canvas.getWidth(), canvas.getHeight());
-//		Point2D corner = getLeftTopCornerOfDrawer();
+		Point2D corner = getLeftTopCornerOfDrawer();
 		drawerContext.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-//		drawerContext.drawImage(drawerImage, corner.getX(), corner.getY());
+		drawerContext.drawImage(drawerImage, corner.getX(), corner.getY());
+		controller.setDrawerPosition(currentPosition.getX(), currentPosition.getY());
 	}
 
 	@Override
