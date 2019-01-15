@@ -77,9 +77,15 @@ public class GraphicExecutionController implements GraphicExecutor {
 
 	@Override
 	public void drawAlong(int pathDirection) {
-		Point2D translation = directionVersor.multiply(pathDirection);
-		Point2D endPoint = currentPosition.add(translation);
-		// TODO: 2019-01-15 Zrobić rzeczywiste rysowanie i aktualizowanie pozycji.
+		if (isDrawerDown) {
+			Point2D translation = directionVersor.multiply(pathDirection);
+			Point2D begin = currentPosition;
+			currentPosition = currentPosition.add(translation);
+			drawerContext.clearRect(0, 0, drawerCanvas.getWidth(), drawerCanvas.getHeight());
+			drawRotatedImage();
+			backgroundContext.strokeLine(begin.getX(), begin.getY(), currentPosition.getX(), currentPosition.getY());
+			setCurrentPositionInController();
+		}
 	}
 
 	@Override
@@ -201,7 +207,8 @@ public class GraphicExecutionController implements GraphicExecutor {
 	}
 
 	@Override
-	public void nop() {}
+	public void nop() {
+	}
 
 	@Override
 	public void print(String message) {
