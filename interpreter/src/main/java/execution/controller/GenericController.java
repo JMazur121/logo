@@ -1,5 +1,6 @@
 package execution.controller;
 
+import execution.instructions.ParserExecutor;
 import execution.utils.ResizableCanvas;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -9,17 +10,20 @@ import javafx.fxml.Initializable;
 import javafx.geometry.HPos;
 import javafx.geometry.Point2D;
 import javafx.geometry.VPos;
+import javafx.scene.Node;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 public abstract class GenericController implements Initializable {
@@ -40,8 +44,11 @@ public abstract class GenericController implements Initializable {
 	protected Map<String, Color> definedColours;
 	protected GraphicExecutionController executionController;
 
-	private AtomicLong latency;
-	private AtomicBoolean isWorkToDo;
+	protected AtomicLong latency;
+	protected AtomicBoolean isWorkToDo;
+	protected BlockingQueue<Runnable> tasksQueue;
+	protected ParserExecutor parserExecutor;
+	protected GraphicalTaskConsumer consumer;
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
@@ -58,6 +65,9 @@ public abstract class GenericController implements Initializable {
 		drawerCanvas.heightProperty().addListener((observable, oldValue, newValue) -> executionController.clear());
 		setupLatencyBox();
 		isWorkToDo = new AtomicBoolean(true);
+		tasksQueue = new LinkedBlockingQueue<>();
+		parserExecutor = new ParserExecutor(executionController, tasksQueue, isWorkToDo);
+		consumer = new GraphicalTaskConsumer(latency, isWorkToDo, tasksQueue);
 	}
 
 	public void showMessage(String message) {
@@ -88,6 +98,12 @@ public abstract class GenericController implements Initializable {
 
 	public void setDrawerPosition(double x, double y) {
 		drawerPositionField.setText(String.format("(%d,%d)", (int) x, (int) y));
+	}
+
+	public void endPressed(ActionEvent event) {
+		close();
+		Stage dialog = (Stage) ((Node) event.getTarget()).getScene().getWindow();
+		dialog.close();
 	}
 
 	private void setupLatencyBox() {

@@ -1,5 +1,6 @@
 package execution.controller;
 
+import javafx.event.ActionEvent;
 import javafx.scene.control.*;
 
 public class ConsoleViewController extends GenericController {
@@ -20,7 +21,16 @@ public class ConsoleViewController extends GenericController {
 
 	@Override
 	public void close() {
-
+		indicator.setVisible(true);
+		isWorkToDo.set(false);
+		latency.set(0);
+		submitButton.setDisable(true);
+		latencyComboBox.setDisable(true);
+		endButton.setDisable(true);
+		parserExecutor.stop();
+		tasksQueue.offer(() -> {});
+		tasksQueue.offer(() -> {});
+		consumer.stop();
 	}
 
 }

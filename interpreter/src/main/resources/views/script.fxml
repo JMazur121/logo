@@ -44,7 +44,7 @@
                 <Label maxHeight="1.7976931348623157E308" text="Kolor wypełnienia" />
                 <ColorPicker fx:id="fillColourPicker" maxHeight="1.7976931348623157E308" />
             <Separator orientation="VERTICAL" prefHeight="200.0" />
-                <Button fx:id="endButton" maxHeight="1.7976931348623157E308" mnemonicParsing="false" prefHeight="28.0" prefWidth="120.0" text="Zatrzymaj" />
+                <Button fx:id="endButton" onAction="#endPressed" maxHeight="1.7976931348623157E308" mnemonicParsing="false" prefHeight="28.0" prefWidth="120.0" text="Zatrzymaj" />
             <ProgressIndicator fx:id="indicator" visible="false" />
             </children>
         </HBox>
