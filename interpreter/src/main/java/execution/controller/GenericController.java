@@ -18,13 +18,15 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 public abstract class GenericController implements Initializable {
 
 	public TextField drawerPositionField;
 	public TextField mousePositionField;
-	public ComboBox<Integer> latencyComboBox;
+	public ComboBox<Long> latencyComboBox;
 	public ColorPicker drawerColourPicker;
 	public ColorPicker fillColourPicker;
 	public Button endButton;
@@ -38,7 +40,8 @@ public abstract class GenericController implements Initializable {
 	protected Map<String, Color> definedColours;
 	protected GraphicExecutionController executionController;
 
-	private AtomicInteger latency;
+	private AtomicLong latency;
+	private AtomicBoolean isWorkToDo;
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
@@ -54,6 +57,7 @@ public abstract class GenericController implements Initializable {
 		drawerCanvas.widthProperty().addListener((observable, oldValue, newValue) -> executionController.clear());
 		drawerCanvas.heightProperty().addListener((observable, oldValue, newValue) -> executionController.clear());
 		setupLatencyBox();
+		isWorkToDo = new AtomicBoolean(true);
 	}
 
 	public void showMessage(String message) {
@@ -87,19 +91,19 @@ public abstract class GenericController implements Initializable {
 	}
 
 	private void setupLatencyBox() {
-		ObservableList<Integer> latencies =
+		ObservableList<Long> latencies =
 				FXCollections.observableArrayList(
-						0,
-						100,
-						200,
-						500,
-						1000
+						0L,
+						100L,
+						200L,
+						500L,
+						1000L
 				);
 		latencyComboBox.setItems(latencies);
-		latencyComboBox.setValue(0);
-		latency = new AtomicInteger(0);
+		latencyComboBox.setValue(0L);
+		latency = new AtomicLong(0L);
 		latencyComboBox.setOnAction(event -> {
-			Integer selected = latencyComboBox.getValue();
+			Long selected = latencyComboBox.getValue();
 			if (selected == null)
 				latencyComboBox.setValue(latency.get());
 			else
