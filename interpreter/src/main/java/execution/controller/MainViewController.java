@@ -39,7 +39,7 @@ public class MainViewController {
 			stage.initModality(Modality.WINDOW_MODAL);
 			stage.initOwner(((Node) event.getSource()).getScene().getWindow());
 			stage.show();
-			controller.setCloseRequestHandler();
+			controller.setSpecialHandlers();
 			controller.setDrawerImage(drawerImage);
 			controller.clearCanvas();
 		} catch (IOException e) {
@@ -58,7 +58,7 @@ public class MainViewController {
 			stage.initModality(Modality.WINDOW_MODAL);
 			stage.initOwner(((Node) event.getSource()).getScene().getWindow());
 			stage.show();
-			viewController.setCloseRequestHandler();
+			viewController.setSpecialHandlers();
 			viewController.setDrawerImage(drawerImage);
 			viewController.clearCanvas();
 		} catch (IOException e) {

@@ -6,7 +6,7 @@ public class ScriptViewController extends GenericController {
 
 	public Button openFileButton;
 
-	public void setCloseRequestHandler() {
+	public void setSpecialHandlers() {
 		endButton.getScene().getWindow().setOnCloseRequest(event -> {
 			Alert alert = new Alert(Alert.AlertType.INFORMATION);
 			alert.setTitle("Zakończenie");

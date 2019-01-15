@@ -116,8 +116,8 @@ public abstract class GenericController implements Initializable {
 						1000L
 				);
 		latencyComboBox.setItems(latencies);
-		latencyComboBox.setValue(0L);
-		latency = new AtomicLong(0L);
+		latencyComboBox.setValue(500L);
+		latency = new AtomicLong(500L);
 		latencyComboBox.setOnAction(event -> {
 			Long selected = latencyComboBox.getValue();
 			if (selected == null)
@@ -147,7 +147,7 @@ public abstract class GenericController implements Initializable {
 		backgroundCanvas.getGraphicsContext2D().setFill(Color.WHITE);
 	}
 
-	public abstract void setCloseRequestHandler();
+	public abstract void setSpecialHandlers();
 
 	public abstract void close();
 

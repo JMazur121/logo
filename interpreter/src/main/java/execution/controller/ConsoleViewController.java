@@ -1,14 +1,18 @@
 package execution.controller;
 
+import com.google.common.base.Strings;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.scene.control.*;
+import java.io.ByteArrayInputStream;
 
 public class ConsoleViewController extends GenericController {
 
 	public Button submitButton;
 	public TextArea codeTextArea;
 
-	public void setCloseRequestHandler() {
+	public void setSpecialHandlers() {
 		endButton.getScene().getWindow().setOnCloseRequest(event -> {
 			Alert alert = new Alert(Alert.AlertType.INFORMATION);
 			alert.setTitle("Zakończenie");
@@ -17,12 +21,20 @@ public class ConsoleViewController extends GenericController {
 			alert.showAndWait();
 			close();
 		});
+		submitButton.setDisable(true);
+
+		codeTextArea.textProperty().addListener((observable, oldValue, newValue) -> {
+			if (Strings.isNullOrEmpty(newValue))
+				submitButton.setDisable(true);
+			else
+				submitButton.setDisable(false);
+		});
 	}
 
 	@Override
 	public void close() {
-		indicator.setVisible(true);
 		isWorkToDo.set(false);
+		indicator.setVisible(true);
 		latency.set(0);
 		submitButton.setDisable(true);
 		latencyComboBox.setDisable(true);
@@ -31,6 +43,11 @@ public class ConsoleViewController extends GenericController {
 		tasksQueue.offer(() -> {});
 		tasksQueue.offer(() -> {});
 		consumer.stop();
+	}
+
+	public void submitPressed(ActionEvent event) {
+		ByteArrayInputStream inputStream = new ByteArrayInputStream(codeTextArea.getText().getBytes());
+		parserExecutor.nextStream(inputStream);
 	}
 
 }
