@@ -47,11 +47,15 @@ public class GraphicExecutionController implements GraphicExecutor {
 		imageHeight = image.getHeight();
 	}
 
-	public void restartDirections() {
+	private void restartDirections() {
 		directionVersor = new Point2D(0, -1);
 		currentPosition = new Point2D(drawerCanvas.getWidth() / 2, drawerCanvas.getHeight() / 2);
 		currentAngle = 0;
 		isDrawerDown = true;
+	}
+
+	private void setCurrentPositionInController() {
+		controller.setDrawerPosition(currentPosition.getX(), currentPosition.getY());
 	}
 
 	private Point2D getLeftTopCornerOfDrawer() {
@@ -63,10 +67,11 @@ public class GraphicExecutionController implements GraphicExecutor {
 		drawerContext.setTransform(r.getMxx(), r.getMyx(), r.getMxy(), r.getMyy(), r.getTx(), r.getTy());
 	}
 
-	private void drawRotatedImage(double angle, double tlpx, double tlpy) {
+	private void drawRotatedImage() {
 		drawerContext.save();
-		rotate(angle, currentPosition.getX(), currentPosition.getY());
-		drawerContext.drawImage(drawerImage, tlpx, tlpy);
+		rotate(currentAngle, currentPosition.getX(), currentPosition.getY());
+		Point2D corner = getLeftTopCornerOfDrawer();
+		drawerContext.drawImage(drawerImage, corner.getX(), corner.getY());
 		drawerContext.restore();
 	}
 
@@ -88,15 +93,15 @@ public class GraphicExecutionController implements GraphicExecutor {
 		backgroundContext.strokeRect(0, 0, backgroundCanvas.getWidth(), backgroundCanvas.getHeight());
 		Point2D corner = getLeftTopCornerOfDrawer();
 		drawerContext.clearRect(0, 0, drawerCanvas.getWidth(), drawerCanvas.getHeight());
-		drawRotatedImage(0, corner.getX(), corner.getY());
-		controller.setDrawerPosition(currentPosition.getX(), currentPosition.getY());
+		drawerContext.drawImage(drawerImage, corner.getX(), corner.getY());
+		setCurrentPositionInController();
 	}
 
 	@Override
 	public void rotate(int angle) {
 		drawerContext.clearRect(0, 0, drawerCanvas.getWidth(), drawerCanvas.getHeight());
 		currentAngle += angle;
-		// TODO: 2019-01-15 Dodać to rysowanie obróconych obrazków
+		drawRotatedImage();
 	}
 
 	@Override
@@ -155,6 +160,12 @@ public class GraphicExecutionController implements GraphicExecutor {
 
 	@Override
 	public void defineColour(String name, int r, int g, int b) {
+		if (r > 255 || g > 255 || b > 255)
+			print("Wartości składowych RGB nie mogą przekraczać 255");
+		else {
+			Color color = Color.rgb(r, g, b);
+			definedColours.put(name, color);
+		}
 	}
 
 	@Override
@@ -184,14 +195,13 @@ public class GraphicExecutionController implements GraphicExecutor {
 	@Override
 	public void moveDrawer(int xTranslation, int yTranslation) {
 		drawerContext.clearRect(0, 0, drawerCanvas.getWidth(), drawerCanvas.getHeight());
-		// TODO: 2019-01-15 Dopisac rysowanie, które też może wymagać tego obrotu
-		Point2D translation = new Point2D(xTranslation, yTranslation);
-
+		currentPosition = currentPosition.add(xTranslation, yTranslation);
+		drawRotatedImage();
+		setCurrentPositionInController();
 	}
 
 	@Override
-	public void nop() {
-	}
+	public void nop() {}
 
 	@Override
 	public void print(String message) {
