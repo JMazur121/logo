@@ -75,6 +75,22 @@ public class GraphicExecutionController implements GraphicExecutor {
 		drawerContext.restore();
 	}
 
+	private double toRadians(double angle) {
+		return angle * (Math.PI / 180);
+	}
+
+	private Point2D rot(double x, double y, double angle) {
+		double cosAngle = Math.cos(toRadians(angle));
+		double sinAngle = Math.sin(toRadians(angle));
+		double newX = x * cosAngle - y * sinAngle;
+		double newY = x * sinAngle + y * cosAngle;
+		return new Point2D(newX, newY);
+	}
+
+	private void updateDirectionVersor() {
+		directionVersor = rot(0, -1, currentAngle);
+	}
+
 	@Override
 	public void drawAlong(int pathDirection) {
 		if (isDrawerDown) {
@@ -108,6 +124,7 @@ public class GraphicExecutionController implements GraphicExecutor {
 		drawerContext.clearRect(0, 0, drawerCanvas.getWidth(), drawerCanvas.getHeight());
 		currentAngle += angle;
 		drawRotatedImage();
+		updateDirectionVersor();
 	}
 
 	@Override
