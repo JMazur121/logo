@@ -12,6 +12,8 @@ import javafx.scene.paint.Paint;
 import javafx.scene.transform.Rotate;
 import lombok.Setter;
 import java.util.Map;
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
 
 public class GraphicExecutionController implements GraphicExecutor {
 
@@ -80,8 +82,8 @@ public class GraphicExecutionController implements GraphicExecutor {
 	}
 
 	private Point2D rot(double x, double y, double angle) {
-		double cosAngle = Math.cos(toRadians(angle));
-		double sinAngle = Math.sin(toRadians(angle));
+		double cosAngle = cos(toRadians(angle));
+		double sinAngle = sin(toRadians(angle));
 		double newX = x * cosAngle - y * sinAngle;
 		double newY = x * sinAngle + y * cosAngle;
 		return new Point2D(newX, newY);
@@ -141,7 +143,7 @@ public class GraphicExecutionController implements GraphicExecutor {
 	public void setStroke(String colourName) {
 		Color color = definedColours.get(colourName);
 		if (color == null)
-			print("Nie zdefiniowano koloru o nazwie \"" + colourName + "\"");
+			print("There is no colour with name \"" + colourName + "\"");
 		else {
 			backgroundContext.setStroke(color);
 			controller.setStrokeColor(color);
@@ -151,7 +153,7 @@ public class GraphicExecutionController implements GraphicExecutor {
 	@Override
 	public void setStroke(int r, int g, int b) {
 		if (r > 255 || g > 255 || b > 255)
-			print("Wartości składowych RGB nie mogą przekraczać 255");
+			print("RGB values cannot exceed 255");
 		else {
 			Color color = Color.rgb(r, g, b);
 			backgroundContext.setStroke(color);
@@ -163,7 +165,7 @@ public class GraphicExecutionController implements GraphicExecutor {
 	public void setFill(String colourName) {
 		Color color = definedColours.get(colourName);
 		if (color == null)
-			print("Nie zdefiniowano koloru o nazwie \"" + colourName + "\"");
+			print("There is no colour with name \"" + colourName + "\"");
 		else {
 			backgroundContext.setFill(color);
 			controller.setFillColor(color);
@@ -173,7 +175,7 @@ public class GraphicExecutionController implements GraphicExecutor {
 	@Override
 	public void setFill(int r, int g, int b) {
 		if (r > 255 || g > 255 || b > 255)
-			print("Wartości składowych RGB nie mogą przekraczać 255");
+			print("RGB values cannot exceed 255");
 		else {
 			Color color = Color.rgb(r, g, b);
 			backgroundContext.setFill(color);
@@ -184,7 +186,7 @@ public class GraphicExecutionController implements GraphicExecutor {
 	@Override
 	public void defineColour(String name, int r, int g, int b) {
 		if (r > 255 || g > 255 || b > 255)
-			print("Wartości składowych RGB nie mogą przekraczać 255");
+			print("RGB values cannot exceed 255");
 		else {
 			Color color = Color.rgb(r, g, b);
 			definedColours.put(name, color);
@@ -196,9 +198,43 @@ public class GraphicExecutionController implements GraphicExecutor {
 		// TODO: 2019-01-15 Trzeba sie zastanowic czy damy rade to zaimplementować
 	}
 
-	@Override
-	public void fillPolygon(int numberOfPoints) {
+	private void calcPolygonPoints(double[] xPoints, double[] yPoints, int numberOfPoints, int sideLength) {
+		double internalAngle = 360 / numberOfPoints;
+		double radius = (sideLength / 2) * (1 / sin(toRadians(internalAngle / 2)));
+		double startingAngle = (numberOfPoints % 2 == 0) ? 45 : 90;
+		for (int i = 0; i < numberOfPoints; i++) {
+			double currentAngle = startingAngle + i * internalAngle;
+			xPoints[i] = (radius * cos(toRadians(currentAngle))) + currentPosition.getX();
+			yPoints[i] = -(radius * sin(toRadians(currentAngle))) + currentPosition.getY();
+		}
+	}
 
+	@Override
+	public void fillPolygon(int numberOfPoints, int sideLength) {
+		if (numberOfPoints < 3)
+			print("Too few point for polygon");
+		else if (sideLength < 0)
+			print("Side length for polygon must be positive");
+		else {
+			double[] xPoints = new double[numberOfPoints];
+			double[] yPoints = new double[numberOfPoints];
+			calcPolygonPoints(xPoints, yPoints, numberOfPoints, sideLength);
+			backgroundContext.fillPolygon(xPoints, yPoints, numberOfPoints);
+		}
+	}
+
+	@Override
+	public void strokePolygon(int numberOfPoints, int sideLength) {
+		if (numberOfPoints < 3)
+			print("Too few point for polygon");
+		else if (sideLength < 0)
+			print("Side length for polygon must be positive");
+		else {
+			double[] xPoints = new double[numberOfPoints];
+			double[] yPoints = new double[numberOfPoints];
+			calcPolygonPoints(xPoints, yPoints, numberOfPoints, sideLength);
+			backgroundContext.strokePolygon(xPoints, yPoints, numberOfPoints);
+		}
 	}
 
 	@Override
