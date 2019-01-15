@@ -1,6 +1,10 @@
 package execution.controller;
 
 import execution.utils.ResizableCanvas;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.Initializable;
 import javafx.geometry.HPos;
 import javafx.geometry.Point2D;
@@ -14,23 +18,27 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class GenericController implements Initializable {
 
 	public TextField drawerPositionField;
 	public TextField mousePositionField;
-	public ComboBox latencyComboBox;
+	public ComboBox<Integer> latencyComboBox;
 	public ColorPicker drawerColourPicker;
 	public ColorPicker fillColourPicker;
 	public Button endButton;
 	public TextField responseField;
 	public GridPane centerPane;
+	public ProgressIndicator indicator;
 
 	protected Image drawerImage;
 	protected ResizableCanvas drawerCanvas;
 	protected ResizableCanvas backgroundCanvas;
 	protected Map<String, Color> definedColours;
 	protected GraphicExecutionController executionController;
+
+	private AtomicInteger latency;
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
@@ -45,6 +53,7 @@ public abstract class GenericController implements Initializable {
 		fillColourPicker.setOnAction(event -> backgroundCanvas.getGraphicsContext2D().setFill(fillColourPicker.getValue()));
 		drawerCanvas.widthProperty().addListener((observable, oldValue, newValue) -> executionController.clear());
 		drawerCanvas.heightProperty().addListener((observable, oldValue, newValue) -> executionController.clear());
+		setupLatencyBox();
 	}
 
 	public void showMessage(String message) {
@@ -75,6 +84,27 @@ public abstract class GenericController implements Initializable {
 
 	public void setDrawerPosition(double x, double y) {
 		drawerPositionField.setText(String.format("(%d,%d)", (int) x, (int) y));
+	}
+
+	private void setupLatencyBox() {
+		ObservableList<Integer> latencies =
+				FXCollections.observableArrayList(
+						0,
+						100,
+						200,
+						500,
+						1000
+				);
+		latencyComboBox.setItems(latencies);
+		latencyComboBox.setValue(0);
+		latency = new AtomicInteger(0);
+		latencyComboBox.setOnAction(event -> {
+			Integer selected = latencyComboBox.getValue();
+			if (selected == null)
+				latencyComboBox.setValue(latency.get());
+			else
+				latency.set(selected);
+		});
 	}
 
 	private void createCanvas() {
