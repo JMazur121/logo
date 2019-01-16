@@ -1,35 +1,52 @@
 package execution.controller;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 
 public class ScriptViewController extends GenericController {
 
 	public Button openFileButton;
+	private boolean firstFile;
 
 	public void setSpecialHandlers() {
+		openFileButton.disabledProperty().addListener((observable, oldValue, newValue) -> {
+			if (newValue)
+				endButton.setDisable(true);
+			else
+				endButton.setDisable(false);
+		});
 		endButton.setDisable(true);
+		firstFile = true;
 		endButton.getScene().getWindow().setOnCloseRequest(event -> {
-			Alert alert = new Alert(Alert.AlertType.INFORMATION);
-			alert.setTitle("Zakończenie");
-			alert.setHeaderText(null);
-			alert.setContentText("Opuszczasz tryb pracy ze skryptem. Poczekaj na zamknięcie okna");
-			alert.showAndWait();
+			showAlert("Closing", "Wait for the window to get closed", Alert.AlertType.INFORMATION);
 			close();
 		});
 	}
 
 	@Override
 	public void close() {
-
+		isWorkToDo.set(false);
+		firstFile = false;
+		indicator.setVisible(true);
+		latency.set(0);
+		parserExecutor.stop();
+		tasksQueue.offer(() -> {});
+		tasksQueue.offer(() -> {});
+		consumer.stop();
+		indicator.setVisible(false);
 	}
 
 	public void endPressed(ActionEvent event) {
-
+		close();
+		tasksQueue.clear();
 	}
 
 	public void openFile(ActionEvent event) {
@@ -38,7 +55,17 @@ public class ScriptViewController extends GenericController {
 		configureFileChooser(fileChooser);
 		File file = fileChooser.showOpenDialog(((Node) event.getSource()).getScene().getWindow());
 		if (file != null) {
-			
+			try {
+				FileInputStream inputStream = new FileInputStream(file);
+				if (!firstFile)
+					parserExecutor.restartExecutor();
+				openFileButton.setDisable(true);
+				isWorkToDo.set(true);
+				consumer.start();
+				parserExecutor.nextStream(inputStream);
+			} catch (FileNotFoundException e) {
+				showAlert("File not found", "Unable to open selected file", Alert.AlertType.ERROR);
+			}
 		}
 	}
 

@@ -14,11 +14,7 @@ public class ConsoleViewController extends GenericController {
 
 	public void setSpecialHandlers() {
 		endButton.getScene().getWindow().setOnCloseRequest(event -> {
-			Alert alert = new Alert(Alert.AlertType.INFORMATION);
-			alert.setTitle("Zakończenie");
-			alert.setHeaderText(null);
-			alert.setContentText("Opuszczasz tryb pracy z konsolą. Poczekaj na zamknięcie okna");
-			alert.showAndWait();
+			showAlert("Closing", "Wait for console-window to get closed", Alert.AlertType.INFORMATION);
 			close();
 		});
 		submitButton.setDisable(true);
@@ -29,7 +25,6 @@ public class ConsoleViewController extends GenericController {
 			else
 				submitButton.setDisable(false);
 		});
-
 		consumer.start();
 	}
 

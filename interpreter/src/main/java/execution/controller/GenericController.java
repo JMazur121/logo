@@ -100,6 +100,14 @@ public abstract class GenericController implements Initializable {
 		drawerPositionField.setText(String.format("(%d,%d)", (int) x, (int) y));
 	}
 
+	public void showAlert(String title, String message, Alert.AlertType type) {
+		Alert alert = new Alert(type);
+		alert.setTitle(title);
+		alert.setHeaderText(null);
+		alert.setContentText(message);
+		alert.showAndWait();
+	}
+
 	private void setupLatencyBox() {
 		ObservableList<Long> latencies =
 				FXCollections.observableArrayList(

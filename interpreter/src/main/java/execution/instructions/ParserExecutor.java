@@ -38,6 +38,10 @@ public class ParserExecutor {
 		scopeExecutor = new ScopeExecutor(graphicExecutor, graphicalTasksQueue, globalVariables, knownMethods, isWorkToDo);
 	}
 
+	public void restartExecutor() {
+		executor = Executors.newSingleThreadExecutor();
+	}
+
 	public void nextStream(InputStream inputStream) {
 		executor.execute(() -> {
 			parser.handleStream(inputStream);
@@ -65,20 +69,19 @@ public class ParserExecutor {
 //				}
 //			}
 			try {
-				while ((nextScope = parser.getNextScope()) != null) {
+				while (isWorkToDo.get() && (nextScope = parser.getNextScope()) != null) {
 					try {
 						scopeExecutor.executeScope(nextScope, true);
 					} catch (Exception e) {
 						graphicalTasksQueue.offer(() -> graphicExecutor.print("Exception : " + e.getMessage()));
-						parser.reset();
 						break;
 					}
 				}
 			} catch (LexerException | ParserException e) {
 				graphicalTasksQueue.offer(() -> graphicExecutor.print(e.getMessage()));
-				parser.reset();
 			}
 //			graphicalTasksQueue.offer(() -> graphicExecutor.print("Opuszczam parsowanie"));
+			parser.reset();
 		});
 	}
 
