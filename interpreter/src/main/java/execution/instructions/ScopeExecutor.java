@@ -71,6 +71,7 @@ public class ScopeExecutor implements InstructionVisitor {
 	}
 
 	public void executeScope(Scope scope, boolean firstCall) throws InterpreterException {
+//		queueNewTask(() -> graphicExecutor.print("execute scope"));
 		currentInstructionPointer = 0;
 		int sizeOfVariablesTable = scope.getNumberOfLocalVariables();
 		if (firstCall && sizeOfVariablesTable > 0) {
@@ -78,8 +79,10 @@ public class ScopeExecutor implements InstructionVisitor {
 			calculationVisitor.setLocalVariables(currentLocalVariables);
 		}
 		ArrayList<BaseInstruction> instructions = scope.getInstructions();
+//		queueNewTask(() -> graphicExecutor.print("Pobralem instrukcje, rozmiar :" + instructions.size()));
 		while (isWorkToDo.get() && currentInstructionPointer < instructions.size()) {
 			BaseInstruction nextInstruction = instructions.get(currentInstructionPointer);
+//			queueNewTask(() -> graphicExecutor.print("Pobralem instrukcje nr :" + currentInstructionPointer));
 			nextInstruction.accept(this);
 		}
 	}
@@ -129,6 +132,7 @@ public class ScopeExecutor implements InstructionVisitor {
 
 	@Override
 	public void visitFunctionCall(FunctionCall functionCall) throws InterpreterException {
+//		queueNewTask(() -> graphicExecutor.print("Function call dla :" + functionCall.getIdentifier()));
 		if (functionCall.isEmbeddedMethodCall()) {
 			if ("stop".equals(functionCall.getIdentifier()))
 				setPointer(Integer.MAX_VALUE);
@@ -145,9 +149,12 @@ public class ScopeExecutor implements InstructionVisitor {
 	}
 
 	private void callEmbeddedMethod(FunctionCall call) throws InterpreterException {
+//		queueNewTask(() -> graphicExecutor.print("metoda wbudowana " + call.getIdentifier()));
 		ArrayList<Node> arguments = call.getArguments();
+//		queueNewTask(() -> graphicExecutor.print("ma argumentow " + arguments.size()));
 		Collection<Pair<Integer, BaseTask>> methods = embeddedTasks.get(call.getIdentifier());
 		BaseTask taskToDo = null;
+//		queueNewTask(() -> graphicExecutor.print("pobrano z kolekcji " + methods));
 		for (Pair<Integer, BaseTask> task : methods) {
 			if (task.getKey() == arguments.size()) {
 				taskToDo = task.getValue();
@@ -155,8 +162,11 @@ public class ScopeExecutor implements InstructionVisitor {
 		}
 		if (taskToDo == null)
 			throw new InterpreterException(wrongNumberOfArgumentsMessage(call.getIdentifier()));
+//		queueNewTask(() -> graphicExecutor.print("task nie jest nullem"));
 		int[] args = new int[arguments.size()];
+//		queueNewTask(() -> graphicExecutor.print("bede liczyl argumenty"));
 		calcArguments(arguments, args, 0);
+//		queueNewTask(() -> graphicExecutor.print("policzylem argument : " + args[0]));
 		if (!"wypisz".equals(call.getIdentifier()) && areNegative(args))
 			throw new InterpreterException(wrongArgumentsTypeMessage(call.getIdentifier()));
 		queueNewTask(taskToDo.newTask(args, graphicExecutor));
@@ -232,13 +242,21 @@ public class ScopeExecutor implements InstructionVisitor {
 	}
 
 	private void visitDefinedMethodCall(FunctionCall functionCall) throws InterpreterException {
+//		queueNewTask(() -> graphicExecutor.print("Odwiedzam metode uzytkownika : " + functionCall.getIdentifier()));
 		Scope scope = knownMethods.get(functionCall.getIdentifier());
 		int[] newLocalVariables = new int[scope.getNumberOfLocalVariables()];
+//		queueNewTask(() -> graphicExecutor.print("Metoda ma lokalnych zmiennyc : " + newLocalVariables.length));
+//		queueNewTask(() -> graphicExecutor.print("Pobralem ze slownika : " + functionCall.getIdentifier()));
 		ArrayList<Node> arguments = functionCall.getArguments();
 		calcArguments(arguments, newLocalVariables, 0);
+//		queueNewTask(() -> graphicExecutor.print("Policzone argumenty : " + functionCall.getIdentifier()));
 		saveCurrentContext();
 		currentLocalVariables = newLocalVariables;
+		calculationVisitor.setLocalVariables(newLocalVariables);
+//		queueNewTask(() -> graphicExecutor.print("Pierwszy argument : " + currentLocalVariables[0]));
+//		queueNewTask(() -> graphicExecutor.print("Wchodze do execute : " + functionCall.getIdentifier()));
 		executeScope(scope, false);
+//		queueNewTask(() -> graphicExecutor.print("Po execute : " + functionCall.getIdentifier()));
 		restoreContext();
 		incrementPointer();
 	}

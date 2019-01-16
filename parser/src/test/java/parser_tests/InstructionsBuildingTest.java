@@ -10,6 +10,8 @@ import java.util.Map;
 import org.junit.Test;
 import parser.Parser;
 import scope.Scope;
+import tree.ArgumentNode;
+import tree.Node;
 import static org.assertj.core.api.Assertions.*;
 
 public class InstructionsBuildingTest {
@@ -188,6 +190,26 @@ public class InstructionsBuildingTest {
 		assertThat(call.getIdentifier()).isEqualTo("czysc");
 		Jump jump = (Jump)instructions.get(2);
 		assertThat(jump.getInstructionPointer()).isEqualTo(0);
+	}
+
+	@Test
+	public void getNextScope_procedureDefinition_returnsProcedureScope() throws LexerException, ParserException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("def kwadrat(bok)[naprzod(bok) \n prawo(90)]".getBytes());
+		parser.handleStream(is);
+		//when
+		Scope scope = parser.getNextScope();
+		//then
+		assertThat(scope).isNotNull();
+		assertThat(scope.isFunctionDefinition()).isTrue();
+		ArrayList<BaseInstruction> instructions = scope.getInstructions();
+		assertThat(instructions).hasSize(2);
+		FunctionCall call = (FunctionCall)instructions.get(0);
+		assertThat(call.getIdentifier()).isEqualTo("naprzod");
+		ArgumentNode arg = (ArgumentNode) call.getArguments().get(0);
+		assertThat(arg.getArgument().readValue()).isEqualTo(0);
+		FunctionCall secondCall = (FunctionCall)instructions.get(1);
+		assertThat(secondCall.getIdentifier()).isEqualTo("prawo");
 	}
 
 }

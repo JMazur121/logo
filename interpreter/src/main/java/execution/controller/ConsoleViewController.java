@@ -82,7 +82,7 @@ public class ConsoleViewController extends GenericController {
 		instructionBox.setOnAction(event -> {
 			InstructionPair selected = instructionBox.getValue();
 			if (selected != null) {
-				codeTextArea.appendText(selected.getName() + "()\n");
+				codeTextArea.appendText(selected.getName() + "()");
 			}
 		});
 	}

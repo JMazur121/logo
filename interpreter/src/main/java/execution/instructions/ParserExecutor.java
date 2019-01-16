@@ -71,12 +71,10 @@ public class ParserExecutor {
 			try {
 				while (isWorkToDo.get() && (nextScope = parser.getNextScope()) != null) {
 					try {
-						final int number = nextScope.getNumberOfLocalVariables();
-						graphicalTasksQueue.offer(() -> graphicExecutor.print("ilosc local :" + number));
-						scopeExecutor.executeScope(nextScope, true);
+						if (!nextScope.isFunctionDefinition())
+							scopeExecutor.executeScope(nextScope, true);
 					} catch (Exception e) {
 						graphicalTasksQueue.offer(() -> graphicExecutor.print("Exception : " + e.getMessage()));
-						graphicalTasksQueue.offer(() -> graphicExecutor.print(e.toString()));
 						break;
 					}
 				}
