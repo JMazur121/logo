@@ -1,22 +1,18 @@
 package execution.controller;
 
 import execution.instructions.ParserExecutor;
+import execution.utils.InstructionPair;
 import execution.utils.ResizableCanvas;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.Initializable;
 import javafx.geometry.HPos;
-import javafx.geometry.Point2D;
 import javafx.geometry.VPos;
-import javafx.scene.Node;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
-import javafx.stage.Stage;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,6 +33,7 @@ public abstract class GenericController implements Initializable {
 	public TextField responseField;
 	public GridPane centerPane;
 	public ProgressIndicator indicator;
+	public ComboBox<InstructionPair> instructionBox;
 
 	protected Image drawerImage;
 	protected ResizableCanvas drawerCanvas;
