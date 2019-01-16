@@ -19,6 +19,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class ScopeExecutor implements InstructionVisitor {
 
@@ -30,16 +32,19 @@ public class ScopeExecutor implements InstructionVisitor {
 	private Map<String, Integer> globalVariables;
 	private Map<String, Scope> knownMethods;
 	private CalculationVisitor calculationVisitor;
+	private AtomicBoolean isWorkToDo;
 
 	private Multimap<String, Pair<Integer, BaseTask>> embeddedTasks;
 
 	public ScopeExecutor(GraphicExecutor graphicExecutor, BlockingQueue<Runnable> graphicalTasksQueue,
-						 Map<String, Integer> globalVariables, Map<String, Scope> knownMethods) {
+						 Map<String, Integer> globalVariables, Map<String, Scope> knownMethods,
+						 AtomicBoolean isWorkToDo) {
 		contextStack = new Stack<>();
 		this.graphicExecutor = graphicExecutor;
 		this.graphicalTasksQueue = graphicalTasksQueue;
 		this.globalVariables = globalVariables;
 		this.knownMethods = knownMethods;
+		this.isWorkToDo = isWorkToDo;
 		calculationVisitor = new CalculationVisitor(globalVariables);
 		currentLocalVariables = null;
 		buildEmbeddedTasks();
@@ -71,7 +76,7 @@ public class ScopeExecutor implements InstructionVisitor {
 			calculationVisitor.setLocalVariables(currentLocalVariables);
 		}
 		ArrayList<BaseInstruction> instructions = scope.getInstructions();
-		while (currentInstructionPointer < instructions.size()) {
+		while (isWorkToDo.get() && currentInstructionPointer < instructions.size()) {
 			BaseInstruction nextInstruction = instructions.get(currentInstructionPointer);
 			nextInstruction.accept(this);
 		}

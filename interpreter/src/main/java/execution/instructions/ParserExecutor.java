@@ -35,12 +35,11 @@ public class ParserExecutor {
 		this.graphicExecutor = graphicExecutor;
 		this.graphicalTasksQueue = graphicalTasksQueue;
 		this.isWorkToDo = isWorkToDo;
-		scopeExecutor = new ScopeExecutor(graphicExecutor, graphicalTasksQueue, globalVariables, knownMethods);
+		scopeExecutor = new ScopeExecutor(graphicExecutor, graphicalTasksQueue, globalVariables, knownMethods, isWorkToDo);
 	}
 
 	public void nextStream(InputStream inputStream) {
 		executor.execute(() -> {
-//			graphicalTasksQueue.offer(() -> graphicExecutor.print("Rozpoczynam parsowanie"));
 			parser.handleStream(inputStream);
 			scopeExecutor.reset();
 			Scope nextScope;
@@ -70,12 +69,14 @@ public class ParserExecutor {
 					try {
 						scopeExecutor.executeScope(nextScope, true);
 					} catch (Exception e) {
-						graphicalTasksQueue.offer(() -> graphicExecutor.print("Wyjątek : " + e.getMessage()));
+						graphicalTasksQueue.offer(() -> graphicExecutor.print("Exception : " + e.getMessage()));
+						parser.reset();
 						break;
 					}
 				}
 			} catch (LexerException | ParserException e) {
 				graphicalTasksQueue.offer(() -> graphicExecutor.print(e.getMessage()));
+				parser.reset();
 			}
 //			graphicalTasksQueue.offer(() -> graphicExecutor.print("Opuszczam parsowanie"));
 		});

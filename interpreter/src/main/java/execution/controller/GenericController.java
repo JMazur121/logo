@@ -100,12 +100,6 @@ public abstract class GenericController implements Initializable {
 		drawerPositionField.setText(String.format("(%d,%d)", (int) x, (int) y));
 	}
 
-	public void endPressed(ActionEvent event) {
-		close();
-		Stage dialog = (Stage) ((Node) event.getTarget()).getScene().getWindow();
-		dialog.close();
-	}
-
 	private void setupLatencyBox() {
 		ObservableList<Long> latencies =
 				FXCollections.observableArrayList(

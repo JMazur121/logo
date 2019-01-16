@@ -2,7 +2,9 @@ package execution.controller;
 
 import com.google.common.base.Strings;
 import javafx.event.ActionEvent;
+import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.stage.Stage;
 import java.io.ByteArrayInputStream;
 
 public class ConsoleViewController extends GenericController {
@@ -49,6 +51,12 @@ public class ConsoleViewController extends GenericController {
 		ByteArrayInputStream inputStream = new ByteArrayInputStream(codeTextArea.getText().getBytes());
 		showMessage("");
 		parserExecutor.nextStream(inputStream);
+	}
+
+	public void endPressed(ActionEvent event) {
+		close();
+		Stage dialog = (Stage) ((Node) event.getTarget()).getScene().getWindow();
+		dialog.close();
 	}
 
 }
