@@ -17,8 +17,9 @@ public interface GraphicExecutor {
 	void strokePolygon(int numberOfPoints, int sideLength);
 	void strokeCircle(int radius);
 	void fillCircle(int radius);
+	void strokeEllipse(int width, int height);
+	void fillEllipse(int width, int height);
 	void moveDrawer(int xTranslation, int yTranslation);
-	void nop();
 	void print(String message);
 
 }

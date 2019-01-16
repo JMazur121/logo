@@ -64,14 +64,14 @@ public class GraphicExecutionController implements GraphicExecutor {
 		return new Point2D(currentPosition.getX() - imageWidth / 2, currentPosition.getY() - imageHeight / 2);
 	}
 
-	private void rotate(double angle, double px, double py) {
+	private void rotate(double angle, double px, double py, GraphicsContext context) {
 		Rotate r = new Rotate(angle, px, py);
-		drawerContext.setTransform(r.getMxx(), r.getMyx(), r.getMxy(), r.getMyy(), r.getTx(), r.getTy());
+		context.setTransform(r.getMxx(), r.getMyx(), r.getMxy(), r.getMyy(), r.getTx(), r.getTy());
 	}
 
 	private void drawRotatedImage() {
 		drawerContext.save();
-		rotate(currentAngle, currentPosition.getX(), currentPosition.getY());
+		rotate(currentAngle, currentPosition.getX(), currentPosition.getY(), drawerContext);
 		Point2D corner = getLeftTopCornerOfDrawer();
 		drawerContext.drawImage(drawerImage, corner.getX(), corner.getY());
 		drawerContext.restore();
@@ -260,7 +260,23 @@ public class GraphicExecutionController implements GraphicExecutor {
 	}
 
 	@Override
-	public void nop() {
+	public void strokeEllipse(int width, int height) {
+		double x = currentPosition.getX() - width / 2;
+		double y = currentPosition.getY() - height / 2;
+		backgroundContext.save();
+		rotate(currentAngle, currentPosition.getX(), currentPosition.getY(), backgroundContext);
+		backgroundContext.strokeOval(x, y, width, height);
+		backgroundContext.restore();
+	}
+
+	@Override
+	public void fillEllipse(int width, int height) {
+		double x = currentPosition.getX() - width / 2;
+		double y = currentPosition.getY() - height / 2;
+		backgroundContext.save();
+		rotate(currentAngle, currentPosition.getX(), currentPosition.getY(), backgroundContext);
+		backgroundContext.fillOval(x, y, width, height);
+		backgroundContext.restore();
 	}
 
 	@Override

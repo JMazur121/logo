@@ -47,6 +47,7 @@ public class ScriptViewController extends GenericController {
 	public void endPressed(ActionEvent event) {
 		close();
 		tasksQueue.clear();
+		openFileButton.setDisable(false);
 	}
 
 	public void openFile(ActionEvent event) {

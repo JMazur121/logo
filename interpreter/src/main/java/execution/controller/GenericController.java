@@ -136,14 +136,15 @@ public abstract class GenericController implements Initializable {
 		centerPane.getRowConstraints().get(0).setValignment(VPos.CENTER);
 		centerPane.add(drawerCanvas, 0, 0);
 		centerPane.add(backgroundCanvas, 0, 0);
+		centerPane.setStyle("-fx-background-color: white");
 		drawerCanvas.widthProperty().bind(
 				centerPane.widthProperty());
 		drawerCanvas.heightProperty().bind(
-				centerPane.heightProperty().subtract(5));
+				centerPane.heightProperty());
 		backgroundCanvas.widthProperty().bind(
 				centerPane.widthProperty());
 		backgroundCanvas.heightProperty().bind(
-				centerPane.heightProperty().subtract(5));
+				centerPane.heightProperty());
 		drawerCanvas.toFront();
 		backgroundCanvas.getGraphicsContext2D().setStroke(Color.BLACK);
 		backgroundCanvas.getGraphicsContext2D().setFill(Color.WHITE);

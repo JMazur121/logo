@@ -60,8 +60,10 @@ public class ScopeExecutor implements InstructionVisitor {
 		embeddedTasks.put("podnies", new Pair<>(0, (args, executor) -> executor::drawerUp));
 		embeddedTasks.put("opusc", new Pair<>(0, (args, executor) -> executor::drawerDown));
 		embeddedTasks.put("zamaluj", new Pair<>(0, (args, executor) -> executor::fill));
-		embeddedTasks.put("foremny", new Pair<>(2, (args, executor) -> () -> executor.strokePolygon(args[0], args[1])));
-		embeddedTasks.put("foremnyPelny", new Pair<>(2, (args, executor) -> () -> executor.fillPolygon(args[0], args[1])));
+		embeddedTasks.put("obrysForemnego", new Pair<>(2, (args, executor) -> () -> executor.strokePolygon(args[0], args[1])));
+		embeddedTasks.put("pelnyForemny", new Pair<>(2, (args, executor) -> () -> executor.fillPolygon(args[0], args[1])));
+		embeddedTasks.put("obrysElipsy", new Pair<>(2, (args, executor) -> () -> executor.strokeEllipse(args[0], args[1])));
+		embeddedTasks.put("pelnaElipsa", new Pair<>(2, (args, executor) -> () -> executor.fillEllipse(args[0], args[1])));
 		embeddedTasks.put("okrag", new Pair<>(1, (args, executor) -> () -> executor.strokeCircle(args[0])));
 		embeddedTasks.put("kolo", new Pair<>(1, (args, executor) -> () -> executor.fillCircle(args[0])));
 		embeddedTasks.put("skok", new Pair<>(2, (args, executor) -> () -> executor.moveDrawer(args[0], args[1])));
