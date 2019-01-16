@@ -1,10 +1,12 @@
 package execution.instructions;
 
+import exceptions.InterpreterException;
 import exceptions.LexerException;
 import exceptions.ParserException;
 import execution.dispatching.GraphicExecutor;
 import parser.Parser;
 import scope.Scope;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,27 +40,44 @@ public class ParserExecutor {
 
 	public void nextStream(InputStream inputStream) {
 		executor.execute(() -> {
+//			graphicalTasksQueue.offer(() -> graphicExecutor.print("Rozpoczynam parsowanie"));
 			parser.handleStream(inputStream);
 			scopeExecutor.reset();
-			while (!parser.isReachedETX() && isWorkToDo.get()) {
-				Scope scope;
-				try {
-					scope = parser.getNextScope();
-				} catch (LexerException | ParserException e) {
-					graphicalTasksQueue.offer(() -> graphicExecutor.print(e.getMessage()));
-					break;
+			Scope nextScope;
+//			while (!parser.isReachedETX() && isWorkToDo.get()) {
+//				graphicalTasksQueue.offer(() -> graphicExecutor.print("Wchodze w whila"));
+//				Scope scope;
+//				try {
+//					scope = parser.getNextScope();
+//				} catch (LexerException | ParserException e) {
+//					graphicalTasksQueue.offer(() -> graphicExecutor.print(e.getMessage()));
+//					break;
+//				}
+//				if (scope == null) {
+//					graphicalTasksQueue.offer(() -> graphicExecutor.print("Null-scope"));
+//					continue;
+//				}
+//				graphicalTasksQueue.offer(() -> graphicExecutor.print("Pobrałem scopa"));
+//				try {
+//					scopeExecutor.executeScope(scope, true);
+//				} catch (Exception e) {
+//					graphicalTasksQueue.offer(() -> graphicExecutor.print("Zlapalem nieznany wyjatek"));
+//					break;
+//				}
+//			}
+			try {
+				while ((nextScope = parser.getNextScope()) != null) {
+					try {
+						scopeExecutor.executeScope(nextScope, true);
+					} catch (Exception e) {
+						graphicalTasksQueue.offer(() -> graphicExecutor.print("Wyjątek : " + e.getMessage()));
+						break;
+					}
 				}
-				if (scope == null) {
-					graphicalTasksQueue.offer(() -> graphicExecutor.print("Unexpected parsing error"));
-					break;
-				}
-				try {
-					scopeExecutor.executeScope(scope, true);
-				} catch (Exception e) {
-					graphicalTasksQueue.offer(() -> graphicExecutor.print(e.getMessage()));
-					break;
-				}
+			} catch (LexerException | ParserException e) {
+				graphicalTasksQueue.offer(() -> graphicExecutor.print(e.getMessage()));
 			}
+//			graphicalTasksQueue.offer(() -> graphicExecutor.print("Opuszczam parsowanie"));
 		});
 	}
 

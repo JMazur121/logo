@@ -1,8 +1,6 @@
 package execution.controller;
 
 import com.google.common.base.Strings;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.scene.control.*;
 import java.io.ByteArrayInputStream;
@@ -29,6 +27,8 @@ public class ConsoleViewController extends GenericController {
 			else
 				submitButton.setDisable(false);
 		});
+
+		consumer.start();
 	}
 
 	@Override
@@ -47,6 +47,7 @@ public class ConsoleViewController extends GenericController {
 
 	public void submitPressed(ActionEvent event) {
 		ByteArrayInputStream inputStream = new ByteArrayInputStream(codeTextArea.getText().getBytes());
+		showMessage("");
 		parserExecutor.nextStream(inputStream);
 	}
 

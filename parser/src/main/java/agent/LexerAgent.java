@@ -46,6 +46,7 @@ public class LexerAgent {
 			lexer.restart();
 		else
 			lexer = new Lexer();
+		isBufferContainingToken = false;
 	}
 
 }
