@@ -442,6 +442,7 @@ public class Parser {
 		int loopIndexReference = lastIndex++;
 		currentLocalReferences.put(identifier.getWord(), loopIndexReference);
 		int rightBoundIndex = lastIndex++;
+		currentLocalReferences.put("",rightBoundIndex);
 		//init right bound with expression
 		IndexedArgument rightBound = addIndexedArgumentAssignment(rightBoundIndex, expressions.get(0));
 		//init index with zero
@@ -465,6 +466,7 @@ public class Parser {
 		int loopIndexReference = lastIndex++;
 		currentLocalReferences.put(identifier.getWord(), loopIndexReference);
 		int rightBoundIndex = lastIndex++;
+		currentLocalReferences.put("",rightBoundIndex);
 		//init right bound with expression
 		IndexedArgument rightBound = addIndexedArgumentAssignment(rightBoundIndex, expressions.get(1));
 		//init index with expression
@@ -487,6 +489,7 @@ public class Parser {
 		int loopIndexReference = lastIndex++;
 		currentLocalReferences.put(identifier.getWord(), loopIndexReference);
 		int rightBoundIndex = lastIndex++;
+		currentLocalReferences.put("",rightBoundIndex);
 		//init right bound with expression
 		IndexedArgument rightBound = addIndexedArgumentAssignment(rightBoundIndex, expressions.get(1));
 		//init index with expression
