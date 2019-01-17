@@ -33,8 +33,11 @@ public class InstructionPair {
 				.add(new InstructionPair("pelnaElipsa", "szerokosc,wysokosc"))
 				.add(new InstructionPair("okrag", "promien"))
 				.add(new InstructionPair("kolo", "promien"))
-				.add(new InstructionPair("skok", "przesuniecieX,przesuniecieY"))
+				.add(new InstructionPair("przesun", "przesuniecieX,przesuniecieY"))
+				.add(new InstructionPair("skok", "doceloweX,doceloweY"))
 				.add(new InstructionPair("wypisz", "wyrazenieArytmetyczne"))
+				.add(new InstructionPair("kolorPisaka", "skladowaR,skladowaG,skladowaB"))
+				.add(new InstructionPair("kolorMalowania", "skladowaR,skladowaG,skladowaB"))
 				.build();
 	}
 

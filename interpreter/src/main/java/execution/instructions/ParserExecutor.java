@@ -47,27 +47,6 @@ public class ParserExecutor {
 			parser.handleStream(inputStream);
 			scopeExecutor.reset();
 			Scope nextScope;
-//			while (!parser.isReachedETX() && isWorkToDo.get()) {
-//				graphicalTasksQueue.offer(() -> graphicExecutor.print("Wchodze w whila"));
-//				Scope scope;
-//				try {
-//					scope = parser.getNextScope();
-//				} catch (LexerException | ParserException e) {
-//					graphicalTasksQueue.offer(() -> graphicExecutor.print(e.getMessage()));
-//					break;
-//				}
-//				if (scope == null) {
-//					graphicalTasksQueue.offer(() -> graphicExecutor.print("Null-scope"));
-//					continue;
-//				}
-//				graphicalTasksQueue.offer(() -> graphicExecutor.print("Pobrałem scopa"));
-//				try {
-//					scopeExecutor.executeScope(scope, true);
-//				} catch (Exception e) {
-//					graphicalTasksQueue.offer(() -> graphicExecutor.print("Zlapalem nieznany wyjatek"));
-//					break;
-//				}
-//			}
 			try {
 				while (isWorkToDo.get() && (nextScope = parser.getNextScope()) != null) {
 					try {
@@ -83,7 +62,6 @@ public class ParserExecutor {
 			} catch (LexerException | ParserException e) {
 				graphicalTasksQueue.offer(() -> graphicExecutor.print(e.getMessage()));
 			}
-//			graphicalTasksQueue.offer(() -> graphicExecutor.print("Opuszczam parsowanie"));
 			parser.reset();
 		});
 	}

@@ -24,7 +24,6 @@ public class GraphicExecutionController implements GraphicExecutor {
 	private Point2D currentPosition;
 	private int currentAngle;
 	private boolean isDrawerDown;
-	private Map<String, Color> definedColours;
 
 	private GenericController controller;
 	private Image drawerImage;
@@ -34,10 +33,9 @@ public class GraphicExecutionController implements GraphicExecutor {
 	private Canvas backgroundCanvas;
 
 	public GraphicExecutionController(GraphicsContext drawerContext, GraphicsContext backgroundContext,
-									  Map<String, Color> definedColours, GenericController controller) {
+									  GenericController controller) {
 		this.drawerContext = drawerContext;
 		this.backgroundContext = backgroundContext;
-		this.definedColours = definedColours;
 		this.controller = controller;
 		drawerCanvas = drawerContext.getCanvas();
 		backgroundCanvas = backgroundContext.getCanvas();
@@ -96,15 +94,14 @@ public class GraphicExecutionController implements GraphicExecutor {
 
 	@Override
 	public void drawAlong(int pathDirection) {
-		if (isDrawerDown) {
-			Point2D translation = directionVersor.multiply(pathDirection);
-			Point2D begin = currentPosition;
-			currentPosition = currentPosition.add(translation);
-			drawerContext.clearRect(0, 0, drawerCanvas.getWidth(), drawerCanvas.getHeight());
-			drawRotatedImage();
+		Point2D translation = directionVersor.multiply(pathDirection);
+		Point2D begin = currentPosition;
+		currentPosition = currentPosition.add(translation);
+		drawerContext.clearRect(0, 0, drawerCanvas.getWidth(), drawerCanvas.getHeight());
+		drawRotatedImage();
+		if (isDrawerDown)
 			backgroundContext.strokeLine(begin.getX(), begin.getY(), currentPosition.getX(), currentPosition.getY());
-			setCurrentPositionInController();
-		}
+		setCurrentPositionInController();
 	}
 
 	@Override
@@ -141,17 +138,6 @@ public class GraphicExecutionController implements GraphicExecutor {
 	}
 
 	@Override
-	public void setStroke(String colourName) {
-		Color color = definedColours.get(colourName);
-		if (color == null)
-			print("There is no colour with name \"" + colourName + "\"");
-		else {
-			backgroundContext.setStroke(color);
-			controller.setStrokeColor(color);
-		}
-	}
-
-	@Override
 	public void setStroke(int r, int g, int b) {
 		if (r > 255 || g > 255 || b > 255)
 			print("RGB values cannot exceed 255");
@@ -159,17 +145,6 @@ public class GraphicExecutionController implements GraphicExecutor {
 			Color color = Color.rgb(r, g, b);
 			backgroundContext.setStroke(color);
 			controller.setStrokeColor(color);
-		}
-	}
-
-	@Override
-	public void setFill(String colourName) {
-		Color color = definedColours.get(colourName);
-		if (color == null)
-			print("There is no colour with name \"" + colourName + "\"");
-		else {
-			backgroundContext.setFill(color);
-			controller.setFillColor(color);
 		}
 	}
 
@@ -185,26 +160,18 @@ public class GraphicExecutionController implements GraphicExecutor {
 	}
 
 	@Override
-	public void defineColour(String name, int r, int g, int b) {
-		if (r > 255 || g > 255 || b > 255)
-			print("RGB values cannot exceed 255");
-		else {
-			Color color = Color.rgb(r, g, b);
-			definedColours.put(name, color);
-		}
-	}
-
-	@Override
 	public void fill() {
 		WritableImage image = backgroundCanvas.snapshot(null, null);
 		PixelReader reader = image.getPixelReader();
 		PixelWriter writer = image.getPixelWriter();
 		int x = (int) currentPosition.getX();
 		int y = (int) currentPosition.getY();
-		int width = (int) image.getWidth();
-		int height = (int) image.getHeight();
+		int width = (int) backgroundCanvas.getWidth();
+		int height = (int) backgroundCanvas.getHeight();
 		Color targetColor = reader.getColor(x, y);
-		Color currentFill = (Color)backgroundContext.getFill();
+		Color currentFill = (Color) backgroundContext.getFill();
+		if (targetColor.equals(currentFill))
+			return;
 		Stack<IntPair> stack = new Stack<>();
 		stack.push(new IntPair(x, y));
 		while (!stack.isEmpty()) {
@@ -257,7 +224,11 @@ public class GraphicExecutionController implements GraphicExecutor {
 			double[] xPoints = new double[numberOfPoints];
 			double[] yPoints = new double[numberOfPoints];
 			calcPolygonPoints(xPoints, yPoints, numberOfPoints, sideLength);
+			backgroundContext.save();
+			rotate(currentAngle, currentPosition.getX(), currentPosition.getY(), backgroundContext);
 			backgroundContext.fillPolygon(xPoints, yPoints, numberOfPoints);
+			backgroundContext.restore();
+
 		}
 	}
 
@@ -271,7 +242,10 @@ public class GraphicExecutionController implements GraphicExecutor {
 			double[] xPoints = new double[numberOfPoints];
 			double[] yPoints = new double[numberOfPoints];
 			calcPolygonPoints(xPoints, yPoints, numberOfPoints, sideLength);
+			backgroundContext.save();
+			rotate(currentAngle, currentPosition.getX(), currentPosition.getY(), backgroundContext);
 			backgroundContext.strokePolygon(xPoints, yPoints, numberOfPoints);
+			backgroundContext.restore();
 		}
 	}
 
@@ -290,9 +264,19 @@ public class GraphicExecutionController implements GraphicExecutor {
 	}
 
 	@Override
-	public void moveDrawer(int xTranslation, int yTranslation) {
+	public void translateDrawer(int xTranslation, int yTranslation) {
 		drawerContext.clearRect(0, 0, drawerCanvas.getWidth(), drawerCanvas.getHeight());
 		currentPosition = currentPosition.add(xTranslation, yTranslation);
+		drawRotatedImage();
+		setCurrentPositionInController();
+	}
+
+	@Override
+	public void moveDrawer(int x, int y) {
+		if (x < 0 || y < 0 || x > drawerCanvas.getWidth() || y > drawerCanvas.getHeight())
+			print("Podany punkt nie nalezy do rysunku");
+		drawerContext.clearRect(0, 0, drawerCanvas.getWidth(), drawerCanvas.getHeight());
+		currentPosition = new Point2D(x, y);
 		drawRotatedImage();
 		setCurrentPositionInController();
 	}

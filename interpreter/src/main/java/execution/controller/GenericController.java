@@ -38,7 +38,6 @@ public abstract class GenericController implements Initializable {
 	protected Image drawerImage;
 	protected ResizableCanvas drawerCanvas;
 	protected ResizableCanvas backgroundCanvas;
-	protected Map<String, Color> definedColours;
 	protected GraphicExecutionController executionController;
 
 	protected AtomicLong latency;
@@ -50,10 +49,8 @@ public abstract class GenericController implements Initializable {
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		createCanvas();
-		executionController = new GraphicExecutionController(drawerCanvas.getGraphicsContext2D(), backgroundCanvas.getGraphicsContext2D(),
-				definedColours, this);
+		executionController = new GraphicExecutionController(drawerCanvas.getGraphicsContext2D(), backgroundCanvas.getGraphicsContext2D(), this);
 		drawerCanvas.setOnMouseMoved(event -> mousePositionField.setText(String.format("(%d,%d)", (int) event.getX(), (int) event.getY())));
-		definedColours = new HashMap<>();
 		drawerColourPicker.setValue(Color.BLACK);
 		fillColourPicker.setValue(Color.WHITE);
 		drawerColourPicker.setOnAction(event -> backgroundCanvas.getGraphicsContext2D().setStroke(drawerColourPicker.getValue()));
@@ -111,8 +108,11 @@ public abstract class GenericController implements Initializable {
 						0L,
 						100L,
 						200L,
+						300L,
 						500L,
-						1000L
+						1000L,
+						2000L,
+						5000L
 				);
 		latencyComboBox.setItems(latencies);
 		latencyComboBox.setValue(500L);

@@ -5,8 +5,10 @@ import execution.utils.InstructionPair;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import java.io.ByteArrayInputStream;
@@ -80,7 +82,7 @@ public class ConsoleViewController extends GenericController {
 		instructions.addAll(InstructionPair.newInstructionList());
 		instructionBox.setItems(instructions);
 		instructionBox.setOnAction(event -> {
-			InstructionPair selected = instructionBox.getValue();
+			InstructionPair selected = instructionBox.selectionModelProperty().getValue().getSelectedItem();
 			if (selected != null) {
 				codeTextArea.appendText(selected.getName() + "()");
 			}
