@@ -2,18 +2,20 @@ package parser;
 
 import agent.LexerAgent;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import exceptions.*;
 import expressions_module.parser.ExpressionParser;
-import expressions_module.tree.*;
-import instructions_module.composite.*;
-import instructions_module.scope.Scope;
+import instructions.*;
 import lombok.Getter;
+import scope.Scope;
 import tokenizer.LiteralToken;
 import tokenizer.Token;
 import tokenizer.TokenType;
+import tree.*;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import static tokenizer.TokenType.*;
 
@@ -44,12 +46,16 @@ public class Parser {
 				.put("zamaluj", 0)
 				.put("kolorPisaka", 3)
 				.put("kolorMalowania", 3)
-				.put("paleta", 4)
-				.put("foremny", 1)
+				.put("obrysForemnego", 2)
+				.put("pelnyForemny", 2)
 				.put("okrag", 1)
 				.put("kolo", 1)
+				.put("obrysElipsy", 2)
+				.put("pelnaElipsa", 2)
+				.put("przesun", 2)
 				.put("skok", 2)
 				.put("stop", 0)
+				.put("wypisz", 1)
 				.build();
 	}
 
@@ -77,7 +83,7 @@ public class Parser {
 	 *
 	 * @return Executable scope or procedure definition
 	 */
-	public Scope getNetScope() throws LexerException, ParserException {
+	public Scope getNextScope() throws LexerException, ParserException {
 		if (reachedETX)
 			return null;
 		Token nextToken = agent.bufferAndGetToken();
@@ -328,7 +334,7 @@ public class Parser {
 		if (embeddedMethodArguments != null) {
 			if (embeddedMethodArguments == 0) {
 				checkForToken(T_RIGHT_PARENTHESIS, "Function-call");
-				instruction = new FunctionCall(id, null, true);
+				instruction = new FunctionCall(id, Lists.newArrayList(), true);
 			}
 			else {
 				ArrayList<Node> arguments = buildLimitedArgumentsList(embeddedMethodArguments);
@@ -343,7 +349,7 @@ public class Parser {
 			Token nextToken = agent.bufferAndGetToken();
 			if (T_RIGHT_PARENTHESIS.equals(nextToken.getTokenType())) {
 				if (method.getNumberOfArguments() == 0)
-					instruction = new FunctionCall(id, null, false);
+					instruction = new FunctionCall(id, Lists.newArrayList(), false);
 				else {
 					TokenMissingException e = new TokenMissingException("Non-zero arguments function call", "function argument", nextToken);
 					throw new ParserException(e.getMessage());
@@ -425,8 +431,7 @@ public class Parser {
 
 	private void addSimpleAddition(int leftIndex, Node expression) {
 		ArgumentNode indexNode = ArgumentNode.buildIndexedArgumentNode(leftIndex);
-		Token operator = new Token(T_ARITHMETIC_ADDITIVE_PLUS, null);
-		OperatorNode addition = new OperatorNode(indexNode, expression, operator);
+		OperatorNode addition = new OperatorNode(indexNode, expression, T_ARITHMETIC_ADDITIVE_PLUS);
 		IndexedArgument leftValue = new IndexedArgument(leftIndex, false);
 		AssignmentInstruction assignmentInstruction = new AssignmentInstruction(leftValue, addition);
 		addInstructionToList(assignmentInstruction);
@@ -437,6 +442,7 @@ public class Parser {
 		int loopIndexReference = lastIndex++;
 		currentLocalReferences.put(identifier.getWord(), loopIndexReference);
 		int rightBoundIndex = lastIndex++;
+		currentLocalReferences.put("",rightBoundIndex);
 		//init right bound with expression
 		IndexedArgument rightBound = addIndexedArgumentAssignment(rightBoundIndex, expressions.get(0));
 		//init index with zero
@@ -460,6 +466,7 @@ public class Parser {
 		int loopIndexReference = lastIndex++;
 		currentLocalReferences.put(identifier.getWord(), loopIndexReference);
 		int rightBoundIndex = lastIndex++;
+		currentLocalReferences.put("",rightBoundIndex);
 		//init right bound with expression
 		IndexedArgument rightBound = addIndexedArgumentAssignment(rightBoundIndex, expressions.get(1));
 		//init index with expression
@@ -482,6 +489,7 @@ public class Parser {
 		int loopIndexReference = lastIndex++;
 		currentLocalReferences.put(identifier.getWord(), loopIndexReference);
 		int rightBoundIndex = lastIndex++;
+		currentLocalReferences.put("",rightBoundIndex);
 		//init right bound with expression
 		IndexedArgument rightBound = addIndexedArgumentAssignment(rightBoundIndex, expressions.get(1));
 		//init index with expression

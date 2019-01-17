@@ -2,14 +2,14 @@ package expressions_module.parser;
 
 import agent.LexerAgent;
 import exceptions.*;
-import expressions_module.tree.ArgumentNode;
-import expressions_module.tree.Node;
-import expressions_module.tree.OperatorNode;
 import lombok.Setter;
 import tokenizer.LiteralToken;
 import tokenizer.NumericToken;
 import tokenizer.Token;
 import tokenizer.TokenType;
+import tree.ArgumentNode;
+import tree.Node;
+import tree.OperatorNode;
 import java.util.Map;
 import static tokenizer.TokenType.*;
 
@@ -44,7 +44,7 @@ public class ExpressionParser {
 		while (T_LOGICAL_OR.equals(nextTokenType)) {
 			agent.commitBufferedToken();
 			Node rightSubtree = getAlternativeSubtree();
-			currentRoot = new OperatorNode(currentRoot, rightSubtree, nextToken);
+			currentRoot = new OperatorNode(currentRoot, rightSubtree, nextToken.getTokenType());
 			if (!isLogicalOperationPossible(currentRoot))
 				throw new ExpressionCorruptedException(nextToken);
 			nextToken = agent.bufferAndGetToken();
@@ -74,7 +74,7 @@ public class ExpressionParser {
 		while (T_LOGICAL_AND.equals(nextTokenType)) {
 			agent.commitBufferedToken();
 			Node rightSubtree = getConjunctionSubtree();
-			currentRoot = new OperatorNode(currentRoot, rightSubtree, nextToken);
+			currentRoot = new OperatorNode(currentRoot, rightSubtree, nextToken.getTokenType());
 			if (!isLogicalOperationPossible(currentRoot))
 				throw new ExpressionCorruptedException(nextToken);
 			nextToken = getNextToken();
@@ -90,7 +90,7 @@ public class ExpressionParser {
 		while (nextTokenType.isRelationalOperator()) {
 			agent.commitBufferedToken();
 			Node rightSubtree = getArithmeticSubtree();
-			currentRoot = new OperatorNode(currentRoot, rightSubtree, nextToken);
+			currentRoot = new OperatorNode(currentRoot, rightSubtree, nextToken.getTokenType());
 			if (!isLogicalOperationPossible(currentRoot))
 				throw new ExpressionCorruptedException(nextToken);
 			nextToken = getNextToken();
@@ -106,7 +106,7 @@ public class ExpressionParser {
 		while (nextTokenType.isAdditiveOperator()) {
 			agent.commitBufferedToken();
 			Node rightSubtree = getAdditiveSubtree();
-			currentRoot = new OperatorNode(currentRoot, rightSubtree, nextToken);
+			currentRoot = new OperatorNode(currentRoot, rightSubtree, nextToken.getTokenType());
 			if (!isArithmeticOperationPossible(currentRoot))
 				throw new ExpressionCorruptedException(nextToken);
 			nextToken = getNextToken();
@@ -122,7 +122,7 @@ public class ExpressionParser {
 		while (nextTokenType.isMultiplicativeOperator()) {
 			agent.commitBufferedToken();
 			Node rightSubtree = getMultiplicativeSubtree();
-			currentRoot = new OperatorNode(currentRoot, rightSubtree, nextToken);
+			currentRoot = new OperatorNode(currentRoot, rightSubtree, nextToken.getTokenType());
 			if (!isArithmeticOperationPossible(currentRoot))
 				throw new ExpressionCorruptedException(nextToken);
 			nextToken = getNextToken();
@@ -138,7 +138,7 @@ public class ExpressionParser {
 		if (T_ARITHMETIC_ADDITIVE_MINUS.equals(firstTokenType)) {
 			agent.commitBufferedToken();
 			subtreeRoot = getTermSubtree();
-			Node unaryRoot = new OperatorNode(subtreeRoot, null, firstToken);
+			Node unaryRoot = new OperatorNode(subtreeRoot, null, firstToken.getTokenType());
 			if (!isArithmeticOperationPossible(unaryRoot))
 				throw new ExpressionCorruptedException(firstToken);
 			return unaryRoot;
@@ -149,7 +149,7 @@ public class ExpressionParser {
 			if (!T_LEFT_PARENTHESIS.equals(nextToken.getTokenType()))
 				throw new TokenMissingException("Logical expression", T_LEFT_PARENTHESIS.getLexem(), nextToken);
 			subtreeRoot = getTermSubtree();
-			Node unaryRoot = new OperatorNode(subtreeRoot, null, firstToken);
+			Node unaryRoot = new OperatorNode(subtreeRoot, null, firstToken.getTokenType());
 			if (!isLogicalOperationPossible(unaryRoot))
 				throw new ExpressionCorruptedException(firstToken);
 			return unaryRoot;
@@ -172,7 +172,7 @@ public class ExpressionParser {
 		Node leftChild = subtreeRoot.getLeftChild();
 		Node rightChild = subtreeRoot.getRightChild();
 		OperatorNode operatorRoot = (OperatorNode) subtreeRoot;
-		TokenType operatorType = operatorRoot.getOperatorToken().getTokenType();
+		TokenType operatorType = operatorRoot.getOperatorType();
 		if (subtreeRoot.isLogicalOperatorNode()) {
 			if (rightChild == null)
 				return leftChild.returnsBooleanValue();

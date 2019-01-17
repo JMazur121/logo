@@ -2,15 +2,16 @@ package parser_tests;
 
 import exceptions.LexerException;
 import exceptions.ParserException;
-import expressions_module.tree.Node;
-import instructions_module.composite.*;
-import instructions_module.scope.Scope;
+import instructions.*;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Test;
 import parser.Parser;
+import scope.Scope;
+import tree.ArgumentNode;
+import tree.Node;
 import static org.assertj.core.api.Assertions.*;
 
 public class InstructionsBuildingTest {
@@ -27,7 +28,7 @@ public class InstructionsBuildingTest {
 		parser.reset();
 		parser.handleStream(is);
 		//when
-		Scope scope = parser.getNetScope();
+		Scope scope = parser.getNextScope();
 		//then
 		assertThat(scope).isNull();
 		assertThat(parser.isReachedETX()).isTrue();
@@ -39,7 +40,7 @@ public class InstructionsBuildingTest {
 		ByteArrayInputStream is = new ByteArrayInputStream("czysc()".getBytes());
 		parser.handleStream(is);
 		//when
-		Scope scope = parser.getNetScope();
+		Scope scope = parser.getNextScope();
 		//then
 		assertThat(scope).isNotNull();
 		assertThat(scope.isFunctionDefinition()).isFalse();
@@ -59,7 +60,7 @@ public class InstructionsBuildingTest {
 		ByteArrayInputStream is = new ByteArrayInputStream("skok(10,20)".getBytes());
 		parser.handleStream(is);
 		//when
-		Scope scope = parser.getNetScope();
+		Scope scope = parser.getNextScope();
 		//then
 		assertThat(scope).isNotNull();
 		assertThat(scope.isFunctionDefinition()).isFalse();
@@ -80,7 +81,7 @@ public class InstructionsBuildingTest {
 		ByteArrayInputStream is = new ByteArrayInputStream("var1 := 100".getBytes());
 		parser.handleStream(is);
 		//when
-		Scope scope = parser.getNetScope();
+		Scope scope = parser.getNextScope();
 		//then
 		assertThat(scope).isNotNull();
 		assertThat(scope.isFunctionDefinition()).isFalse();
@@ -100,7 +101,7 @@ public class InstructionsBuildingTest {
 		ByteArrayInputStream is = new ByteArrayInputStream("jesli(var2 > 0) stop()".getBytes());
 		parser.handleStream(is);
 		//when
-		Scope scope = parser.getNetScope();
+		Scope scope = parser.getNextScope();
 		//then
 		assertThat(scope).isNotNull();
 		assertThat(scope.isFunctionDefinition()).isFalse();
@@ -122,7 +123,7 @@ public class InstructionsBuildingTest {
 				"wpw jesli(var3 < 0) [czysc()] wpw stop()").getBytes());
 		parser.handleStream(is);
 		//when
-		Scope scope = parser.getNetScope();
+		Scope scope = parser.getNextScope();
 		//then
 		assertThat(scope).isNotNull();
 		assertThat(scope.isFunctionDefinition()).isFalse();
@@ -150,7 +151,7 @@ public class InstructionsBuildingTest {
 		ByteArrayInputStream is = new ByteArrayInputStream("powtarzaj(idx1,10) [czysc()]".getBytes());
 		parser.handleStream(is);
 		//when
-		Scope scope = parser.getNetScope();
+		Scope scope = parser.getNextScope();
 		//then
 		assertThat(scope).isNotNull();
 		assertThat(scope.isFunctionDefinition()).isFalse();
@@ -177,7 +178,7 @@ public class InstructionsBuildingTest {
 		ByteArrayInputStream is = new ByteArrayInputStream("tdj(varW > 10) [czysc()]".getBytes());
 		parser.handleStream(is);
 		//when
-		Scope scope = parser.getNetScope();
+		Scope scope = parser.getNextScope();
 		//then
 		assertThat(scope).isNotNull();
 		assertThat(scope.isFunctionDefinition()).isFalse();
@@ -189,6 +190,26 @@ public class InstructionsBuildingTest {
 		assertThat(call.getIdentifier()).isEqualTo("czysc");
 		Jump jump = (Jump)instructions.get(2);
 		assertThat(jump.getInstructionPointer()).isEqualTo(0);
+	}
+
+	@Test
+	public void getNextScope_procedureDefinition_returnsProcedureScope() throws LexerException, ParserException {
+		//before
+		ByteArrayInputStream is = new ByteArrayInputStream("def kwadrat(bok)[naprzod(bok) \n prawo(90)]".getBytes());
+		parser.handleStream(is);
+		//when
+		Scope scope = parser.getNextScope();
+		//then
+		assertThat(scope).isNotNull();
+		assertThat(scope.isFunctionDefinition()).isTrue();
+		ArrayList<BaseInstruction> instructions = scope.getInstructions();
+		assertThat(instructions).hasSize(2);
+		FunctionCall call = (FunctionCall)instructions.get(0);
+		assertThat(call.getIdentifier()).isEqualTo("naprzod");
+		ArgumentNode arg = (ArgumentNode) call.getArguments().get(0);
+		assertThat(arg.getArgument().readValue()).isEqualTo(0);
+		FunctionCall secondCall = (FunctionCall)instructions.get(1);
+		assertThat(secondCall.getIdentifier()).isEqualTo("prawo");
 	}
 
 }

@@ -1,7 +1,7 @@
 import exceptions.LexerException;
 import exceptions.ParserException;
-import instructions_module.scope.Scope;
 import parser.Parser;
+import scope.Scope;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +17,7 @@ public class Test {
 		parser.handleStream(in);
 		while (!parser.isReachedETX()) {
 			try {
-				parser.getNetScope();
+				parser.getNextScope();
 			} catch (LexerException | ParserException e) {
 				System.out.println(e.getMessage());
 				break;

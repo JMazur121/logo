@@ -1,10 +1,9 @@
 def spirala(bok) [
-    jesli(bok < 10) [stop()]
+    jesli(100 > 10) [stop()]
     naprzod(bok)
     prawo(90)
     spirala(bok - 2)
 ]
-
 #zmienna globalna
 bok := 10
 {
