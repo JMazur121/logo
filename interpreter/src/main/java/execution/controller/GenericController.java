@@ -79,6 +79,10 @@ public abstract class GenericController implements Initializable {
 		fillColourPicker.setValue(color);
 	}
 
+	public Color getFillColor() {
+		return fillColourPicker.getValue();
+	}
+
 	public void setDrawerImage(Image image) {
 		drawerImage = image;
 		executionController.setImage(image);

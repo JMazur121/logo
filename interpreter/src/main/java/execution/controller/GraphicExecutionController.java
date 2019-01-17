@@ -1,17 +1,23 @@
 package execution.controller;
 
 import execution.dispatching.GraphicExecutor;
+import execution.utils.IntPair;
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.image.Image;
+import javafx.scene.image.PixelReader;
+import javafx.scene.image.PixelWriter;
+import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.transform.Rotate;
 import lombok.Setter;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Stack;
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
 
@@ -195,7 +201,44 @@ public class GraphicExecutionController implements GraphicExecutor {
 
 	@Override
 	public void fill() {
-		// TODO: 2019-01-15 Trzeba sie zastanowic czy damy rade to zaimplementować
+		WritableImage image = backgroundCanvas.snapshot(null, null);
+		PixelReader reader = image.getPixelReader();
+		PixelWriter writer = image.getPixelWriter();
+		int x = (int) currentPosition.getX();
+		int y = (int) currentPosition.getY();
+		int width = (int) image.getWidth();
+		int height = (int) image.getHeight();
+		Color targetColor = reader.getColor(x, y);
+		Color currentFill = (Color)backgroundContext.getFill();
+		Stack<IntPair> stack = new Stack<>();
+		stack.push(new IntPair(x, y));
+		while (!stack.isEmpty()) {
+			IntPair point = stack.pop();
+			x = point.x;
+			y = point.y;
+			if (filled(reader, x, y, targetColor)) {
+				continue;
+			}
+			writer.setColor(x, y, currentFill);
+			push(stack, x - 1, y, width, height);
+			push(stack, x, y + 1, width, height);
+			push(stack, x + 1, y, width, height);
+			push(stack, x, y - 1, width, height);
+		}
+		backgroundContext.drawImage(image, 0, 0);
+	}
+
+	private void push(Stack<IntPair> stack, int x, int y, int w, int h) {
+		if (x < 0 || x > w ||
+				y < 0 || y > h) {
+			return;
+		}
+		stack.push(new IntPair(x, y));
+	}
+
+	private boolean filled(PixelReader reader, int x, int y, Color toFill) {
+		Color color = reader.getColor(x, y);
+		return !color.equals(toFill);
 	}
 
 	private void calcPolygonPoints(double[] xPoints, double[] yPoints, int numberOfPoints, int sideLength) {

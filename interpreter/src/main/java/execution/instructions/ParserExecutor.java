@@ -38,7 +38,7 @@ public class ParserExecutor {
 		scopeExecutor = new ScopeExecutor(graphicExecutor, graphicalTasksQueue, globalVariables, knownMethods, isWorkToDo);
 	}
 
-	public void restartExecutor() {
+	public void reinitialize() {
 		executor = Executors.newSingleThreadExecutor();
 	}
 
@@ -71,7 +71,9 @@ public class ParserExecutor {
 			try {
 				while (isWorkToDo.get() && (nextScope = parser.getNextScope()) != null) {
 					try {
-						if (!nextScope.isFunctionDefinition())
+						if (nextScope.isFunctionDefinition())
+							graphicalTasksQueue.offer(() -> graphicExecutor.print("Dodano definicje funkcji"));
+						else
 							scopeExecutor.executeScope(nextScope, true);
 					} catch (Exception e) {
 						graphicalTasksQueue.offer(() -> graphicExecutor.print("Exception : " + e.getMessage()));

@@ -1,12 +1,9 @@
 package execution.controller;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.stage.FileChooser;
-import javafx.stage.Stage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -58,8 +55,10 @@ public class ScriptViewController extends GenericController {
 		if (file != null) {
 			try {
 				FileInputStream inputStream = new FileInputStream(file);
-				if (!firstFile)
-					parserExecutor.restartExecutor();
+				if (!firstFile) {
+					parserExecutor.reinitialize();
+					consumer.reinitialize();
+				}
 				openFileButton.setDisable(true);
 				isWorkToDo.set(true);
 				consumer.start();

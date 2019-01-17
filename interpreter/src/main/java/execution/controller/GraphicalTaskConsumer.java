@@ -45,4 +45,8 @@ public class GraphicalTaskConsumer {
 		}
 	}
 
+	public void reinitialize() {
+		executor = Executors.newSingleThreadExecutor();
+	}
+
 }
