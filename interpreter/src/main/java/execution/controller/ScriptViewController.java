@@ -16,9 +16,9 @@ public class ScriptViewController extends GenericController {
 	public void setSpecialHandlers() {
 		openFileButton.disabledProperty().addListener((observable, oldValue, newValue) -> {
 			if (newValue)
-				endButton.setDisable(true);
-			else
 				endButton.setDisable(false);
+			else
+				endButton.setDisable(true);
 		});
 		endButton.setDisable(true);
 		firstFile = true;
